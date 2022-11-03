@@ -25,14 +25,7 @@ const ctx = canvas.getContext('2d');
 ctx.scale(dpr, dpr);
 
 const FORCES = [];
-const Bodies = [
-    {position: {x: CanvasWidth / 2, y: CanvasHeight / 2 - 180}, size: 10, velocity: {x: 0, y: 0}, active: true},
-    {position: {x: CanvasWidth / 2, y: CanvasHeight / 2 - 120}, size: 20, velocity: {x: 0, y: 0}, active: true},
-    {position: {x: CanvasWidth / 2, y: CanvasHeight / 2 - 60}, size: 30, velocity: {x: 0, y: 0}, active: true},
-    {position: {x: CanvasWidth / 2, y: CanvasHeight / 2}, size: 40, velocity: {x: 0, y: 0}, active: true},
-    {position: {x: CanvasWidth / 2 - 10, y: CanvasHeight - 280}, size: 60, velocity: {x: 0, y: 0}, active: true},
-    {position: {x: CanvasWidth / 2 - 20, y: CanvasHeight - 180}, size: 80, velocity: {x: 0, y: 0}, active: true}
-];
+const Bodies = [];
 
 const Colliders = [
     {x: 0, y: 0, width: CanvasWidth, height: 1},
@@ -40,6 +33,39 @@ const Colliders = [
     {x: 0, y: 0, width: 1, height: CanvasHeight - 120},
     {x: CanvasWidth - 1, y: 0, width: 1, height: CanvasHeight - 120},
 ];
+
+const initBodies = [
+    {xOffset: 0, size: 60},
+    {xOffset: -20, size: 70},
+    {xOffset: 10, size: 50},
+    {xOffset: -5, size: 30},
+    {xOffset: 5, size: 40},
+    {xOffset: 0, size: 10},
+    {xOffset: 0, size: 20},
+    {xOffset: -2, size: 5},
+    {xOffset: 2, size: 5},
+    {xOffset: -1, size: 5},
+    {xOffset: 1, size: 5},
+    {xOffset: 0, size: 5},
+];
+
+let last;
+for (const pattern of initBodies) {
+    const yOffset = last?.position.y ?? CanvasHeight - 120;
+    const body = {
+        position: {
+            x: CanvasWidth / 2 + pattern.xOffset,
+            y: yOffset - pattern.size / 2 - (last?.size ?? 0) / 2 - 20,
+        },
+        size: pattern.size,
+        mass: pattern.size / 10,
+        velocity: {x: 0, y: 0},
+        active: true
+    };
+
+    Bodies.push(body);
+    last = body;
+}
 
 function calculatePhysics(elapsed) {
     FORCES.splice(0);
