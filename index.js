@@ -27,13 +27,6 @@ ctx.scale(dpr, dpr);
 const FORCES = [];
 const Bodies = [];
 
-const Colliders = [
-    {x: 0, y: 0, width: CanvasWidth, height: 1},
-    {x: 0, y: CanvasHeight - 120, width: CanvasWidth, height: 1},
-    {x: 0, y: 0, width: 1, height: CanvasHeight - 120},
-    {x: CanvasWidth - 1, y: 0, width: 1, height: CanvasHeight - 120},
-];
-
 const initBodies = [
     {xOffset: 0, size: 60},
     {xOffset: -20, size: 70},
@@ -49,9 +42,13 @@ const initBodies = [
     {xOffset: 0, size: 5},
 ];
 
-let last;
+const Constraints = [
+    {left: 1, top: 1, right: CanvasWidth - 1, bottom: CanvasHeight - 120 - 1},
+];
+
+let last = null;
 for (const pattern of initBodies) {
-    const yOffset = last?.position.y ?? CanvasHeight - 120;
+    const yOffset = last?.position.y ?? Constraints[0].bottom;
     const body = {
         position: {
             x: CanvasWidth / 2 + pattern.xOffset,
@@ -83,9 +80,7 @@ function calculatePhysics(elapsed) {
         body.velocity.y *= Resistance;
         body.velocity.x *= Resistance;
 
-
         FORCES.push({position: {...body.position}, velocity: {x: 0, y: Gravity}});
-        processWorldCollision(body);
     }
 
     for (let i = 0; i < Bodies.length; i++) {
@@ -93,24 +88,53 @@ function calculatePhysics(elapsed) {
             processCollision(Bodies[i], Bodies[j]);
         }
     }
+
+    for (let i = 0; i < Bodies.length; i++) {
+        for (let j = 0; j < Bodies.length; j++) {
+            if (i === j) continue;
+            processBodyConstraint(Bodies[i], Bodies[j]);
+        }
+
+        for (const constraint of Constraints) {
+            processInnerConstraints(Bodies[i], constraint);
+        }
+    }
 }
 
-function processWorldCollision(body) {
+function processInnerConstraints(body, constraint) {
     const box = circleBox(body);
-    if (box.left < 0) {
-        body.position.x = body.size / 2;
-        body.velocity.x = 0;
-    } else if (box.right > CanvasWidth) {
-        body.position.x = CanvasWidth - body.size / 2;
-        body.velocity.x = 0;
+    if (box.left < constraint.left) {
+        body.position.x = constraint.left + body.size / 2;
+        body.velocity.x *= -1;
+    } else if (box.right > constraint.right) {
+        body.position.x = constraint.right - body.size / 2;
+        body.velocity.x *= -1;
     }
 
-    if (box.top < 0) {
-        body.position.y = body.size / 2;
-        body.velocity.y = 0;
-    } else if (box.bottom > CanvasHeight - 120) {
-        body.position.y = CanvasHeight - body.size / 2 - 120;
-        body.velocity.y = 0;
+    if (box.top < constraint.top) {
+        body.position.y = constraint.top + body.size / 2;
+        body.velocity.y *= -0.1;
+    } else if (box.bottom > constraint.bottom) {
+        body.position.y = constraint.bottom - body.size / 2;
+        body.velocity.y *= -0.1;
+    }
+}
+
+function processBodyConstraint(body, constraintBody) {
+    if (_checkBoxCollision(circleBox(body), circleBox(constraintBody))) {
+        const dx = body.position.x - constraintBody.position.x,
+            dy = body.position.y - constraintBody.position.y;
+
+        const centerDistance = (body.size + constraintBody.size) / 2;
+        const collisionSizeSq = Math.pow(centerDistance, 2);
+        const distSquare = dx * dx + dy * dy;
+
+        if (distSquare <= collisionSizeSq) {
+            const angle = Math.atan2(dy, dx);
+
+            body.position.x = constraintBody.position.x + Math.cos(angle) * centerDistance;
+            body.position.y = constraintBody.position.y + Math.sin(angle) * centerDistance;
+        }
     }
 }
 
@@ -134,7 +158,8 @@ function _checkBoxCollision(box1, box2) {
 
 function processCollision(body1, body2) {
     function _collide(dx, dy, distSquare, b1, b2) {
-        const dot = ((b1.velocity.x - b2.velocity.x) * dx + (b1.velocity.y - b2.velocity.y) * dy);
+        const massFactor = (2 * b2.mass) / (b1.mass + b2.mass);
+        const dot = massFactor * ((b1.velocity.x - b2.velocity.x) * dx + (b1.velocity.y - b2.velocity.y) * dy);
         return {x: -dot / distSquare * dx, y: -dot / distSquare * dy};
     }
 
@@ -163,13 +188,13 @@ function processCollision(body1, body2) {
 function render() {
     ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
 
-    ctx.strokeStyle = "lightgrey";
-    ctx.fillStyle = "black";
-
-    for (const collider of Colliders) {
-        ctx.fillRect(collider.x, collider.y, collider.width, collider.height);
+    ctx.strokeStyle = "black";
+    for (const constraint of Constraints) {
+        ctx.strokeRect(constraint.left, constraint.top, constraint.right - constraint.left, constraint.bottom - constraint.top);
     }
 
+    ctx.strokeStyle = "lightgrey";
+    ctx.fillStyle = "black";
     for (const body of Bodies) {
         ctx.beginPath();
         ctx.arc(body.position.x, body.position.y, body.size / 2, 0, Math.PI * 2);
