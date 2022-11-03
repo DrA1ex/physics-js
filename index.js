@@ -5,7 +5,7 @@ const params = Object.fromEntries(urlSearchParams.entries());
 
 const DEBUG = params["debug"] === "1";
 const SlowMotion = Number.parseFloat(params["slow_motion"] || "1");
-const Gravity = 100;
+const Gravity = Number.parseFloat(params["g"] || "100");
 const Resistance = Number.parseFloat(params["resistance"] || "0.99");
 
 const canvas = document.getElementById("canvas");
@@ -140,7 +140,7 @@ function processCollision(body1, body2) {
 function render() {
     ctx.clearRect(0, 0, CanvasWidth, CanvasHeight);
 
-    ctx.strokeStyle = "white";
+    ctx.strokeStyle = "lightgrey";
     ctx.fillStyle = "black";
 
     for (const collider of Colliders) {
