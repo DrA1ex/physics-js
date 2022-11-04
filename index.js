@@ -8,6 +8,7 @@ const SlowMotion = Number.parseFloat(params["slow_motion"] || "1");
 const Gravity = Number.parseFloat(params["g"] || "100");
 const Resistance = Number.parseFloat(params["resistance"] || "0.99");
 
+const stats = document.getElementById("stats");
 const canvas = document.getElementById("canvas");
 
 const rect = canvas.getBoundingClientRect();
@@ -79,8 +80,6 @@ function calculatePhysics(elapsed) {
         body.velocity.y += Gravity * delta;
         body.velocity.y *= Resistance;
         body.velocity.x *= Resistance;
-
-        FORCES.push({position: {...body.position}, velocity: {x: 0, y: Gravity}});
     }
 
     for (let i = 0; i < Bodies.length; i++) {
@@ -232,13 +231,24 @@ let lastStepTime = performance.now();
 let elapsed = 0;
 
 function step() {
+    const t = performance.now();
     calculatePhysics(Math.min(elapsed, 33) / 1000);
+    const physicsTime = performance.now() - t;
 
     requestAnimationFrame(timestamp => {
         elapsed = timestamp - lastStepTime;
         lastStepTime = timestamp;
 
+        const t = performance.now();
         render();
+        const renderTime = performance.now() - t;
+
+        stats.innerText = [
+            `Bodies: ${Bodies.length}`,
+            `Physics time: ${physicsTime.toFixed(2)}ms`,
+            `Render time: ${renderTime.toFixed(2)}ms`
+        ].join("\n");
+
         setTimeout(step);
     });
 }
