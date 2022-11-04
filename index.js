@@ -123,25 +123,22 @@ function circleBox(body) {
     }
 }
 
-function processCollision(body1, body2) {
-    function _checkBoxCollision() {
-        function _checkRange(start1, end1, start2, end2) {
-            return start1 >= start2 && start1 <= end2 || end1 >= start2 && end1 <= end2;
-        }
-
-        const box1 = circleBox(body1);
-        const box2 = circleBox(body2);
-
-        return _checkRange(box1.left, box1.right, box2.left, box2.right)
-            && _checkRange(box1.top, box1.bottom, box2.top, box2.bottom);
+function _checkBoxCollision(box1, box2) {
+    function _checkRange(start1, end1, start2, end2) {
+        return end1 >= start2 && start1 <= end2;
     }
 
+    return _checkRange(box1.left, box1.right, box2.left, box2.right)
+        && _checkRange(box1.top, box1.bottom, box2.top, box2.bottom);
+}
+
+function processCollision(body1, body2) {
     function _collide(dx, dy, distSquare, b1, b2) {
         const dot = ((b1.velocity.x - b2.velocity.x) * dx + (b1.velocity.y - b2.velocity.y) * dy);
         return {x: -dot / distSquare * dx, y: -dot / distSquare * dy};
     }
 
-    if (_checkBoxCollision()) {
+    if (_checkBoxCollision(circleBox(body1), circleBox(body2))) {
         const dx = body1.position.x - body2.position.x,
             dy = body1.position.y - body2.position.y;
         const collisionSizeSq = Math.pow((body1.size + body2.size) / 2, 2);
@@ -231,16 +228,16 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
     const x = point.clientX - bcr.x;
     const y = point.clientY - bcr.y;
 
-    let action;
-    if (e.touches) {
-        action = e.touches.length === 2 ? 2 : 1;
+    const pointBox = {left: x, right: x, top: y, bottom: y};
+    const body = Bodies.find(b => _checkBoxCollision(circleBox(b), pointBox));
+    if (body) {
+        const angle = Math.random() * Math.PI * 2;
+        const force = Math.random() * Gravity * 10;
+
+        body.velocity.x += Math.cos(angle) * force;
+        body.velocity.y += Math.sin(angle) * force;
     } else {
-        action = e.altKey || e.button === 2 ? 2 : 1;
-    }
-
-    if (action === 1) {
         const size = Math.floor(1 + Math.random() * 4) * 10;
-
         Bodies.push({
             position: {x, y},
             velocity: {x: 0, y: 0},
