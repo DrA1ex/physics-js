@@ -221,4 +221,34 @@ function step() {
     });
 }
 
+canvas.oncontextmenu = () => false;
+canvas.onmousedown = canvas.ontouchstart = (e) => {
+    e.preventDefault();
+
+    const point = e.touches ? e.touches[0] : e;
+    const bcr = e.target.getBoundingClientRect();
+
+    const x = point.clientX - bcr.x;
+    const y = point.clientY - bcr.y;
+
+    let action;
+    if (e.touches) {
+        action = e.touches.length === 2 ? 2 : 1;
+    } else {
+        action = e.altKey || e.button === 2 ? 2 : 1;
+    }
+
+    if (action === 1) {
+        const size = Math.floor(1 + Math.random() * 4) * 10;
+
+        Bodies.push({
+            position: {x, y},
+            velocity: {x: 0, y: 0},
+            size,
+            mass: size / 10,
+            active: true
+        });
+    }
+}
+
 step();
