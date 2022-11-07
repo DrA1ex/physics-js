@@ -58,6 +58,7 @@ for (const pattern of initBodies) {
         size: pattern.size,
         mass: pattern.size / 10,
         velocity: {x: 0, y: 0},
+        pseudoVelocity: {x: 0, y: 0},
         active: true
     };
 
@@ -69,13 +70,20 @@ function calculatePhysics(elapsed) {
     FORCES.splice(0);
     const delta = elapsed * SlowMotion;
 
+    if (delta <= 0) {
+        return;
+    }
+
     for (const body of Bodies) {
         if (!body.active) {
             continue;
         }
 
-        body.position.x += body.velocity.x * delta;
-        body.position.y += body.velocity.y * delta;
+        body.position.x += body.velocity.x * delta + body.pseudoVelocity.x;
+        body.position.y += body.velocity.y * delta + body.pseudoVelocity.y;
+
+        body.pseudoVelocity.x = 0;
+        body.pseudoVelocity.y = 0;
 
         body.velocity.y += Gravity * delta;
         body.velocity.y *= Resistance;
@@ -88,13 +96,8 @@ function calculatePhysics(elapsed) {
         }
     }
 
-    for (let i = 0; i < Bodies.length; i++) {
-        for (let j = 0; j < Bodies.length; j++) {
-            if (i === j) continue;
-            processBodyConstraint(Bodies[i], Bodies[j]);
-        }
-
-        for (const constraint of Constraints) {
+    for (const constraint of Constraints) {
+        for (let i = 0; i < Bodies.length; i++) {
             processInnerConstraints(Bodies[i], constraint);
         }
     }
@@ -103,37 +106,19 @@ function calculatePhysics(elapsed) {
 function processInnerConstraints(body, constraint) {
     const box = circleBox(body);
     if (box.left < constraint.left) {
-        body.position.x = constraint.left + body.size / 2;
-        body.velocity.x *= -1;
+        body.pseudoVelocity.x += constraint.left - box.left
+        body.velocity.x *= -0.3;
     } else if (box.right > constraint.right) {
-        body.position.x = constraint.right - body.size / 2;
-        body.velocity.x *= -1;
+        body.pseudoVelocity.x += constraint.right - box.right;
+        body.velocity.x *= -0.3;
     }
 
     if (box.top < constraint.top) {
-        body.position.y = constraint.top + body.size / 2;
+        body.pseudoVelocity.y += constraint.top - box.top;
         body.velocity.y *= -0.1;
     } else if (box.bottom > constraint.bottom) {
-        body.position.y = constraint.bottom - body.size / 2;
+        body.pseudoVelocity.y += constraint.bottom - box.bottom;
         body.velocity.y *= -0.1;
-    }
-}
-
-function processBodyConstraint(body, constraintBody) {
-    if (_checkBoxCollision(circleBox(body), circleBox(constraintBody))) {
-        const dx = body.position.x - constraintBody.position.x,
-            dy = body.position.y - constraintBody.position.y;
-
-        const centerDistance = (body.size + constraintBody.size) / 2;
-        const collisionSizeSq = Math.pow(centerDistance, 2);
-        const distSquare = dx * dx + dy * dy;
-
-        if (distSquare <= collisionSizeSq) {
-            const angle = Math.atan2(dy, dx);
-
-            body.position.x = constraintBody.position.x + Math.cos(angle) * centerDistance;
-            body.position.y = constraintBody.position.y + Math.sin(angle) * centerDistance;
-        }
     }
 }
 
@@ -165,7 +150,8 @@ function processCollision(body1, body2) {
     if (_checkBoxCollision(circleBox(body1), circleBox(body2))) {
         const dx = body1.position.x - body2.position.x,
             dy = body1.position.y - body2.position.y;
-        const collisionSizeSq = Math.pow((body1.size + body2.size) / 2, 2);
+        const centerDistance = (body1.size + body2.size) / 2;
+        const collisionSizeSq = Math.pow(centerDistance, 2);
 
         const distSquare = dx * dx + dy * dy;
         if (distSquare <= collisionSizeSq) {
@@ -180,6 +166,10 @@ function processCollision(body1, body2) {
 
             body2.velocity.x += velocity2.x;
             body2.velocity.y += velocity2.y;
+
+            const angle = Math.atan2(dy, dx);
+            body1.pseudoVelocity.x += Math.cos(angle) * centerDistance - dx;
+            body1.pseudoVelocity.y += Math.sin(angle) * centerDistance - dy;
         }
     }
 }
@@ -272,14 +262,18 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
         body.velocity.x += Math.cos(angle) * force;
         body.velocity.y += Math.sin(angle) * force;
     } else {
-        const size = Math.floor(1 + Math.random() * 4) * 10;
-        Bodies.push({
-            position: {x, y},
-            velocity: {x: 0, y: 0},
-            size,
-            mass: size / 10,
-            active: true
-        });
+        for (let k = 0; k < 5; k++) {
+            const size = Math.floor(1 + Math.random() * 4) * 10;
+            const body = {
+                position: {x: x + 10 - Math.random() * 5, y: y + 10 - Math.random() * 5},
+                velocity: {x: 0, y: 0},
+                pseudoVelocity: {x: 0, y: 0},
+                size,
+                mass: size / 10,
+                active: true
+            };
+            setTimeout(() => Bodies.push(body), 33 * k);
+        }
     }
 }
 
