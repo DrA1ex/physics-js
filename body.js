@@ -1,6 +1,8 @@
 import {Vector2} from "./vector.js";
 import {CircleCollider, RectCollider} from "./collision.js";
 
+/** @typedef {Body|CirceBody} BodyType */
+
 export class BoundaryBox {
     width;
     height;
@@ -18,6 +20,7 @@ export class BoundaryBox {
 
         this.width = this.right - this.left;
         this.height = this.bottom - this.top;
+        this.center = new Vector2(this.left + this.width / 2, this.top + this.height / 2);
     }
 }
 
@@ -28,7 +31,6 @@ export class Body {
     active = true;
     position = new Vector2();
     velocity = new Vector2();
-    pseudoVelocity = new Vector2();
     mass = 0;
 
     constructor(x, y, mass) {

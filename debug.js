@@ -1,16 +1,16 @@
 export class Debug {
-    forces = [];
+    impulses = [];
 
-    addForce(position, size, color = null) {
-        this.forces.push({color, position, size});
+    addImpulse(position, size, color = null) {
+        this.impulses.push({color, position, size});
     }
 
     reset() {
-        this.forces.splice(0);
+        this.impulses.splice(0);
     }
 
     render(ctx) {
-        for (const force of this.forces) {
+        for (const force of this.impulses) {
             ctx.strokeStyle = force.color || "green";
             this.#drawVector(ctx, force.position, force.size);
         }

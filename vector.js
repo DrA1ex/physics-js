@@ -49,6 +49,15 @@ export class Vector2 {
         return this.#aggregate((acc, value, dimension) => acc + value * vector[dimension]);
     }
 
+    cross(vector) {
+        const reversed = vector.reverse();
+        return this.#aggregate((acc, value, dimension) => acc - value * reversed[dimension]);
+    }
+
+    reverse() {
+        return new Vector2(...this.constructor.DIMENSIONS.map(d => this[d]).reverse());
+    }
+
     #apply(fn) {
         for (const dimension of this.constructor.DIMENSIONS) {
             this[dimension] = fn(this[dimension], dimension);
