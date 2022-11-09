@@ -35,7 +35,7 @@ const Solver = new ImpulseBasedSolver();
 Solver.addConstraint({type: ConstraintType.inset, box: new BoundaryBox(1, CanvasWidth, 1, CanvasHeight - 120 - 1)});
 
 Solver.addForce((delta, body) => new Vector2(0, Gravity * body.mass * delta));
-Solver.addForce((delta, body) => body.velocity.copy().scale(-(1 - Resistance) * body.mass));
+Solver.addForce((delta, body) => body.velocity.copy().scale(-(1 - Resistance) * body.mass * SlowMotion));
 
 const initBodies = [
     {xOffset: 0, size: 60},
