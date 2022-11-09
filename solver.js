@@ -161,7 +161,7 @@ export class ImpulseBasedSolver {
         this.debug.addCollision(collision.contact);
         this.debug.addImpulse(collision.contact, collision.penetration.copy().negate(), "violet");
 
-        const delta = body1.position.copy().sub(body2.position);
+        const delta = collision.delta;
         const distSquare = Math.pow(collision.distance, 2);
 
         const velocity1 = _collide(delta, distSquare, body1, body2);

@@ -1,6 +1,10 @@
 import {Vector2} from "./vector.js";
 import {CirceBody} from "./body.js";
 
+function clamp(min, max, value) {
+    return Math.min(max, Math.max(min, value));
+}
+
 export class Collision {
     result = false;
     distance = 0;
@@ -60,14 +64,12 @@ export class RectCollider extends Collider {
             this.collision = new Collision(true);
             this.collision.delta = delta;
             this.collision.tangent = new Vector2(Math.cos(angle), Math.sin(angle));
+            this.collision.distance = Math.sqrt(delta.dot(delta));
 
-            const distance = Math.sqrt(box1.center.dot(box2.center));
-            const pointX = yResult ? box1.center.x : box1.center.x + (box1.left < box2.top ? box2.left - box1.right : box2.right - box1.left);
-            const pointY = !yResult ? box1.center.y : box1.center.y + (box1.top < box2.top ? box2.top - box1.bottom : box2.bottom - box1.top);
-
-            this.collision.distance = distance;
-            this.collision.contact = new Vector2(pointX, pointY)
-            this.collision.penetration = new Vector2(0, 0);
+            const contact1 = RectCollider.#getContactPoint(this.collision.tangent, box1, box2);
+            const contact2 = RectCollider.#getContactPoint(this.collision.tangent.copy().scale(-1), box2, box1);
+            this.collision.contact = contact1;
+            this.collision.penetration = contact1.copy().sub(contact2);
         } else {
             this.collision = new Collision(false);
         }
@@ -76,6 +78,14 @@ export class RectCollider extends Collider {
 
     #checkRange(start1, end1, start2, end2) {
         return end1 >= start2 && start1 <= end2;
+    }
+
+    static #getContactPoint(tangent, box1, box2) {
+        const contact = tangent.copy().scale(Math.max(box2.width, box2.height) * 10);
+        contact.x = clamp(-box2.width, box2.width, contact.x)
+        contact.y = clamp(-box2.height, box2.height, contact.y);
+        contact.scale(0.5);
+        return contact.add(box2.center);
     }
 }
 
@@ -86,7 +96,7 @@ export class CircleCollider extends RectCollider {
 
     detectCollision(body) {
         if (!(body instanceof CirceBody)) {
-            return super.detectCollision(body);
+            return body.detectCollision(this);
         }
 
         if (super.detectCollision(body)) {
@@ -99,6 +109,7 @@ export class CircleCollider extends RectCollider {
 
             if (result) {
                 this.collision = new Collision(true);
+                this.collision.delta = delta;
                 this.collision.distance = distance;
                 this.collision.tangent = boxCollision.tangent;
                 this.collision.contact = this.collision.tangent.copy().scale(body.radius).add(body.position);
