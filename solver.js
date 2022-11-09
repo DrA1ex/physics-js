@@ -158,6 +158,9 @@ export class ImpulseBasedSolver {
         }
 
         const collision = body1.collider.collision;
+        this.debug.addCollision(collision.contact);
+        this.debug.addImpulse(collision.contact, collision.penetration.copy().negate(), "violet");
+
         const delta = body1.position.copy().sub(body2.position);
         const distSquare = Math.pow(collision.distance, 2);
 
@@ -195,17 +198,25 @@ export class ImpulseBasedSolver {
         if (box.left < cBox.left) {
             this.#storeImpulse(body, new Vector2(-body.velocity.x - body.velocity.x * xDamper, 0), ImpulseType.scalar);
             this.#storeImpulse(body, new Vector2(cBox.left - box.left, 0), ImpulseType.pseudo);
+
+            this.debug.addCollision(new Vector2(cBox.left, body.position.y));
         } else if (box.right > cBox.right) {
             this.#storeImpulse(body, new Vector2(-body.velocity.x - body.velocity.x * xDamper, 0), ImpulseType.scalar);
             this.#storeImpulse(body, new Vector2(cBox.right - box.right, 0), ImpulseType.pseudo);
+
+            this.debug.addCollision(new Vector2(cBox.right, body.position.y));
         }
 
         if (box.top < cBox.top) {
             this.#storeImpulse(body, new Vector2(0, -body.velocity.y - body.velocity.y * yDamper), ImpulseType.scalar);
             this.#storeImpulse(body, new Vector2(0, cBox.top - box.top), ImpulseType.pseudo);
+
+            this.debug.addCollision(new Vector2(body.position.x, cBox.top));
         } else if (box.bottom > cBox.bottom) {
             this.#storeImpulse(body, new Vector2(0, -body.velocity.y - body.velocity.y * yDamper), ImpulseType.scalar);
             this.#storeImpulse(body, new Vector2(0, cBox.bottom - box.bottom), ImpulseType.pseudo);
+
+            this.debug.addCollision(new Vector2(body.position.x, cBox.bottom));
         }
     }
 }
