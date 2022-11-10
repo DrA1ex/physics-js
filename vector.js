@@ -9,8 +9,12 @@ export class Vector2 {
         this.y = y;
     }
 
+    elements() {
+        return this.constructor.DIMENSIONS.map(d => this[d]);
+    }
+
     copy() {
-        return new Vector2(...this.constructor.DIMENSIONS.map(d => this[d]));
+        return new Vector2(...this.elements());
     }
 
     add(vector) {
@@ -41,6 +45,11 @@ export class Vector2 {
         return this.#apply(() => 0);
     }
 
+    normalize() {
+        const d = Math.sqrt(this.dot(this));
+        return this.#apply(value => value / d);
+    }
+
     scale(scalar) {
         return this.#apply(value => value * scalar);
     }
@@ -49,13 +58,25 @@ export class Vector2 {
         return this.#aggregate((acc, value, dimension) => acc + value * vector[dimension]);
     }
 
+    length() {
+        return Math.sqrt(this.dot(this));
+    }
+
     cross(vector) {
         const reversed = vector.reverse();
         return this.#aggregate((acc, value, dimension) => acc - value * reversed[dimension]);
     }
 
-    reverse() {
+    reversed() {
         return new Vector2(...this.constructor.DIMENSIONS.map(d => this[d]).reverse());
+    }
+
+    perpendicular() {
+        return new Vector2(this.y, -this.x);
+    }
+
+    normal() {
+        return this.perpendicular().normalize();
     }
 
     #apply(fn) {

@@ -96,7 +96,7 @@ export class CircleCollider extends RectCollider {
 
     detectCollision(body) {
         if (!(body instanceof CirceBody)) {
-            return body.detectCollision(this);
+            return super.detectCollision(body);
         }
 
         if (super.detectCollision(body)) {

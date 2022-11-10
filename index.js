@@ -7,6 +7,8 @@ const urlSearchParams = new URLSearchParams(window.location.search);
 const params = Object.fromEntries(urlSearchParams.entries());
 
 const DEBUG = params["debug"] === "1";
+const ShowVectors = params["debug_vector"] === "1";
+const ShowVectorLength = params["debug_vector_length"] === "1";
 const SlowMotion = Number.parseFloat(params["slow_motion"] || "1");
 const Gravity = Number.parseFloat(params["g"] || "100");
 const Resistance = Math.min(1, Math.max(0, Number.parseFloat(params["resistance"] || "0.99")));
@@ -28,11 +30,15 @@ canvas.height = CanvasHeight * dpr;
 const ctx = canvas.getContext('2d');
 ctx.scale(dpr, dpr);
 
-const DebugInstance = new Debug();
+const DebugInstance = new Debug({showVectorLength: ShowVectorLength, showVector: ShowVectors});
 window.__app = {DebugInstance};
 
 const Solver = new ImpulseBasedSolver();
-Solver.addConstraint({type: ConstraintType.inset, box: new BoundaryBox(1, CanvasWidth, 1, CanvasHeight - 120 - 1)});
+Solver.addConstraint({
+    type: ConstraintType.inset,
+    box: new BoundaryBox(1, CanvasWidth, 1, CanvasHeight - 120 - 1),
+    damper: new Vector2(0.5, 0.3),
+});
 
 Solver.addForce((delta, body) => new Vector2(0, Gravity * body.mass * delta));
 Solver.addForce((delta, body) => body.velocity.copy().scale(-(1 - Resistance) * body.mass * SlowMotion));
@@ -69,7 +75,7 @@ for (const pattern of initBodies) {
 
 function calculatePhysics(elapsed) {
     const delta = elapsed * SlowMotion;
-    Solver.step(delta);
+    Solver.solve(delta);
 }
 
 function render() {
@@ -92,13 +98,13 @@ function render() {
             ctx.rect(box.left, box.top, box.width, box.height);
         }
 
-        ctx.fill();
+        if (body.active) ctx.fill();
         ctx.stroke();
     }
 
     if (DEBUG) {
-        ctx.strokeStyle = "darkgreen";
         for (const body of Solver.rigidBodies) {
+            ctx.strokeStyle = body.active ? "#007500" : "#394d39";
             const box = body.boundary;
             ctx.strokeRect(box.left, box.top, box.right - box.left, box.bottom - box.top);
         }
@@ -147,9 +153,9 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
     const body = Solver.rigidBodies.find(b => pointBox.collider.detectCollision(b));
     if (body) {
         const angle = Math.random() * Math.PI * 2;
-        const force = Math.random() * Gravity * 10;
+        const force = Math.random() * Gravity * 10 * body.mass;
 
-        body.velocity.add(new Vector2(Math.cos(angle), Math.sin(angle)).scale(force));
+        body.applyImpulse(new Vector2(Math.cos(angle), Math.sin(angle)).scale(force));
     } else {
         for (let k = 0; k < 5; k++) {
             const size = Math.floor(1 + Math.random() * 4) * 10;
