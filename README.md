@@ -2,6 +2,6 @@
 
 Yet another physics engine implementation
 
-<img width="926" alt="image" src="https://user-images.githubusercontent.com/1194059/201296160-e93b9aee-4898-41c7-9bab-4dc37c6c69db.png">
+![image](https://user-images.githubusercontent.com/1194059/201300307-5bf1a4e6-1073-456e-a240-445a31ff2eb2.png)
 
 Demo: [link](https://dra1ex.github.io/physics-js/)
