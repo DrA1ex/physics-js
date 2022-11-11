@@ -25,6 +25,10 @@ export class Vector2 {
         return this.#apply((value, dimension) => value - vector[dimension]);
     }
 
+    delta(vector) {
+        return this.copy().sub(vector);
+    }
+
     mul(vector) {
         return this.#apply((value, dimension) => value * vector[dimension]);
     }
@@ -46,12 +50,20 @@ export class Vector2 {
     }
 
     normalize() {
-        const d = Math.sqrt(this.dot(this));
-        return this.#apply(value => value / d);
+        const length = this.length();
+        return this.#apply(value => value / length);
+    }
+
+    normalized() {
+        return this.copy().normalize();
     }
 
     scale(scalar) {
         return this.#apply(value => value * scalar);
+    }
+
+    scaled(scalar) {
+        return this.copy().scale(scalar);
     }
 
     dot(vector) {

@@ -83,11 +83,11 @@ export class ImpulseBasedSolver {
                 switch (type) {
                     case ImpulseType.regular:
                         body.applyImpulse(impulse);
-                        this.debug.addVector(body.position, impulse.copy().scale(1 / body.mass));
+                        this.debug.addVector(body.position, impulse.scaled(1 / body.mass));
                         break;
 
                     case ImpulseType.scalar:
-                        body.applyImpulse(impulse.copy().scale(body.mass));
+                        body.applyImpulse(impulse.scaled(body.mass));
                         this.debug.addVector(body.position, impulse);
                         break;
 
@@ -107,7 +107,7 @@ export class ImpulseBasedSolver {
                 continue;
             }
 
-            body.position.add(body.velocity.copy().scale(delta));
+            body.position.add(body.velocity.scaled(delta));
             this.debug.addVector(body.position, body.velocity, "red");
         }
     }
@@ -161,15 +161,15 @@ export class ImpulseBasedSolver {
         this.debug.addCollision(collision.contact);
         this.debug.addVector(collision.contact, collision.penetration.copy().negate(), "violet");
 
-        const velocityDelta = body1.velocity.copy().sub(body2.velocity);
+        const velocityDelta = body1.velocity.delta(body2.velocity);
         const projectedVelocity = collision.tangent.dot(velocityDelta);
         const effectiveMass = body1.mass + body2.mass
 
         const velocity1 = (1 + body1.restitution) * body2.mass / effectiveMass * projectedVelocity;
         const velocity2 = (1 + body2.restitution) * body1.mass / effectiveMass * projectedVelocity;
 
-        this.#storeImpulse(body1, collision.tangent.copy().scale(-velocity1), ImpulseType.scalar);
-        this.#storeImpulse(body2, collision.tangent.copy().scale(velocity2), ImpulseType.scalar);
+        this.#storeImpulse(body1, collision.tangent.scaled(-velocity1), ImpulseType.scalar);
+        this.#storeImpulse(body2, collision.tangent.scaled(velocity2), ImpulseType.scalar);
 
         this.#storeImpulse(body1, collision.penetration, ImpulseType.pseudo);
     }

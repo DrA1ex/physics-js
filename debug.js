@@ -71,17 +71,19 @@ export class Debug {
      * @param {number} arrowSize
      */
     #drawVector(ctx, position, size, arrowSize) {
+        const length = size.length();
+        if (length <= arrowSize) {
+            return;
+        }
+
         ctx.beginPath();
         ctx.moveTo(position.x, position.y);
         ctx.lineTo(position.x + size.x, position.y + size.y);
         ctx.stroke();
 
         this.#drawPoint(ctx, position.copy().add(size), arrowSize);
-
-        const length = size.length();
-        if (this.showVectorLength && length > 10) {
-            const angle = Math.atan2(size.y, size.x);
-            const pos = new Vector2(Math.cos(angle), Math.sin(angle)).scale(size.length() / 2).add(position);
+        if (length > 10 && this.showVectorLength) {
+            const pos = size.normalized().scale(size.length() / 2).add(position);
             this.#drawLabel(ctx, pos, length.toFixed(1), arrowSize);
         }
     }

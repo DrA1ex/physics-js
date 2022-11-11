@@ -94,7 +94,7 @@ export class Body {
      * @param {Vector2} impulse
      */
     applyImpulse(impulse) {
-        const scaledImpulse = impulse.copy().scale(1 / this.mass);
+        const scaledImpulse = impulse.scaled(1 / this.mass);
         this.velocity.add(scaledImpulse);
     }
 }
