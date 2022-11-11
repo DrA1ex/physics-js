@@ -7,6 +7,7 @@ export class Debug {
     collisions = [];
 
     constructor(options = null) {
+        this.showBoundary = options?.showBoundary ?? true;
         this.showVectorLength = options?.showVectorLength ?? false;
         this.showVector = options?.showVector ?? true;
         this.vectorArrowSize = options?.vectorArrowSize ?? 2;
@@ -37,10 +38,18 @@ export class Debug {
 
     /**
      * @param {CanvasRenderingContext2D} ctx
+     * @param {Body[]} bodies
      */
-    render(ctx) {
-        ctx.font = "12px serif";
+    render(ctx, bodies) {
+        if (this.showBoundary) {
+            for (const body of bodies) {
+                ctx.strokeStyle = body.active ? "#007500" : "#394d39";
+                const box = body.boundary;
+                ctx.strokeRect(box.left, box.top, box.right - box.left, box.bottom - box.top);
+            }
+        }
 
+        ctx.font = "12px serif";
         if (this.showVector) {
             for (const force of this.vectors) {
                 ctx.strokeStyle = force.color || "green";

@@ -6,9 +6,21 @@ import {ConstraintType, ImpulseBasedSolver} from "./solver.js";
 const urlSearchParams = new URLSearchParams(window.location.search);
 const params = Object.fromEntries(urlSearchParams.entries());
 
-const DEBUG = params["debug"] === "1";
-const ShowVectors = params["debug_vector"] === "1";
-const ShowVectorLength = params["debug_vector_length"] === "1";
+function parseBool(param) {
+    if (param === "1") {
+        return true;
+    } else if (param === "0") {
+        return false;
+    }
+
+    return null
+}
+
+const DebugMode = parseBool(params["debug"]) ?? false;
+const ShowVectors = parseBool(params["debug_vector"]);
+const ShowVectorLength = parseBool(params["debug_vector_length"]);
+const ShowBoundary = parseBool(params["debug_boundary"]);
+
 const SlowMotion = Number.parseFloat(params["slow_motion"] || "1");
 const Gravity = Number.parseFloat(params["g"] || "100");
 const Resistance = Math.min(1, Math.max(0, Number.parseFloat(params["resistance"] || "0.99")));
@@ -30,7 +42,7 @@ canvas.height = CanvasHeight * dpr;
 const ctx = canvas.getContext('2d');
 ctx.scale(dpr, dpr);
 
-const DebugInstance = new Debug({showVectorLength: ShowVectorLength, showVector: ShowVectors});
+const DebugInstance = new Debug({showBoundary: ShowBoundary, showVectorLength: ShowVectorLength, showVector: ShowVectors});
 window.__app = {DebugInstance};
 
 const Solver = new ImpulseBasedSolver();
@@ -102,24 +114,32 @@ function render() {
         ctx.stroke();
     }
 
-    if (DEBUG) {
-        for (const body of Solver.rigidBodies) {
-            ctx.strokeStyle = body.active ? "#007500" : "#394d39";
-            const box = body.boundary;
-            ctx.strokeRect(box.left, box.top, box.right - box.left, box.bottom - box.top);
-        }
-
-        DebugInstance.render(ctx);
+    if (DebugMode) {
+        DebugInstance.render(ctx, Solver.rigidBodies);
     }
+}
+
+const ModeEnum = {
+    playing: 0,
+    pause: 1,
+    step: 2,
 }
 
 let lastStepTime = performance.now();
 let elapsed = 0;
+let mode = ModeEnum.playing;
 
 function step() {
     const t = performance.now();
-    calculatePhysics(Math.min(elapsed, 33) / 1000);
+    if (mode !== ModeEnum.pause) {
+        calculatePhysics(Math.min(elapsed, 33) / 1000);
+    }
+
     const physicsTime = performance.now() - t;
+
+    if (mode === ModeEnum.step) {
+        mode = ModeEnum.pause;
+    }
 
     requestAnimationFrame(timestamp => {
         elapsed = timestamp - lastStepTime;
@@ -164,6 +184,23 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
             setTimeout(() => Solver.addRigidBody(body), 33 * k);
         }
     }
+}
+
+document.body.onkeydown = function (e) {
+    switch (e.code) {
+        case "Escape":
+            mode = mode === ModeEnum.playing ? ModeEnum.pause : ModeEnum.playing;
+            break;
+
+        case "Space":
+            mode = ModeEnum.step;
+            break;
+
+        default:
+            return;
+    }
+
+    e.preventDefault();
 }
 
 step();
