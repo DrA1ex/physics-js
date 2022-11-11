@@ -9,6 +9,10 @@ export class Vector2 {
         this.y = y;
     }
 
+    static fromAngle(angle) {
+        return new Vector2(Math.cos(angle), Math.sin(angle));
+    }
+
     elements() {
         return this.constructor.DIMENSIONS.map(d => this[d]);
     }
@@ -41,6 +45,10 @@ export class Vector2 {
         return this.#apply(value => -value);
     }
 
+    negated() {
+        return this.copy().negate();
+    }
+
     invert() {
         return this.#apply(value => 1 / value);
     }
@@ -51,7 +59,11 @@ export class Vector2 {
 
     normalize() {
         const length = this.length();
-        return this.#apply(value => value / length);
+        if (length > 0) {
+            return this.#apply(value => value / length);
+        }
+
+        return this.zero();
     }
 
     normalized() {

@@ -107,7 +107,7 @@ export class ImpulseBasedSolver {
                 continue;
             }
 
-            body.position.add(body.velocity.scaled(delta));
+            body.position.add(body.velocity.scaled(this.stepInfo.delta));
             this.debug.addVector(body.position, body.velocity, "red");
         }
     }
@@ -159,7 +159,7 @@ export class ImpulseBasedSolver {
 
         const collision = body1.collider.collision;
         this.debug.addCollision(collision.contact);
-        this.debug.addVector(collision.contact, collision.penetration.copy().negate(), "violet");
+        this.debug.addVector(collision.contact, collision.penetration.negated(), "violet");
 
         const velocityDelta = body1.velocity.delta(body2.velocity);
         const projectedVelocity = collision.tangent.dot(velocityDelta);
@@ -218,9 +218,9 @@ export class ImpulseBasedSolver {
         const impulse = new Vector2(1 + xDamper, 1 + yDamper).mul(body.velocity).mul(hasCollision).negate();
 
         this.#storeImpulse(body, impulse, ImpulseType.scalar);
-        this.#storeImpulse(body, penetration.copy().negate(), ImpulseType.pseudo);
+        this.#storeImpulse(body, penetration.negated(), ImpulseType.pseudo);
 
-        const tangent = penetration.copy().normalize();
+        const tangent = penetration.normalized();
         const collision = tangent.copy().mul(new Vector2(box.width / 2, box.height / 2)).add(penetration).add(body.position);
         this.debug.addCollision(collision);
     }

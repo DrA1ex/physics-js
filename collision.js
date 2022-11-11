@@ -34,13 +34,48 @@ export class Collider {
     }
 
     /**
-     * @abstract
-     * @param body
+     * @param {Body} body2
      * @return {boolean}
      */
-    detectCollision(body) {
-        this.collision = new Collision(false);
-        return false;
+    detectCollision(body2) {
+        const body1 = this.body
+        if (body1 instanceof CirceBody && body2 instanceof CirceBody) {
+            this.collision = CircleCollider.detectCollision(body1, body2);
+        } else if (body1 instanceof CirceBody) {
+            this.collision = CircleCollider.detectCollision(body1, body2);
+        } else if (body2 instanceof CirceBody) {
+            this.collision = CircleCollider.detectCollision(body2, body1);
+            this.collision.penetration?.negate();
+        } else {
+            this.collision = RectCollider.detectCollision(body1, body2);
+        }
+
+        return this.collision.result;
+    }
+
+    static _getBoxPoint(tangent, box) {
+        const xRad = box.width / 2;
+        const yRad = box.height / 2;
+        const tan = tangent.y / tangent.x;
+
+        let point;
+        const y = xRad * tan;
+        if (Math.abs(y) <= yRad) {
+            if (tangent.x >= 0) {
+                point = new Vector2(xRad, y);
+            } else {
+                point = new Vector2(-xRad, -y);
+            }
+        } else {
+            const x = yRad / tan;
+            if (tangent.y >= 0) {
+                point = new Vector2(x, yRad);
+            } else {
+                point = new Vector2(-x, -yRad);
+            }
+        }
+
+        return point;
     }
 }
 
@@ -49,75 +84,125 @@ export class RectCollider extends Collider {
         super(body);
     }
 
-    detectCollision(body) {
-        const box1 = this.body.boundary;
-        const box2 = body.boundary;
+    /**
+     * @param {Body} body1
+     * @param {Body} body2
+     * @return {Collision}
+     */
+    static detectCollision(body1, body2) {
+        const box1 = body1.boundary;
+        const box2 = body2.boundary;
 
-        const xResult = this.#checkRange(box1.left, box1.right, box2.left, box2.right)
-        const yResult = this.#checkRange(box1.top, box1.bottom, box2.top, box2.bottom);
-        const result = xResult && yResult;
+        const result = this.#checkRange(box1.left, box1.right, box2.left, box2.right) &&
+            this.#checkRange(box1.top, box1.bottom, box2.top, box2.bottom);
 
         if (result) {
-            const delta = this.body.position.delta(body.position);
+            const delta = body1.position.delta(body2.position);
 
-            this.collision = new Collision(true);
-            this.collision.delta = delta;
-            this.collision.tangent = delta.normalized();
-            this.collision.distance = delta.length();
+            const collision = new Collision(true);
+            collision.delta = delta;
+            collision.distance = delta.length();
 
-            const contact1 = RectCollider.#getContactPoint(this.collision.tangent, box1, box2);
-            const contact2 = RectCollider.#getContactPoint(this.collision.tangent.scaled(-1), box2, box1);
-            this.collision.contact = contact1;
-            this.collision.penetration = contact1.delta(contact2);
-        } else {
-            this.collision = new Collision(false);
+            const contact1 = this._getBoxPoint(delta.normalized(), box2).add(box2.center);
+            const contact2 = this._getBoxPoint(delta.normalized().negated(), box1).add(box1.center);
+            collision.contact = contact1;
+            collision.penetration = contact1.delta(contact2);
+            collision.tangent = this.#getSideByPoint(contact1, box2);
+
+            return collision;
         }
-        return result;
+
+        return new Collision(false);
     }
 
-    #checkRange(start1, end1, start2, end2) {
+    static #checkRange(start1, end1, start2, end2) {
         return end1 >= start2 && start1 <= end2;
     }
 
-    static #getContactPoint(tangent, box1, box2) {
-        const contact = tangent.scaled(Math.max(box2.width, box2.height) * 10);
-        contact.x = clamp(-box2.width, box2.width, contact.x)
-        contact.y = clamp(-box2.height, box2.height, contact.y);
-        contact.scale(0.5);
-        return contact.add(box2.center);
+    static #getSideByPoint(point, box) {
+        const normalized = point.delta(box.center).div(new Vector2(box.width / 2, box.height / 2));
+        if (Math.abs(normalized.x) === 1) {
+            return new Vector2(Math.sign(normalized.x), 0);
+        } else {
+            return new Vector2(0, Math.sign(normalized.y));
+        }
     }
 }
 
-export class CircleCollider extends RectCollider {
+export class CircleCollider extends Collider {
     constructor(body) {
         super(body);
     }
 
-    detectCollision(body) {
-        if (!(body instanceof CirceBody)) {
-            return super.detectCollision(body);
-        }
-
-        if (super.detectCollision(body)) {
-            const boxCollision = this.collision;
-
-            const delta = boxCollision.delta;
-            const centerDistance = this.body.radius + body.radius;
-            const distance = delta.length();
-            const result = distance <= centerDistance;
-
-            if (result) {
-                this.collision = new Collision(true);
-                this.collision.delta = delta;
-                this.collision.distance = distance;
-                this.collision.tangent = boxCollision.tangent;
-                this.collision.contact = this.collision.tangent.scaled(body.radius).add(body.position);
-                this.collision.penetration = this.collision.tangent.scaled(centerDistance).sub(delta);
-            } else {
-                this.collision = new Collision(false);
+    /**
+     * @param {CirceBody} body1
+     * @param {Body} body2
+     * @return {Collision}
+     */
+    static detectCollision(body1, body2) {
+        const boxCollision = RectCollider.detectCollision(body1, body2);
+        if (boxCollision.result) {
+            if (body2 instanceof CirceBody) {
+                return this.#circleCollision(boxCollision, body1, body2);
             }
+
+            return this.#rectCollision(boxCollision, body1, body2);
         }
 
-        return this.collision.result;
+        return boxCollision;
+    }
+
+    /**
+     * @param {Collision} boxCollision
+     * @param {CirceBody} body1
+     * @param {CirceBody} body2
+     */
+    static #circleCollision(boxCollision, body1, body2) {
+        const delta = boxCollision.delta;
+        const distance = boxCollision.distance;
+        const centerDistance = body1.radius + body2.radius;
+        const result = distance <= centerDistance;
+
+        if (result) {
+            const collision = new Collision(true);
+            collision.delta = delta;
+            collision.distance = distance;
+            collision.tangent = delta.normalized();
+            collision.contact = collision.tangent.scaled(body2.radius).add(body2.position);
+            collision.penetration = collision.tangent.scaled(centerDistance).sub(delta);
+
+            return collision;
+        }
+
+        return new Collision(false);
+    }
+
+    /**
+     * @param {Collision} boxCollision
+     * @param {CirceBody} body1
+     * @param {Body} body2
+     */
+    static #rectCollision(boxCollision, body1, body2) {
+        const box2 = body2.boundary;
+
+        const delta = boxCollision.delta;
+        const distance = boxCollision.distance;
+        const tangent = delta.normalized();
+        const box2Contact = this._getBoxPoint(tangent, box2);
+        const centerDistance = body1.radius + box2Contact.length();
+        const result = distance <= centerDistance;
+
+        if (result) {
+            const collision = new Collision(true);
+            collision.delta = delta;
+            collision.distance = distance;
+            collision.tangent = delta.normalized();
+            collision.contact = box2Contact.add(body2.position);
+            collision.penetration = collision.tangent.scaled(centerDistance).sub(delta);
+
+            return collision;
+        }
+
+        return new Collision(false);
     }
 }

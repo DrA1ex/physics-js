@@ -1,7 +1,7 @@
 import {Vector2} from "./vector.js";
 
 export class Debug {
-    /** @type {Array<{position: Vector2, size: Vector2, color: string}>}*/
+    /** @type {Array<{position: Vector2, size: Vector2, color: string, labeled: boolean}>}*/
     vectors = [];
     /** @type {Array<{position: Vector2, color: string}>}*/
     collisions = [];
@@ -18,9 +18,10 @@ export class Debug {
      * @param {Vector2} position
      * @param {Vector2} size
      * @param {string|null} [color=null]
+     * @param {boolean|null} [labeled=null]
      */
-    addVector(position, size, color = null) {
-        this.vectors.push({position, size, color});
+    addVector(position, size, color = null, labeled = true) {
+        this.vectors.push({position, size, color, labeled});
     }
 
     /**
@@ -51,10 +52,10 @@ export class Debug {
 
         ctx.font = "12px serif";
         if (this.showVector) {
-            for (const force of this.vectors) {
-                ctx.strokeStyle = force.color || "green";
+            for (const vectorInfo of this.vectors) {
+                ctx.strokeStyle = vectorInfo.color || "green";
                 ctx.fillStyle = ctx.strokeStyle;
-                this.#drawVector(ctx, force.position, force.size.copy(), this.vectorArrowSize);
+                this.#drawVector(ctx, vectorInfo.position, vectorInfo.size.copy(), this.vectorArrowSize, vectorInfo.labeled);
             }
         }
 
@@ -69,8 +70,9 @@ export class Debug {
      * @param {Vector2} position
      * @param {Vector2} size
      * @param {number} arrowSize
+     * @param {boolean} labeled
      */
-    #drawVector(ctx, position, size, arrowSize) {
+    #drawVector(ctx, position, size, arrowSize, labeled) {
         const length = size.length();
         if (length <= arrowSize) {
             return;
@@ -82,7 +84,7 @@ export class Debug {
         ctx.stroke();
 
         this.#drawPoint(ctx, position.copy().add(size), arrowSize);
-        if (length > 10 && this.showVectorLength) {
+        if (labeled && length > 20 && this.showVectorLength) {
             const pos = size.normalized().scale(size.length() / 2).add(position);
             this.#drawLabel(ctx, pos, length.toFixed(1), arrowSize);
         }

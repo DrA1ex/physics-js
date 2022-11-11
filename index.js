@@ -1,4 +1,4 @@
-import {Body, BoundaryBox, CirceBody} from "./body.js";
+import {Body, BoundaryBox, CirceBody, RectBody} from "./body.js";
 import {Vector2} from "./vector.js";
 import {Debug} from "./debug.js";
 import {ConstraintType, ImpulseBasedSolver} from "./solver.js";
@@ -74,12 +74,23 @@ let last = null;
 for (const pattern of initBodies) {
     const yOffset = last?.position.y ?? Solver.constraints[0]?.box.bottom ?? 0;
 
-    const body = new CirceBody(
-        CanvasWidth / 2 + pattern.xOffset,
-        yOffset - pattern.size / 2 - (last?.radius ?? 0) - 20,
-        pattern.size / 2,
-        pattern.size / 10
-    );
+    let body;
+    if (last instanceof CirceBody) {
+        body = new RectBody(
+            CanvasWidth / 2 + pattern.xOffset,
+            yOffset - pattern.size / 2 - (last?.radius ?? 0) - 20,
+            pattern.size,
+            pattern.size,
+            pattern.size / 10
+        );
+    } else {
+        body = new CirceBody(
+            CanvasWidth / 2 + pattern.xOffset,
+            yOffset - pattern.size / 2 - (last?.width ?? 0) / 2 - 20,
+            pattern.size / 2,
+            pattern.size / 10
+        );
+    }
 
     Solver.addRigidBody(body);
     last = body;
@@ -132,7 +143,7 @@ let mode = ModeEnum.playing;
 function step() {
     const t = performance.now();
     if (mode !== ModeEnum.pause) {
-        calculatePhysics(Math.min(elapsed, 33) / 1000);
+        calculatePhysics(elapsed / 1000);
     }
 
     const physicsTime = performance.now() - t;
@@ -179,9 +190,16 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
     } else {
         for (let k = 0; k < 5; k++) {
             const size = Math.floor(1 + Math.random() * 4) * 10;
-            const body = new CirceBody(x + 10 - Math.random() * 5, y + 10 - Math.random() * 5, size / 2, size / 10);
+            const body = new RectBody(x + 10 - Math.random() * 5, y + 10 - Math.random() * 5, size, size, size / 10);
 
             setTimeout(() => Solver.addRigidBody(body), 33 * k);
+        }
+
+        for (let k = 0; k < 5; k++) {
+            const size = Math.floor(1 + Math.random() * 4) * 10;
+            const body = new CirceBody(x + 10 - Math.random() * 5, y + 10 - Math.random() * 5, size / 2, size / 10);
+
+            setTimeout(() => Solver.addRigidBody(body), 33 * (k + 5));
         }
     }
 }
