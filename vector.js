@@ -87,7 +87,7 @@ export class Vector2 {
     }
 
     cross(vector) {
-        const reversed = vector.reverse();
+        const reversed = vector.reversed();
         return this.#aggregate((acc, value, dimension) => acc - value * reversed[dimension]);
     }
 
@@ -103,6 +103,10 @@ export class Vector2 {
         return this.perpendicular().normalize();
     }
 
+    /**
+     * @param {function(value: number, dimension: string )} fn
+     * @return {Vector2}
+     */
     #apply(fn) {
         for (const dimension of this.constructor.DIMENSIONS) {
             this[dimension] = fn(this[dimension], dimension);
@@ -111,6 +115,12 @@ export class Vector2 {
         return this;
     }
 
+    /**
+     *
+     * @param {function(acc: number, value: number, dimension: string )} fn
+     * @param {number} [init=0]
+     * @return {number}
+     */
     #aggregate(fn, init = 0) {
         let acc = init;
         for (const dimension of this.constructor.DIMENSIONS) {

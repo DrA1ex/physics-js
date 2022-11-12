@@ -112,17 +112,7 @@ function render() {
     ctx.strokeStyle = "lightgrey";
     ctx.fillStyle = "black";
     for (const body of Solver.rigidBodies) {
-        ctx.beginPath();
-
-        if (body instanceof CirceBody) {
-            ctx.arc(body.position.x, body.position.y, body.radius, 0, Math.PI * 2);
-        } else {
-            const box = body.boundary;
-            ctx.rect(box.left, box.top, box.width, box.height);
-        }
-
-        if (body.active) ctx.fill();
-        ctx.stroke();
+        body.render(ctx);
     }
 
     if (DebugMode) {
@@ -186,7 +176,7 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
         const angle = Math.random() * Math.PI * 2;
         const force = Math.random() * Gravity * 10 * body.mass;
 
-        body.applyImpulse(new Vector2(Math.cos(angle), Math.sin(angle)).scale(force));
+        body.applyImpulse(new Vector2(Math.cos(angle), Math.sin(angle)).scale(force), body.position);
     } else {
         for (let k = 0; k < 5; k++) {
             const size = Math.floor(1 + Math.random() * 4) * 10;

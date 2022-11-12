@@ -12,7 +12,8 @@ export class Collision {
     /**@type{Vector2}*/
     delta = null;
     /**@type{Vector2}*/
-    contact = null;
+    aContact = null;
+    bContact = null;
     /**@type{Vector2}*/
     tangent = null;
     /**@type{Vector2}*/
@@ -105,7 +106,8 @@ export class RectCollider extends Collider {
 
             const contact1 = this._getBoxPoint(delta.normalized(), box2).add(box2.center);
             const contact2 = this._getBoxPoint(delta.normalized().negated(), box1).add(box1.center);
-            collision.contact = contact1;
+            collision.aContact = contact1;
+            collision.bContact = contact2;
             collision.penetration = contact1.delta(contact2);
             collision.tangent = this.#getSideByPoint(contact1, box2);
 
@@ -168,7 +170,8 @@ export class CircleCollider extends Collider {
             collision.delta = delta;
             collision.distance = distance;
             collision.tangent = delta.normalized();
-            collision.contact = collision.tangent.scaled(body2.radius).add(body2.position);
+            collision.aContact = collision.tangent.scaled(body2.radius).add(body2.position);
+            collision.bContact = collision.tangent.negated().scale(body1.radius).add(body1.position);
             collision.penetration = collision.tangent.scaled(centerDistance).sub(delta);
 
             return collision;
@@ -197,7 +200,8 @@ export class CircleCollider extends Collider {
             collision.delta = delta;
             collision.distance = distance;
             collision.tangent = delta.normalized();
-            collision.contact = box2Contact.add(body2.position);
+            collision.aContact = box2Contact.add(body2.position);
+            collision.bContact = collision.tangent.negated().scale(body1.radius).add(body1.position);
             collision.penetration = collision.tangent.scaled(centerDistance).sub(delta);
 
             return collision;
