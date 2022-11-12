@@ -126,7 +126,7 @@ export class Body {
         this.position.add(velocity);
         this.angle += rotation;
 
-        if (Math.abs(this.angle) > 2 * Math.PI) {
+        if (Math.abs(this.angle) >= 2 * Math.PI) {
             const scale = Math.floor(this.angle / (2 * Math.PI));
             this.angle = this.angle - 2 * Math.PI * scale;
         }
@@ -137,20 +137,10 @@ export class Body {
      */
     render(ctx) {
         const box = this.boundary;
-
-        ctx.save();
-
-        ctx.translate(box.center.x, box.center.y);
-
-        //TODO: Implement proper rect collision
-        //ctx.rotate(this.angle);
-
         ctx.beginPath();
         ctx.rect(-box.width / 2, -box.width / 2, box.width, box.height);
         if (this.active) ctx.fill();
         ctx.stroke();
-
-        ctx.restore();
     }
 }
 
@@ -170,10 +160,42 @@ export class RectBody extends Body {
     }
 
     get boundary() {
+        const halfSize = new Vector2(this.width / 2, this.height / 2);
+        const points = [
+            new Vector2(-halfSize.x, -halfSize.y),
+            new Vector2(-halfSize.x, halfSize.y),
+            new Vector2(halfSize.x, -halfSize.y),
+            new Vector2(halfSize.x, halfSize.y)
+        ].map(p => p.rotated(this.angle));
+
+        let left = points[0].x, right = points[0].x, top = points[0].y, bottom = points[0].y;
+        for (let i = 1; i < points.length; i++) {
+            const point = points[i];
+
+            if (left > point.x) left = point.x;
+            if (right < point.x) right = point.x;
+            if (top > point.y) top = point.y;
+            if (bottom < point.y) bottom = point.y;
+        }
+
         return new BoundaryBox(
-            this.position.x - this.width / 2, this.position.x + this.width / 2,
-            this.position.y - this.height / 2, this.position.y + this.height / 2
+            this.position.x + left, this.position.x + right,
+            this.position.y + top, this.position.y + bottom
         );
+    }
+
+    render(ctx) {
+        ctx.save();
+
+        ctx.translate(this.position.x, this.position.y);
+        ctx.rotate(this.angle);
+
+        ctx.beginPath();
+        ctx.rect(-this.width / 2, -this.width / 2, this.width, this.height);
+        if (this.active) ctx.fill();
+        ctx.stroke();
+
+        ctx.restore();
     }
 }
 

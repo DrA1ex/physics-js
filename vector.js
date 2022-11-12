@@ -103,6 +103,18 @@ export class Vector2 {
         return this.perpendicular().normalize();
     }
 
+    rotated(angle, anchor = null) {
+        anchor = anchor ?? new Vector2();
+
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+
+        return new Vector2(
+            cos * (this.x - anchor.x) - sin * (this.y - anchor.y) + anchor.x,
+            sin * (this.x - anchor.x) + cos * (this.y - anchor.y) + anchor.y
+        );
+    }
+
     /**
      * @param {function(value: number, dimension: string )} fn
      * @return {Vector2}
