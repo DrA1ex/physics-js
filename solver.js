@@ -1,43 +1,26 @@
+import {Vector2} from "./vector.js";
+import {ConstraintType, ImpulseType} from "./enum.js";
+
 /**
  * @typedef {{type: ConstraintType}} ConstraintBase
  * @typedef {ConstraintBase & {box: BoundaryBox, damper: Vector2}} InsetConstraint
  *
  * @typedef {InsetConstraint} Constraint
  *
- * @typedef {function(delta: number, body: Body): Vector2} Force
- *
  * @typedef {type: ImpulseType, impulse: Vector2, point: Vector2} Impulse
  */
-
-import {Vector2} from "./vector.js";
-
-/**
- * @enum{number}
- */
-export const ConstraintType = {
-    inset: 0,
-}
-
-/**
- * @enum{number}
- */
-const ImpulseType = {
-    regular: 0,
-    scalar: 1,
-    pseudo: 2,
-}
 
 export class ImpulseBasedSolver {
     /** @type {Body[]} */
     rigidBodies = [];
     /** @type {Constraint[]} */
     constraints = [];
-    /** @type {Force[]} */
+    /** @type {IForce[]} */
     forces = [];
 
     stepInfo = {
         delta: 0,
-        /** @type {Map<Body, Impulse>}*/
+        /** @type {Map<Body, Impulse[]>}*/
         impulses: new Map(),
     }
 
@@ -60,7 +43,7 @@ export class ImpulseBasedSolver {
     }
 
     /**
-     * @param {Force} force
+     * @param {IForce} force
      */
     addForce(force) {
         this.forces.push(force);
@@ -76,6 +59,14 @@ export class ImpulseBasedSolver {
 
         if (this.stepInfo.delta === 0) {
             return;
+        }
+
+        // Forces
+        for (const force of this.forces) {
+            for (const body of this.rigidBodies) {
+                const {impulse, point, type} = force.impulse(this.stepInfo.delta, body);
+                this.#storeImpulse(body, impulse, point, type);
+            }
         }
 
         this.step();
@@ -119,13 +110,6 @@ export class ImpulseBasedSolver {
     }
 
     step() {
-        // Forces
-        for (const force of this.forces) {
-            for (const body of this.rigidBodies) {
-                this.#storeImpulse(body, force(this.stepInfo.delta, body), body.position);
-            }
-        }
-
         // Constraints
         for (let i = 0; i < this.rigidBodies.length; i++) {
             const body1 = this.rigidBodies[i];

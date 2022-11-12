@@ -1,7 +1,9 @@
 import {Body, BoundaryBox, CirceBody, RectBody} from "./body.js";
 import {Vector2} from "./vector.js";
 import {Debug} from "./debug.js";
-import {ConstraintType, ImpulseBasedSolver} from "./solver.js";
+import {ImpulseBasedSolver} from "./solver.js";
+import {GravityForce, ResistanceForce} from "./force.js";
+import {ConstraintType} from "./enum.js";
 
 const urlSearchParams = new URLSearchParams(window.location.search);
 const params = Object.fromEntries(urlSearchParams.entries());
@@ -52,8 +54,8 @@ Solver.addConstraint({
     damper: new Vector2(0.5, 0.3),
 });
 
-Solver.addForce((delta, body) => new Vector2(0, Gravity * body.mass * delta));
-Solver.addForce((delta, body) => body.velocity.copy().scale(-(1 - Resistance) * body.mass * SlowMotion));
+Solver.addForce(new GravityForce(Gravity));
+Solver.addForce(new ResistanceForce(Resistance));
 
 const initBodies = [
     {xOffset: 0, size: 60},
