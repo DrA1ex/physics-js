@@ -1,9 +1,10 @@
-import {Body, BoundaryBox, CirceBody, RectBody} from "./body.js";
+import {BoundaryBox, CirceBody, RectBody} from "./body.js";
 import {Vector2} from "./vector.js";
 import {Debug} from "./debug.js";
 import {ImpulseBasedSolver} from "./solver.js";
 import {GravityForce, ResistanceForce} from "./force.js";
 import {ConstraintType} from "./enum.js";
+import {Collider} from "./collision.js";
 
 const urlSearchParams = new URLSearchParams(window.location.search);
 const params = Object.fromEntries(urlSearchParams.entries());
@@ -172,8 +173,8 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
     const x = point.clientX - bcr.x;
     const y = point.clientY - bcr.y;
 
-    const pointBox = new Body(x, y, 0);
-    const body = Solver.rigidBodies.find(b => pointBox.collider.detectCollision(b));
+    const pointBox = BoundaryBox.fromDimensions(x, y, 1, 1);
+    const body = Solver.rigidBodies.find(b => Collider.detectBoundaryCollision(pointBox, b.boundary).result);
     if (body) {
         const angle = Math.random() * Math.PI * 2;
         const force = Math.random() * Gravity * 10 * body.mass;

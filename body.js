@@ -23,8 +23,50 @@ export class BoundaryBox {
         this.center = new Vector2(this.left + this.width / 2, this.top + this.height / 2);
     }
 
+    rotated(angle) {
+        if (angle === 0) {
+            return this;
+        }
+
+        const halfSize = new Vector2(this.width / 2, this.height / 2);
+        const points = [
+            new Vector2(-halfSize.x, -halfSize.y),
+            new Vector2(-halfSize.x, halfSize.y),
+            new Vector2(halfSize.x, -halfSize.y),
+            new Vector2(halfSize.x, halfSize.y)
+        ].map(p => p.rotated(angle));
+
+        let left = points[0].x, right = points[0].x, top = points[0].y, bottom = points[0].y;
+        for (let i = 1; i < points.length; i++) {
+            const point = points[i];
+
+            if (left > point.x) left = point.x;
+            if (right < point.x) right = point.x;
+            if (top > point.y) top = point.y;
+            if (bottom < point.y) bottom = point.y;
+        }
+
+        return new BoundaryBox(
+            this.center.x + left, this.center.x + right,
+            this.center.y + top, this.center.y + bottom
+        );
+    }
+
+    rotatedOrigin(angle, origin) {
+        if (angle === 0) {
+            return this;
+        }
+
+        const newCenter = this.center.rotated(angle, origin);
+        return BoundaryBox.fromCenteredDimensions(newCenter.x, newCenter.y, this.width, this.height);
+    }
+
     static fromDimensions(x, y, width, height) {
         return new BoundaryBox(x, x + width, y, y + height);
+    }
+
+    static fromCenteredDimensions(x, y, width, height) {
+        return BoundaryBox.fromDimensions(x - width / 2, y - height / 2, width, height);
     }
 }
 
@@ -160,28 +202,11 @@ export class RectBody extends Body {
     }
 
     get boundary() {
-        const halfSize = new Vector2(this.width / 2, this.height / 2);
-        const points = [
-            new Vector2(-halfSize.x, -halfSize.y),
-            new Vector2(-halfSize.x, halfSize.y),
-            new Vector2(halfSize.x, -halfSize.y),
-            new Vector2(halfSize.x, halfSize.y)
-        ].map(p => p.rotated(this.angle));
+        return this.box.rotated(this.angle);
+    }
 
-        let left = points[0].x, right = points[0].x, top = points[0].y, bottom = points[0].y;
-        for (let i = 1; i < points.length; i++) {
-            const point = points[i];
-
-            if (left > point.x) left = point.x;
-            if (right < point.x) right = point.x;
-            if (top > point.y) top = point.y;
-            if (bottom < point.y) bottom = point.y;
-        }
-
-        return new BoundaryBox(
-            this.position.x + left, this.position.x + right,
-            this.position.y + top, this.position.y + bottom
-        );
+    get box() {
+        return BoundaryBox.fromCenteredDimensions(this.position.x, this.position.y, this.width, this.height);
     }
 
     render(ctx) {

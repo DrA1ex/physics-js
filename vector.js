@@ -33,6 +33,10 @@ export class Vector2 {
         return this.copy().sub(vector);
     }
 
+    tangent(vector) {
+        return this.delta(vector).normalize();
+    }
+
     mul(vector) {
         return this.#apply((value, dimension) => value * vector[dimension]);
     }
