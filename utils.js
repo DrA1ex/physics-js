@@ -187,7 +187,7 @@ export function findIntersections(pointA1, pointA2, pointB1, pointB2) {
  * @param {BoundaryBox} box1
  * @return {boolean}
  */
-export function isInsideBox(collisionPointB1, box1) {
+export function containsByBox(collisionPointB1, box1) {
     return box1.left <= collisionPointB1.x && collisionPointB1.x <= box1.right &&
         box1.top <= collisionPointB1.y && collisionPointB1.y <= box1.bottom;
 }
@@ -213,4 +213,25 @@ export function getSidePoints(side, box, local = false) {
     }
 
     return localPoints;
+}
+
+/**
+ * @param {Vector2} target
+ * @param {Array<Vector2>} points
+ * @return {Vector2|null}
+ */
+export function getClosestPoint(target, points) {
+    let result = null;
+    let minDistance = Number.POSITIVE_INFINITY
+
+    for (const point of points) {
+        const d = target.delta(point).length();
+
+        if (d < minDistance) {
+            minDistance = d;
+            result = point;
+        }
+    }
+
+    return result;
 }

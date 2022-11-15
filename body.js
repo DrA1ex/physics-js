@@ -23,18 +23,21 @@ export class BoundaryBox {
         this.center = new Vector2(this.left + this.width / 2, this.top + this.height / 2);
     }
 
+    rotatedPoints(angle) {
+        return [
+            new Vector2(this.left, this.top),
+            new Vector2(this.right, this.top),
+            new Vector2(this.right, this.bottom),
+            new Vector2(this.left, this.bottom)
+        ].map(p => p.rotated(angle, this.center));
+    }
+
     rotated(angle) {
         if (angle === 0) {
             return this;
         }
 
-        const halfSize = new Vector2(this.width / 2, this.height / 2);
-        const points = [
-            new Vector2(-halfSize.x, -halfSize.y),
-            new Vector2(-halfSize.x, halfSize.y),
-            new Vector2(halfSize.x, -halfSize.y),
-            new Vector2(halfSize.x, halfSize.y)
-        ].map(p => p.rotated(angle));
+        const points = this.rotatedPoints(angle);
 
         let left = points[0].x, right = points[0].x, top = points[0].y, bottom = points[0].y;
         for (let i = 1; i < points.length; i++) {
@@ -46,10 +49,7 @@ export class BoundaryBox {
             if (bottom < point.y) bottom = point.y;
         }
 
-        return new BoundaryBox(
-            this.center.x + left, this.center.x + right,
-            this.center.y + top, this.center.y + bottom
-        );
+        return new BoundaryBox(left, right, top, bottom);
     }
 
     rotatedOrigin(angle, origin) {
@@ -187,9 +187,22 @@ export class Body {
 }
 
 /**
+ * @abstract
+ */
+export class PolygonBody extends Body {
+    /**
+     * @abstract
+     * @return {Array<Vector2>}
+     */
+    get points() {
+        return [this.position];
+    }
+}
+
+/**
  * @extends Body<RectBody>
  */
-export class RectBody extends Body {
+export class RectBody extends PolygonBody {
     width = 0;
     height = 0;
 
@@ -203,6 +216,10 @@ export class RectBody extends Body {
 
     get boundary() {
         return this.box.rotated(this.angle);
+    }
+
+    get points() {
+        return this.box.rotatedPoints(this.angle);
     }
 
     get box() {

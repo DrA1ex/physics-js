@@ -173,7 +173,7 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
     const x = point.clientX - bcr.x;
     const y = point.clientY - bcr.y;
 
-    const pointBox = BoundaryBox.fromDimensions(x, y, 1, 1);
+    const pointBox = new BoundaryBox(x, x, y, y);
     const body = Solver.rigidBodies.find(b => Collider.detectBoundaryCollision(pointBox, b.boundary).result);
     if (body) {
         const angle = Math.random() * Math.PI * 2;
