@@ -217,7 +217,7 @@ export function getSidePoints(side, box, local = false) {
 
 /**
  * @param {Vector2} target
- * @param {Array<Vector2>} points
+ * @param {Vector2[]} points
  * @return {Vector2|null}
  */
 export function getClosestPoint(target, points) {
@@ -234,4 +234,44 @@ export function getClosestPoint(target, points) {
     }
 
     return result;
+}
+
+/**
+ * @param {Vector2} projection
+ * @param {Vector2[]} points1
+ * @param {Vector2[]} points2
+ * @return {{result: boolean, overlap: number}}
+ */
+export function getProjectionIntersectionInfo(projection, points1, points2) {
+    const i1 = this.getProjectedInterval(projection, points1);
+    const i2 = this.getProjectedInterval(projection, points2);
+
+    return {
+        result: isRangeIntersects(i1.min, i1.max, i2.min, i2.max),
+        overlap: Math.min(i1.max, i2.max) - Math.max(i1.min, i2.min),
+        i1, i2
+    };
+}
+
+/**
+ *
+ * @param {Vector2} projection
+ * @param {Vector2[]} points
+ * @return {{min: number, max: number}}
+ */
+export function getProjectedInterval(projection, points) {
+    let min = Number.POSITIVE_INFINITY, max = Number.NEGATIVE_INFINITY;
+    for (const point of points) {
+        const projected = projection.dot(point);
+
+        if (projected < min) {
+            min = projected;
+        }
+
+        if (projected > max) {
+            max = projected;
+        }
+    }
+
+    return {min, max};
 }

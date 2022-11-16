@@ -3,7 +3,7 @@ import {Vector2} from "./vector.js";
 export class Debug {
     /** @type {Array<{position: Vector2, size: Vector2, color: string, labeled: boolean}>}*/
     vectors = [];
-    /** @type {Array<{position: Vector2, color: string}>}*/
+    /** @type {Array<{position: Vector2, color: string, size: number}>}*/
     collisions = [];
 
     constructor(options = null) {
@@ -27,9 +27,10 @@ export class Debug {
     /**
      * @param {Vector2} position
      * @param {string|null} [color=null]
+     * @param {number|null} [size=null]
      */
-    addCollision(position, color = null) {
-        this.collisions.push({position, color});
+    addCollision(position, color = null, size = null) {
+        this.collisions.push({position, color, size});
     }
 
     reset() {
@@ -59,9 +60,9 @@ export class Debug {
             }
         }
 
-        for (const force of this.collisions) {
-            ctx.strokeStyle = force.color || "violet";
-            this.#drawPoint(ctx, force.position, this.collisionSize);
+        for (const point of this.collisions) {
+            ctx.strokeStyle = point.color || "violet";
+            this.#drawPoint(ctx, point.position, point.size || this.collisionSize);
         }
     }
 

@@ -91,15 +91,19 @@ export class Collider {
         const points1 = poly1.points;
         const points2 = poly2.points;
 
+        if (points1.length === 0 || points2.length === 0) {
+            throw Error("Unexpected poly: no points");
+        }
+
         const testedNormals = new Set();
-        let result = false;
+        let hasCollision = true;
         let minInterval = null;
 
         for (const [p1, p2, body] of [[points1, points2, poly1], [points2, points1, poly2]]) {
             const check = this.#detectPointsCollision(p1, p2, testedNormals);
-            result ||= check.result;
+            hasCollision &&= check.result;
 
-            if (!result) {
+            if (!hasCollision) {
                 return {result: false, collision: null};
             }
 
@@ -107,6 +111,7 @@ export class Collider {
                 minInterval = {...check, body};
             }
         }
+
 
         return {
             result: true,
@@ -123,6 +128,10 @@ export class Collider {
 
 
     static detectPointWithPolygonCollision(point, polyPoints) {
+        if (polyPoints.length === 0) {
+            throw Error("Unexpected poly: no points");
+        }
+
         return this.#detectPointsCollision(polyPoints, [point], new Set()).result;
     }
 
@@ -144,7 +153,7 @@ export class Collider {
                 continue;
             }
 
-            const check = this.#detectNormalCollision(normal, points1, points2);
+            const check = Utils.getProjectionIntersectionInfo(normal, points1, points2);
             if (!check.result) {
                 return {result: false};
             }
@@ -169,40 +178,13 @@ export class Collider {
 
     static #getNormalKey(normal, fractionDigits = 7) {
         const clipped = normal.copy();
-        if (normal.x !== 0) {
-            clipped.x = Math.abs(clipped.x);
-        } else {
-            clipped.y = Math.abs(clipped.y);
+        if (normal.x < 0) {
+            clipped.negate();
+        } else if (normal.x === 0 && normal.y < 0) {
+            clipped.negate();
         }
 
-        return `${Math.abs(clipped.x).toFixed(fractionDigits)}_${Math.abs(clipped.y).toFixed(fractionDigits)}`;
-    }
-
-    static #detectNormalCollision(normal, points1, points2) {
-        const i1 = this.#getProjectedInterval(normal, points1);
-        const i2 = this.#getProjectedInterval(normal, points2);
-
-        return {
-            result: Utils.isRangeIntersects(i1.min, i1.max, i2.min, i2.max),
-            overlap: Math.min(i1.max, i2.max) - Math.max(i1.min, i2.min)
-        };
-    }
-
-    static #getProjectedInterval(normal, points) {
-        let min = Number.POSITIVE_INFINITY, max = Number.NEGATIVE_INFINITY;
-        for (const point of points) {
-            const projected = normal.dot(point);
-
-            if (projected < min) {
-                min = projected;
-            }
-
-            if (projected > max) {
-                max = projected;
-            }
-        }
-
-        return {min, max};
+        return `${clipped.x.toFixed(fractionDigits)}_${clipped.y.toFixed(fractionDigits)}`;
     }
 }
 
@@ -225,19 +207,27 @@ export class PolygonCollider extends Collider {
 
         const collisionInfo = polyCollision.collision;
 
+        const centerTangent = boundaryCollision.tangent
         const originTangent = collisionInfo.origin.delta(collisionInfo.body.position).normalized();
-        const projectedOrigin = boundaryCollision.tangent.dot(originTangent);
-        const projectedNormal = boundaryCollision.tangent.dot(collisionInfo.normal);
+        const projectedOrigin = centerTangent.dot(originTangent);
+        const projectedNormal = centerTangent.dot(collisionInfo.normal);
 
-        const points = collisionInfo.body === body1 ? collisionInfo.points2 : collisionInfo.points1;
+        const [points, otherPoints] = collisionInfo.body === body1 ? [collisionInfo.points2, collisionInfo.points1] :
+            [collisionInfo.points1, collisionInfo.points2];
         const flipOrigin = collisionInfo.body === body1 ? projectedOrigin > 0 : projectedOrigin < 0;
         const flipNormal = collisionInfo.body === body1 ? projectedNormal < 0 : projectedOrigin > 0;
         const origin = flipOrigin ? collisionInfo.origin.rotated(Math.PI, collisionInfo.body.position) : collisionInfo.origin;
         const normal = flipNormal ? collisionInfo.normal.negated() : collisionInfo.normal;
 
-        const candidates = PolygonCollider.#filterCollisionsCandidates(points, origin, normal)
-        let collisionA = candidates.length === 2 ? candidates[1].delta(candidates[0]).scaled(0.5).add(candidates[0]) : candidates[0];
+        let collisionA = PolygonCollider.#getCollisionPoint(points, origin, normal);
         let collisionB = collisionA.delta(normal.scaled(collisionInfo.overlap));
+
+        const pointAContained = Utils.getProjectionIntersectionInfo(normal.perpendicular(), [collisionA], otherPoints);
+        if (!pointAContained.result) {
+            const alternativeCollision = PolygonCollider.#getCollisionPoint(otherPoints, origin, centerTangent.negated());
+            collisionA = alternativeCollision.delta(normal.scaled(-collisionInfo.overlap));
+            collisionB = alternativeCollision;
+        }
 
         const collision = new Collision(true);
         collision.delta = boundaryCollision.delta;
@@ -251,21 +241,21 @@ export class PolygonCollider extends Collider {
         return collision;
     }
 
-    static #filterCollisionsCandidates(points, origin, normal) {
+    static #getCollisionPoint(points, origin, normal, eps = 1e-7) {
         const originProjection = origin.dot(normal);
         let candidates, maxProj = Number.NEGATIVE_INFINITY;
         for (const point of points) {
             const proj = point.dot(normal);
-            if (proj >= originProjection && proj > maxProj) {
+            if (proj - originProjection >= -eps && proj > maxProj) {
                 maxProj = proj;
                 candidates = [point]
-            } else if (proj === maxProj) {
+            } else if (Math.abs(proj - maxProj) < eps) {
                 // noinspection JSUnusedAssignment
                 candidates.push(point);
             }
         }
 
-        return candidates;
+        return candidates.length === 2 ? candidates[1].delta(candidates[0]).scaled(0.5).add(candidates[0]) : candidates[0];
     }
 }
 
