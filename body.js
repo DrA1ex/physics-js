@@ -1,7 +1,8 @@
 import {Vector2} from "./vector.js";
-import {CircleCollider, RectCollider} from "./collision.js";
+import {CircleCollider, PolygonCollider, RectCollider} from "./collision.js";
+import {BodyRenderer, CircleBodyRenderer, PolygonBodyRenderer, RectBodyRenderer} from "./render.js";
 
-/** @typedef {Body|CirceBody} BodyType */
+/** @typedef {Body|CircleBody} BodyType */
 
 export class BoundaryBox {
     width;
@@ -37,19 +38,7 @@ export class BoundaryBox {
             return this;
         }
 
-        const points = this.rotatedPoints(angle);
-
-        let left = points[0].x, right = points[0].x, top = points[0].y, bottom = points[0].y;
-        for (let i = 1; i < points.length; i++) {
-            const point = points[i];
-
-            if (left > point.x) left = point.x;
-            if (right < point.x) right = point.x;
-            if (top > point.y) top = point.y;
-            if (bottom < point.y) bottom = point.y;
-        }
-
-        return new BoundaryBox(left, right, top, bottom);
+        return BoundaryBox.fromPoints(this.rotatedPoints(angle));
     }
 
     rotatedOrigin(angle, origin) {
@@ -68,6 +57,20 @@ export class BoundaryBox {
     static fromCenteredDimensions(x, y, width, height) {
         return BoundaryBox.fromDimensions(x - width / 2, y - height / 2, width, height);
     }
+
+    static fromPoints(points) {
+        let left = points[0].x, right = points[0].x, top = points[0].y, bottom = points[0].y;
+        for (let i = 1; i < points.length; i++) {
+            const point = points[i];
+
+            if (left > point.x) left = point.x;
+            if (right < point.x) right = point.x;
+            if (top > point.y) top = point.y;
+            if (bottom < point.y) bottom = point.y;
+        }
+
+        return new BoundaryBox(left, right, top, bottom);
+    }
 }
 
 /**
@@ -76,7 +79,9 @@ export class BoundaryBox {
  */
 export class Body {
     /** @type {Collider} */
-    collider = null;
+    collider;
+    /*** @type {BodyRenderer} */
+    renderer
     active = true;
 
     _mass = 0;
@@ -96,6 +101,7 @@ export class Body {
         this.inertia = this.mass / 2;
 
         this.collider = new RectCollider(this);
+        this.renderer = new BodyRenderer(this);
     }
 
     /** @return {T} */
@@ -173,29 +179,33 @@ export class Body {
             this.angle = this.angle - 2 * Math.PI * scale;
         }
     }
-
-    /**
-     * @param {CanvasRenderingContext2D} ctx
-     */
-    render(ctx) {
-        const box = this.boundary;
-        ctx.beginPath();
-        ctx.rect(-box.width / 2, -box.width / 2, box.width, box.height);
-        if (this.active) ctx.fill();
-        ctx.stroke();
-    }
 }
 
-/**
- * @abstract
- */
 export class PolygonBody extends Body {
+    constructor(x, y, points, mass) {
+        super(x, y, mass);
+        this._points = points;
+
+        const boundary = this.boundary;
+        this.inertia = (this.mass / 12) * (boundary.width + Math.pow(boundary.height, 2));
+
+        this.collider = new PolygonCollider(this);
+        this.renderer = new PolygonBodyRenderer(this);
+    }
+
     /**
-     * @abstract
      * @return {Array<Vector2>}
      */
     get points() {
-        return [this.position];
+        if (this.angle === 0) {
+            return this._points.map(p => p.copy().add(this.position));
+        }
+
+        return this._points.map(p => p.rotated(this.angle).add(this.position));
+    }
+
+    get boundary() {
+        return BoundaryBox.fromPoints(this.points);
     }
 }
 
@@ -207,53 +217,37 @@ export class RectBody extends PolygonBody {
     height = 0;
 
     constructor(x, y, width, height, mass) {
-        super(x, y, mass);
+        const points = [
+            new Vector2(-width / 2, -height / 2),
+            new Vector2(width / 2, -height / 2),
+            new Vector2(width / 2, height / 2),
+            new Vector2(-width / 2, height / 2),
+        ];
+
+        super(x, y, points, mass);
 
         this.width = width;
         this.height = height;
         this.inertia = (this.mass / 12) * (this.width + Math.pow(this.height, 2));
-    }
 
-    get boundary() {
-        return this.box.rotated(this.angle);
-    }
-
-    get points() {
-        return this.box.rotatedPoints(this.angle);
-    }
-
-    get box() {
-        return BoundaryBox.fromCenteredDimensions(this.position.x, this.position.y, this.width, this.height);
-    }
-
-    render(ctx) {
-        ctx.save();
-
-        ctx.translate(this.position.x, this.position.y);
-        ctx.rotate(this.angle);
-
-        ctx.beginPath();
-        ctx.rect(-this.width / 2, -this.width / 2, this.width, this.height);
-        if (this.active) ctx.fill();
-        ctx.stroke();
-
-        ctx.restore();
+        this.renderer = new RectBodyRenderer(this);
     }
 }
 
 /**
- * @extends Body<CirceBody>
+ * @extends Body<CircleBody>
  */
-export class CirceBody extends Body {
+export class CircleBody extends Body {
     radius = 0;
 
     constructor(x, y, radius, mass) {
         super(x, y, mass);
 
         this.radius = radius;
-        this.collider = new CircleCollider(this);
-
         this.inertia = this.mass * Math.pow(this.radius, 2) / 2;
+
+        this.collider = new CircleCollider(this);
+        this.renderer = new CircleBodyRenderer(this);
     }
 
     get boundary() {
@@ -261,18 +255,5 @@ export class CirceBody extends Body {
             this.position.x - this.radius, this.position.x + this.radius,
             this.position.y - +this.radius, this.position.y + this.radius
         );
-    }
-
-    render(ctx) {
-        ctx.beginPath();
-        ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
-
-        if (this.active) ctx.fill();
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.moveTo(this.position.x, this.position.y);
-        ctx.lineTo(...Vector2.fromAngle(this.angle).scale(this.radius).add(this.position).elements());
-        ctx.stroke();
     }
 }

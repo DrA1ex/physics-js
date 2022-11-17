@@ -90,6 +90,10 @@ export class Vector2 {
         return Math.sqrt(this.dot(this));
     }
 
+    lengthSquared() {
+        return this.dot(this);
+    }
+
     cross(vector) {
         const reversed = vector.reversed();
         return this.#aggregate((acc, value, dimension) => acc - value * reversed[dimension]);

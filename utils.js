@@ -71,79 +71,6 @@ export function getSideNormal(point, box, local = false) {
 }
 
 /**
- * @param {Vector2} point
- * @param {BoundaryBox} box
- * @param {boolean} [local=false]
- * @return {Vector2}
- */
-export function getNearestVertex(point, box, local = false) {
-    if (local) {
-        point = point.copy().add(box.center);
-    }
-
-    return new Vector2(
-        point.x < box.center.x ? box.left : box.right,
-        point.y < box.center.y ? box.top : box.bottom
-    );
-}
-
-/**
- * @param {Vector2} side
- * @param {BoundaryBox} box
- * @param {Vector2} origin
- * @param {boolean} [local=false]
- * @return {Vector2}
- */
-export function getNearestBoxVertex(side, box, origin, local = false) {
-    const [candidate1, candidate2] = getSidePoints(side, box);
-    const candidate1Length = origin.delta(candidate1).length();
-    const candidate2Length = origin.delta(candidate2).length();
-
-    return candidate1Length < candidate2Length ? candidate1 : candidate2;
-}
-
-/**
- * @param {Vector2} origin
- * @param {Vector2} boxPoint
- * @param {BoundaryBox} box
- * @param {Vector2|null} [side=null]
- * @param {boolean} [local=false]
- * @return {Vector2}
- */
-export function getAltitude(origin, boxPoint, box, side = null, local = false) {
-    if (local) {
-        origin = origin.copy().add(box.center);
-        boxPoint = boxPoint.copy().add(box.center);
-    }
-
-    side = side ?? getSideNormal(boxPoint, box, false);
-    const result = clampInsideBox(new Vector2(
-        side.x === 0 ? origin.x : boxPoint.x,
-        side.y === 0 ? origin.y : boxPoint.y
-    ), box, false);
-
-    if (local) {
-        return result.sub(box.center);
-    }
-
-    return result;
-}
-
-/**
- * @param {Vector2} point
- * @param {BoundaryBox} box
- * @param {boolean} [local=false]
- * @return {Vector2}
- */
-export function clampInsideBox(point, box, local = false) {
-    if (local) {
-        point = point.copy().add(box.center);
-    }
-
-    return new Vector2(clamp(box.left, box.right, point.x), clamp(box.top, box.bottom, point.y));
-}
-
-/**
  * @param {Vector2} pointA1
  * @param {Vector2} pointA2
  * @param {Vector2} pointB1
@@ -180,60 +107,6 @@ export function findIntersections(pointA1, pointA2, pointB1, pointB2) {
     let y = y1 + ua * (y2 - y1)
 
     return new Vector2(x, y);
-}
-
-/**
- * @param {Vector2} collisionPointB1
- * @param {BoundaryBox} box1
- * @return {boolean}
- */
-export function containsByBox(collisionPointB1, box1) {
-    return box1.left <= collisionPointB1.x && collisionPointB1.x <= box1.right &&
-        box1.top <= collisionPointB1.y && collisionPointB1.y <= box1.bottom;
-}
-
-/**
- * @param {Vector2} side
- * @param {BoundaryBox} box
- * @param {boolean} [local=false]
- * @return {[Vector2, Vector2]}
- */
-export function getSidePoints(side, box, local = false) {
-    let localPoints;
-
-    const halfSize = new Vector2(box.width / 2, box.height / 2);
-    if (side.x === 0) {
-        localPoints = [new Vector2(-halfSize.x, side.y * halfSize.y), new Vector2(halfSize.x, side.y * halfSize.x)];
-    } else {
-        localPoints = [new Vector2(side.x * halfSize.x, -halfSize.y), new Vector2(side.x * halfSize.x, halfSize.y)];
-    }
-
-    if (!local) {
-        return localPoints.map(p => p.add(box.center));
-    }
-
-    return localPoints;
-}
-
-/**
- * @param {Vector2} target
- * @param {Vector2[]} points
- * @return {Vector2|null}
- */
-export function getClosestPoint(target, points) {
-    let result = null;
-    let minDistance = Number.POSITIVE_INFINITY
-
-    for (const point of points) {
-        const d = target.delta(point).length();
-
-        if (d < minDistance) {
-            minDistance = d;
-            result = point;
-        }
-    }
-
-    return result;
 }
 
 /**
@@ -274,4 +147,23 @@ export function getProjectedInterval(projection, points) {
     }
 
     return {min, max};
+}
+
+/***
+ * @param {Vector2} origin
+ * @param {Vector2[]} points
+ * @return {Vector2|null}
+ */
+export function getClosestPoint(origin, points) {
+    let minDist = Number.POSITIVE_INFINITY;
+    let closestPoint = null;
+    for (const point of points) {
+        const dist = point.delta(origin).lengthSquared()
+        if (dist < minDist) {
+            minDist = dist;
+            closestPoint = point;
+        }
+    }
+
+    return closestPoint;
 }

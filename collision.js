@@ -1,6 +1,6 @@
 import {Vector2} from "./vector.js";
 import * as Utils from "./utils.js";
-import {Body, BoundaryBox, CirceBody, RectBody} from "./body.js";
+import {Body, BoundaryBox, CircleBody, PolygonBody, RectBody} from "./body.js";
 
 export class Collision {
     result = false;
@@ -14,6 +14,8 @@ export class Collision {
     /**@type{Vector2}*/
     tangent = null;
     /**@type{Vector2}*/
+    centerTangent = null;
+    /**@type{Vector2}*/
     penetration = null;
 
     constructor(result = false) {
@@ -22,6 +24,21 @@ export class Collision {
 }
 
 export class Collider {
+    static #collisionDetectTypes = null
+    static #collisionDetectTypesInitializer = () => [
+        [CircleBody, CircleBody, CircleCollider.detectCollision.bind(CircleCollider)],
+        [CircleBody, Body, CircleCollider.detectCollision.bind(CircleCollider)],
+        [Body, CircleBody, (b1, b2) => Collider.#flipAfterDetect(b1, b2, CircleCollider.detectCollision.bind(CircleCollider))],
+
+        [RectBody, Body, RectCollider.detectCollision.bind(RectCollider)],
+        [Body, RectBody, (b1, b2) => Collider.#flipAfterDetect(b1, b2, RectCollider.detectCollision.bind(RectCollider))],
+
+        [PolygonCollider, Body, PolygonCollider.detectCollision.bind(PolygonCollider)],
+        [Body, PolygonCollider, (b1, b2) => Collider.#flipAfterDetect(b1, b2, PolygonCollider.detectCollision.bind(PolygonCollider))],
+
+        [Body, Body, (b1, b2) => Collider.detectBoundaryCollision(b1.boundary, b2.boundary)],
+    ];
+
     /**@type {BodyType} */
     body = null;
     /**@type {Collision} */
@@ -29,6 +46,10 @@ export class Collider {
 
     constructor(body) {
         this.body = body;
+
+        if (!Collider.#collisionDetectTypes) {
+            Collider.#collisionDetectTypes = Collider.#collisionDetectTypesInitializer();
+        }
     }
 
     /**
@@ -37,23 +58,25 @@ export class Collider {
      */
     detectCollision(body2) {
         const body1 = this.body
-        if (body1 instanceof CirceBody && body2 instanceof CirceBody) {
-            this.collision = CircleCollider.detectCollision(body1, body2);
-        } else if (body1 instanceof CirceBody) {
-            this.collision = CircleCollider.detectCollision(body1, body2);
-        } else if (body2 instanceof CirceBody) {
-            this.collision = CircleCollider.detectCollision(body2, body1);
-            this.collision.penetration?.negate();
-        } else if (body1 instanceof RectBody) {
-            this.collision = RectCollider.detectCollision(body1, body2);
-        } else if (body2 instanceof RectBody) {
-            this.collision = RectCollider.detectCollision(body2, body1);
-            this.collision.penetration?.negate();
-        } else {
-            this.collision = Collider.detectBoundaryCollision(body1.boundary, body2.boundary);
+
+        for (const [type1, type2, detectorFn] of Collider.#collisionDetectTypes) {
+            if (body1 instanceof type1 && body2 instanceof type2) {
+                this.collision = detectorFn(body1, body2);
+                break;
+            }
         }
 
         return this.collision.result;
+    }
+
+    static #flipAfterDetect(body1, body2, detectionFn) {
+        const collision = detectionFn(body2, body1);
+        if (collision.result) {
+            [collision.aContact, collision.bContact] = [collision.bContact, collision.aContact];
+            collision.penetration.negate();
+        }
+
+        return collision;
     }
 
     static detectBoundaryCollision(box1, box2) {
@@ -70,6 +93,7 @@ export class Collider {
 
             collision.delta = delta;
             collision.distance = delta.length();
+            collision.centerTangent = tangent;
             collision.tangent = Utils.getSideNormal(contact1, box2);
 
             collision.aContact = contact1;
@@ -135,6 +159,14 @@ export class Collider {
         return this.#detectPointsCollision(polyPoints, [point], new Set()).result;
     }
 
+    static detectPolygonWithCircleCollision(origin, radius, polyPoints) {
+        if (polyPoints.length === 0) {
+            throw Error("Unexpected poly: no points");
+        }
+
+        return this.#detectPointsToCircleCollision(polyPoints, origin, radius);
+    }
+
     /***
      * @param {Array<Vector2>} points1
      * @param {Array<Vector2>} points2
@@ -160,6 +192,51 @@ export class Collider {
 
             if (minInterval === null || minInterval.overlap > check.overlap) {
                 minInterval = {...check, normal, origin: delta.scaled(0.5).add(p1)};
+            }
+        }
+
+        return {result: minInterval !== null, ...minInterval};
+    }
+
+    /**
+     * @param {Vector2[]} points
+     * @param {Vector2} circleOrigin
+     * @param {origin} radius
+     * @return {*}
+     */
+    static #detectPointsToCircleCollision(points, circleOrigin, radius) {
+        function* getNextAxis() {
+            // Polygon axis for SAT
+            for (let i = 0; i < points.length; i++) {
+                const p1 = points[i];
+                const p2 = points[(i + 1) % points.length];
+                const delta = p2.delta(p1);
+                const normal = delta.normal();
+
+                yield {normal, origin: delta.scaled(0.5).add(p1)};
+            }
+
+            // Circle axis for SAT
+            const closestPoint = Utils.getClosestPoint(circleOrigin, points);
+            const normal = closestPoint.tangent(circleOrigin);
+            yield {normal, origin: closestPoint};
+        }
+
+        const testedNormals = new Set();
+        let minInterval = null;
+        for (const {normal, origin} of getNextAxis()) {
+            if (this.#isNormalAlreadyProcessed(normal, testedNormals)) {
+                continue;
+            }
+
+            const circlePoints = [circleOrigin.copy().add(normal.scaled(-radius)), circleOrigin.copy().add(normal.scaled(radius))];
+            const check = Utils.getProjectionIntersectionInfo(normal, points, circlePoints);
+            if (!check.result) {
+                return {result: false};
+            }
+
+            if (minInterval === null || minInterval.overlap > check.overlap) {
+                minInterval = {...check, normal, origin};
             }
         }
 
@@ -206,47 +283,46 @@ export class PolygonCollider extends Collider {
         }
 
         const collisionInfo = polyCollision.collision;
-
-        const centerTangent = boundaryCollision.tangent
-        const originTangent = collisionInfo.origin.delta(collisionInfo.body.position).normalized();
-        const projectedOrigin = centerTangent.dot(originTangent);
-        const projectedNormal = centerTangent.dot(collisionInfo.normal);
-
         const [points, otherPoints] = collisionInfo.body === body1 ? [collisionInfo.points2, collisionInfo.points1] :
             [collisionInfo.points1, collisionInfo.points2];
-        const flipOrigin = collisionInfo.body === body1 ? projectedOrigin > 0 : projectedOrigin < 0;
-        const flipNormal = collisionInfo.body === body1 ? projectedNormal < 0 : projectedOrigin > 0;
-        const origin = flipOrigin ? collisionInfo.origin.rotated(Math.PI, collisionInfo.body.position) : collisionInfo.origin;
+
+        const centerTangent = boundaryCollision.centerTangent
+        const projectedNormal = centerTangent.dot(collisionInfo.normal);
+        const flipNormal = collisionInfo.body === body1 ? projectedNormal < 0 : projectedNormal > 0;
+
         const normal = flipNormal ? collisionInfo.normal.negated() : collisionInfo.normal;
 
-        let collisionA = PolygonCollider.#getCollisionPoint(points, origin, normal);
+        let collisionA = PolygonCollider._getCollisionPoint(points, normal);
         let collisionB = collisionA.delta(normal.scaled(collisionInfo.overlap));
 
         const pointAContained = Utils.getProjectionIntersectionInfo(normal.perpendicular(), [collisionA], otherPoints);
         if (!pointAContained.result) {
-            const alternativeCollision = PolygonCollider.#getCollisionPoint(otherPoints, origin, centerTangent.negated());
+            const alternativeCollision = PolygonCollider._getCollisionPoint(otherPoints, centerTangent.negated());
             collisionA = alternativeCollision.delta(normal.scaled(-collisionInfo.overlap));
             collisionB = alternativeCollision;
+        }
+
+        if (collisionInfo.body !== body1) {
+            [collisionA, collisionB] = [collisionB, collisionA];
         }
 
         const collision = new Collision(true);
         collision.delta = boundaryCollision.delta;
         collision.distance = boundaryCollision.distance;
-
-        collision.aContact = collisionInfo.body === body1 ? collisionA : collisionB;
-        collision.bContact = collisionInfo.body === body1 ? collisionB : collisionA;
+        collision.aContact = collisionA;
+        collision.bContact = collisionB;
+        collision.centerTangent = boundaryCollision.centerTangent;
         collision.tangent = collision.aContact.tangent(collision.bContact);
         collision.penetration = collision.tangent.scaled(collisionInfo.overlap);
 
         return collision;
     }
 
-    static #getCollisionPoint(points, origin, normal, eps = 1e-7) {
-        const originProjection = origin.dot(normal);
+    static _getCollisionPoint(points, normal, eps = 1e-7) {
         let candidates, maxProj = Number.NEGATIVE_INFINITY;
         for (const point of points) {
             const proj = point.dot(normal);
-            if (proj - originProjection >= -eps && proj > maxProj) {
+            if (proj > maxProj) {
                 maxProj = proj;
                 candidates = [point]
             } else if (Math.abs(proj - maxProj) < eps) {
@@ -266,7 +342,7 @@ export class RectCollider extends PolygonCollider {
 
     static detectCollision(body1, body2) {
         if (body1 instanceof RectBody && body2 instanceof RectBody && body1.angle === 0 && body2.angle === 0) {
-            return Collider.detectBoundaryCollision(body1.box, body2.box);
+            return Collider.detectBoundaryCollision(body1.boundary, body2.boundary);
         }
 
         return super.detectCollision(body1, body2);
@@ -279,7 +355,7 @@ export class CircleCollider extends Collider {
     }
 
     /**
-     * @param {CirceBody} body1
+     * @param {CircleBody} body1
      * @param {Body} body2
      * @return {Collision}
      */
@@ -287,13 +363,13 @@ export class CircleCollider extends Collider {
         const boundaryCollision = Collider.detectBoundaryCollision(body1.boundary, body2.boundary);
 
         if (boundaryCollision.result) {
-            if (body2 instanceof CirceBody) {
+            if (body2 instanceof CircleBody) {
                 return this.#circleCollision(boundaryCollision, body1, body2);
-            } else if (body2 instanceof RectBody) {
-                return this.#rectCollision(boundaryCollision, body1, body2, body2.box);
+            } else if (body2 instanceof PolygonBody || body2 instanceof RectBody && body2.angle !== 0) {
+                return this.#polyCollision(boundaryCollision, body1, body2);
             }
 
-            return this.#rectCollision(boundaryCollision, body1, body2, body2.boundary);
+            return this.#rectCollision(boundaryCollision, body1, body2.boundary);
         }
 
         return boundaryCollision;
@@ -301,8 +377,9 @@ export class CircleCollider extends Collider {
 
     /**
      * @param {Collision} boxCollision
-     * @param {CirceBody} body1
-     * @param {CirceBody} body2
+     * @param {CircleBody} body1
+     * @param {CircleBody} body2
+     * @return {Collision}
      */
     static #circleCollision(boxCollision, body1, body2) {
         const delta = boxCollision.delta;
@@ -314,7 +391,8 @@ export class CircleCollider extends Collider {
             const collision = new Collision(true);
             collision.delta = delta;
             collision.distance = distance;
-            collision.tangent = delta.normalized();
+            collision.tangent = boxCollision.centerTangent;
+            collision.centerTangent = boxCollision.centerTangent;
             collision.aContact = collision.tangent.scaled(body2.radius).add(body2.position);
             collision.bContact = collision.tangent.negated().scale(body1.radius).add(body1.position);
             collision.penetration = collision.tangent.scaled(centerDistance).sub(delta);
@@ -327,31 +405,56 @@ export class CircleCollider extends Collider {
 
     /**
      * @param {Collision} boundaryCollision
-     * @param {CirceBody} body1
-     * @param {Body} body2
-     * @param {BoundaryBox} box2
+     * @param {CircleBody} body1
+     * @param {PolygonBody} body2
      */
-    static #rectCollision(boundaryCollision, body1, body2, box2) {
-        const angle2 = body2.angle;
+    static #polyCollision(boundaryCollision, body1, body2) {
+        const points2 = body2.points;
+        const collisionInfo = Collider.detectPolygonWithCircleCollision(body1.position, body1.radius, points2);
+        if (!collisionInfo.result) {
+            return new Collision(false);
+        }
 
-        const delta = boundaryCollision.delta;
-        const rotatedDelta = delta.rotated(-angle2);
-        const box2Contact = Utils.getAltitude(rotatedDelta, Utils.getBoxPoint(rotatedDelta, box2), box2, null, true);
+        const centerTangent = boundaryCollision.centerTangent;
+        const projectedNormal = centerTangent.dot(collisionInfo.normal);
+        const normal = projectedNormal > 0 ? collisionInfo.normal.negated() : collisionInfo.normal;
+
+        const collisionB = normal.scaled(body1.radius).add(body1.position);
+        const collisionA = collisionB.delta(normal.scaled(collisionInfo.overlap));
+
+        const collision = new Collision(true);
+        collision.delta = boundaryCollision.delta;
+        collision.distance = boundaryCollision.distance;
+        collision.aContact = collisionA;
+        collision.bContact = collisionB;
+        collision.centerTangent = boundaryCollision.centerTangent;
+        collision.tangent = collision.aContact.tangent(collision.bContact);
+        collision.penetration = collision.tangent.scaled(collisionInfo.overlap);
+
+        return collision;
+    }
+
+    /**
+     * @param {Collision} boundaryCollision
+     * @param {CircleBody} body1
+     * @param {BoundaryBox} box2
+     * @return {Collision}
+     */
+    static #rectCollision(boundaryCollision, body1, box2) {
+        const tangent = boundaryCollision.centerTangent;
+        const box2Contact = Utils.getBoxPoint(tangent, box2);
 
         const centerDistance = body1.radius + box2Contact.length();
         const distance = boundaryCollision.distance;
         const result = distance <= centerDistance;
 
         if (result) {
-            const aContact = box2Contact.rotated(angle2).add(box2.center);
-            const tangent = body1.position.tangent(aContact);
-
             const collision = new Collision(true);
-            collision.delta = delta;
+            collision.delta = boundaryCollision.delta;
             collision.distance = distance;
             collision.tangent = tangent;
-            collision.aContact = aContact;
-            collision.bContact = tangent.negated().scale(body1.radius).add(body1.position);
+            collision.aContact = box2Contact.add(box2.center);
+            collision.bContact = tangent.scaled(-body1.radius).add(body1.position);
             collision.penetration = collision.aContact.delta(collision.bContact);
 
             return collision;

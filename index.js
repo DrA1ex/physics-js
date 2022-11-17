@@ -1,10 +1,10 @@
-import {BoundaryBox, CirceBody, RectBody} from "./body.js";
+import {BoundaryBox, CircleBody, RectBody} from "./body.js";
 import {Vector2} from "./vector.js";
 import {Debug} from "./debug.js";
 import {ImpulseBasedSolver} from "./solver.js";
-import {GravityForce, ResistanceForce} from "./force.js";
 import {ConstraintType} from "./enum.js";
 import {Collider} from "./collision.js";
+import {GravityForce, ResistanceForce} from "./force.js";
 
 const urlSearchParams = new URLSearchParams(window.location.search);
 const params = Object.fromEntries(urlSearchParams.entries());
@@ -78,7 +78,7 @@ for (const pattern of initBodies) {
     const yOffset = last?.position.y ?? Solver.constraints[0]?.box.bottom ?? 0;
 
     let body;
-    if (last instanceof CirceBody) {
+    if (last instanceof CircleBody) {
         body = new RectBody(
             CanvasWidth / 2 + pattern.xOffset,
             yOffset - pattern.size / 2 - (last?.radius ?? 0) - 20,
@@ -87,7 +87,7 @@ for (const pattern of initBodies) {
             pattern.size / 10
         );
     } else {
-        body = new CirceBody(
+        body = new CircleBody(
             CanvasWidth / 2 + pattern.xOffset,
             yOffset - pattern.size / 2 - (last?.width ?? 0) / 2 - 20,
             pattern.size / 2,
@@ -115,7 +115,7 @@ function render() {
     ctx.strokeStyle = "lightgrey";
     ctx.fillStyle = "black";
     for (const body of Solver.rigidBodies) {
-        body.render(ctx);
+        body.renderer.render(ctx);
     }
 
     if (DebugMode) {
@@ -190,7 +190,7 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
 
         for (let k = 0; k < 5; k++) {
             const size = Math.floor(1 + Math.random() * 4) * 10;
-            const body = new CirceBody(x + 10 - Math.random() * 5, y + 10 - Math.random() * 5, size / 2, size / 10);
+            const body = new CircleBody(x + 10 - Math.random() * 5, y + 10 - Math.random() * 5, size / 2, size / 10);
 
             setTimeout(() => Solver.addRigidBody(body), 33 * (k + 5));
         }
