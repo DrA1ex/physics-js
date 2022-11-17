@@ -22,6 +22,7 @@ export class ImpulseBasedSolver {
         delta: 0,
         /** @type {Map<Body, Impulse[]>}*/
         impulses: new Map(),
+        collisionCount: 0
     }
 
     constructor() {
@@ -56,6 +57,7 @@ export class ImpulseBasedSolver {
         this.debug.reset();
         this.stepInfo.delta = Math.max(0, Math.min(0.1, delta));
         this.stepInfo.impulses.clear();
+        this.stepInfo.collisionCount = 0;
 
         if (this.stepInfo.delta === 0) {
             return;
@@ -149,6 +151,7 @@ export class ImpulseBasedSolver {
         }
 
         const collision = body1.collider.collision;
+        this.stepInfo.collisionCount += 1;
         this.debug.addCollision(collision.aContact);
         this.debug.addVector(collision.aContact, collision.penetration.negated(), "violet");
 

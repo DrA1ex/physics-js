@@ -155,6 +155,7 @@ function step() {
 
         stats.innerText = [
             `Bodies: ${Solver.rigidBodies.length}`,
+            `Collisions: ${Solver.stepInfo.collisionCount}`,
             `Physics time: ${physicsTime.toFixed(2)}ms`,
             `Render time: ${renderTime.toFixed(2)}ms`
         ].join("\n");
