@@ -132,6 +132,7 @@ export class Bootstrap {
         this.#ctx.scale(this.dpr, this.dpr);
 
         if (this.#statsElement) {
+            this.#statsElement.className = "stats-block";
             this.#statsElement.style.position = "absolute";
             this.#statsElement.style.left = "1rem";
             this.#statsElement.style.bottom = "1rem";
