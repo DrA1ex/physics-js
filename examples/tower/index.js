@@ -44,9 +44,18 @@ function getMousePos(e) {
 
 let startPoint = null;
 let vectorId = null;
+let creatingBody = null;
 canvas.onmousedown = canvas.ontouchstart = (e) => {
     e.preventDefault();
     startPoint = getMousePos(e)
+
+    if (!creatingBody) {
+        creatingBody = new CircleBody(startPoint.x, startPoint.y, size, 50);
+        BootstrapInstance.addRigidBody(creatingBody);
+    }
+
+    creatingBody.setPosition(startPoint, startPoint);
+    creatingBody.setActive(false);
 }
 
 canvas.onmousemove = canvas.ontouchmove = (e) => {
@@ -69,13 +78,13 @@ canvas.onmouseup = canvas.ontouchend = (e) => {
     e.preventDefault();
     const pos = getMousePos(e);
 
-    const body = new CircleBody(startPoint.x, startPoint.y, size, 50);
-    body.setVelocity(startPoint.delta(pos).scale(2))
-    BootstrapInstance.addRigidBody(body);
+    creatingBody.setActive(true);
+    creatingBody.setVelocity(startPoint.delta(pos).scale(2));
 
     BootstrapInstance.removeVector(vectorId);
     startPoint = null;
     vectorId = null;
+    creatingBody = null;
 }
 
 BootstrapInstance.run();
