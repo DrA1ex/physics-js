@@ -166,6 +166,7 @@ export class Bootstrap {
             this.#statsElement.style.left = "1rem";
             this.#statsElement.style.bottom = "1rem";
             this.#statsElement.style.margin = "0";
+            this.#statsElement.style.textShadow = "0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white";
         }
     }
 
