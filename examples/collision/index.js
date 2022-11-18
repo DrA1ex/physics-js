@@ -1,10 +1,17 @@
 import {Bootstrap} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
-import {CircleBody, RectBody} from "../../body.js";
+import {BoundaryBox, CircleBody, RectBody} from "../../body.js";
 import {Vector2} from "../../vector.js";
+import {ConstraintType} from "../../enum.js";
 
 const options = Params.parse()
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
+
+BootstrapInstance.addConstraint({
+    type: ConstraintType.inset,
+    box: new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, BootstrapInstance.canvasHeight),
+    damper: new Vector2(0.3, 0.3),
+});
 
 const size = 50;
 const distance = 200;
@@ -25,7 +32,7 @@ for (let i = 0; i < count; i++) {
     BootstrapInstance.addRigidBody(body);
 }
 
-BootstrapInstance.addRigidBody(new CircleBody(center.x + distance / 2, center.y + distance / 2, size, 1).setActive(false).setAngularVelocity(-Math.PI / 2));
+BootstrapInstance.addRigidBody(new CircleBody(center.x + distance / 2, center.y + distance / 2, size, 1).setActive(false));
 
 BootstrapInstance.run();
 
@@ -49,6 +56,6 @@ setInterval(() => {
 
         body.angularVelocity *= 0.3;
         body.angle += body.angularVelocity * delta;
-        body.setVelocity(rotatingBody.position.delta(body.position).scaled(0.1));
+        body.velocity.add(rotatingBody.position.delta(body.position).scaled(0.1 * delta));
     }
 }, timeout);
