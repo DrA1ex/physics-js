@@ -1,6 +1,6 @@
 import {Bootstrap} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
-import {BoundaryBox, RectBody} from "../../body.js";
+import {BoundaryBox, CircleBody, RectBody} from "../../body.js";
 import {Vector2} from "../../vector.js";
 import {ConstraintType} from "../../enum.js";
 import {GravityForce, ResistanceForce} from "../../force.js";
@@ -32,6 +32,50 @@ for (let i = 0; i < towerHeight; i++) {
     }
 
     currentY -= size;
+}
+
+
+function getMousePos(e) {
+    const point = e.touches ? e.touches[0] : e;
+    const bcr = e.target.getBoundingClientRect();
+
+    return new Vector2(point.clientX - bcr.x, point.clientY - bcr.y);
+}
+
+let startPoint = null;
+let vectorId = null;
+canvas.onmousedown = canvas.ontouchstart = (e) => {
+    e.preventDefault();
+    startPoint = getMousePos(e)
+}
+
+canvas.onmousemove = canvas.ontouchmove = (e) => {
+    if (!startPoint) {
+        return;
+    }
+
+    e.preventDefault();
+    const pos = getMousePos(e);
+
+    if (vectorId !== null) BootstrapInstance.removeVector(vectorId);
+    vectorId = BootstrapInstance.addVector(startPoint, startPoint.delta(pos).scale(0.5), "red");
+}
+
+canvas.onmouseup = canvas.ontouchend = (e) => {
+    if (!startPoint) {
+        return;
+    }
+
+    e.preventDefault();
+    const pos = getMousePos(e);
+
+    const body = new CircleBody(startPoint.x, startPoint.y, size, 50);
+    body.setVelocity(startPoint.delta(pos).scale(2))
+    BootstrapInstance.addRigidBody(body);
+
+    BootstrapInstance.removeVector(vectorId);
+    startPoint = null;
+    vectorId = null;
 }
 
 BootstrapInstance.run();

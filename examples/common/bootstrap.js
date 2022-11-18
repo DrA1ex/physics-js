@@ -18,6 +18,11 @@ export class Bootstrap {
     #canvas;
     #ctx;
 
+    #pointId = 0;
+    #drawingPoints = new Map();
+    #vectorId = 0;
+    #drawingVectors = new Map();
+
     #statsElement;
     #stats = {
         elapsed: 0,
@@ -35,11 +40,12 @@ export class Bootstrap {
     #canvasHeight;
 
     get solver() {return this.#solver;}
-
     get state() {return this.#state;}
+
     get dpr() {return this.#dpr;}
     get canvasWidth() {return this.#canvasWidth;}
     get canvasHeight() {return this.#canvasHeight;}
+
     get stats() {return {...this.#stats};}
 
     /**
@@ -117,6 +123,28 @@ export class Bootstrap {
         this.#state = State.stop;
     }
 
+    addPoint(point, color = "black") {
+        this.#drawingPoints.set(this.#pointId, {point, color});
+        return this.#pointId++;
+    }
+
+    removePoint(id) {
+        if (this.#drawingPoints.has(id)) {
+            this.#drawingPoints.delete(id);
+        }
+    }
+
+    addVector(point, size, color = "black") {
+        this.#drawingVectors.set(this.#vectorId, {point, size, color});
+        return this.#vectorId++;
+    }
+
+    removeVector(id) {
+        if (this.#drawingVectors.has(id)) {
+            this.#drawingVectors.delete(id);
+        }
+    }
+
     #init() {
         const rect = canvas.getBoundingClientRect();
 
@@ -133,6 +161,7 @@ export class Bootstrap {
 
         if (this.#statsElement) {
             this.#statsElement.className = "stats-block";
+            this.#statsElement.style.pointerEvents = "none";
             this.#statsElement.style.position = "absolute";
             this.#statsElement.style.left = "1rem";
             this.#statsElement.style.bottom = "1rem";
@@ -192,6 +221,14 @@ export class Bootstrap {
             this.#debugInstance.render(this.#ctx, this.#solver.rigidBodies);
         }
 
+        for (const {point, color} of this.#drawingPoints.values()) {
+            this.#drawPoint(point, color);
+        }
+
+        for (const {point, size, color} of this.#drawingVectors.values()) {
+            this.#drawVector(point, size, color);
+        }
+
         if (this.#statsElement) {
             this.#statsElement.innerText = [
                 `Bodies: ${this.#stats.bodiesCount}`,
@@ -201,5 +238,26 @@ export class Bootstrap {
                 `Render time: ${this.#stats.renderTime.toFixed(2)}ms`,
             ].join("\n");
         }
+    }
+
+    #drawPoint(point, color, size = 2) {
+        this.#ctx.strokeStyle = color;
+        this.#ctx.fillStyle = color;
+
+        this.#ctx.beginPath();
+        this.#ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
+        this.#ctx.fill()
+    }
+
+    #drawVector(point, size, color, pointSize = 2) {
+        this.#ctx.strokeStyle = color;
+        this.#ctx.fillStyle = color;
+
+        this.#ctx.beginPath();
+        this.#ctx.moveTo(point.x, point.y);
+        this.#ctx.lineTo(point.x + size.x, point.y + size.y);
+        this.#ctx.stroke()
+
+        this.#drawPoint(point.copy().add(size), color, pointSize);
     }
 }
