@@ -6,5 +6,6 @@ Yet another physics engine implementation
 
 ## Examples
 
-- Falling bodies demo: [link](https://dra1ex.github.io/physics-js/examples/falling)
-- Collision demo: [link](https://dra1ex.github.io/physics-js/examples/collision)
+- Falling bodies: [link](https://dra1ex.github.io/physics-js/examples/falling)
+- Collision: [link](https://dra1ex.github.io/physics-js/examples/collision)
+- Tower: [link](https://dra1ex.github.io/physics-js/examples/tower)
