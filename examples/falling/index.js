@@ -4,36 +4,13 @@ import {GravityForce, ResistanceForce} from "../../force.js";
 import {ConstraintType} from "../../enum.js";
 import {Vector2} from "../../vector.js";
 import {Collider} from "../../collision.js";
+import * as Params from "../common/params.js";
 
-const urlSearchParams = new URLSearchParams(window.location.search);
-const params = Object.fromEntries(urlSearchParams.entries());
+const options = Params.parse()
+const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
 
-function parseBool(param) {
-    if (param === "1") {
-        return true;
-    } else if (param === "0") {
-        return false;
-    }
-
-    return null
-}
-
-const DebugMode = parseBool(params["debug"]) ?? false;
-const ShowVectors = parseBool(params["debug_vector"]);
-const ShowVectorLength = parseBool(params["debug_vector_length"]);
-const ShowBoundary = parseBool(params["debug_boundary"]);
-
-const SlowMotion = Number.parseFloat(params["slow_motion"] || "1");
-const Gravity = Number.parseFloat(params["g"] || "100");
-const Resistance = Math.min(1, Math.max(0, Number.parseFloat(params["resistance"] || "0.99")));
-
-const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), {
-    debug: DebugMode, slowMotionRate: SlowMotion,
-    showBoundary: ShowBoundary, showVectorLength: ShowVectorLength, showVector: ShowVectors
-});
-
-BootstrapInstance.addForce(new GravityForce(Gravity));
-BootstrapInstance.addForce(new ResistanceForce(Resistance));
+BootstrapInstance.addForce(new GravityForce(options.gravity));
+BootstrapInstance.addForce(new ResistanceForce(options.resistance));
 
 BootstrapInstance.addConstraint({
     type: ConstraintType.inset,

@@ -1,0 +1,54 @@
+import {Bootstrap} from "../common/bootstrap.js";
+import * as Params from "../common/params.js";
+import {CircleBody, RectBody} from "../../body.js";
+import {Vector2} from "../../vector.js";
+
+const options = Params.parse()
+const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
+
+const size = 50;
+const distance = 200;
+const center = new Vector2(BootstrapInstance.canvasWidth / 2, BootstrapInstance.canvasHeight / 2);
+
+const count = 15;
+const angleStep = Math.PI * 2 / count;
+for (let i = 0; i < count; i++) {
+    const position = Vector2.fromAngle(angleStep * i).scale(distance).add(center);
+
+    let body;
+    if (i % 2 === 0) {
+        body = new CircleBody(position.x, position.y, size / 2, 1);
+    } else {
+        body = new RectBody(position.x, position.y, size, size, 1);
+    }
+
+    BootstrapInstance.addRigidBody(body);
+}
+
+BootstrapInstance.addRigidBody(new CircleBody(center.x + distance / 2, center.y + distance / 2, size, 1).setActive(false).setAngularVelocity(-Math.PI / 2));
+
+BootstrapInstance.run();
+
+const timeout = 1000 / 60;
+const delta = timeout / 1000 * options.slowMotion;
+setInterval(() => {
+    const count = BootstrapInstance.solver.rigidBodies.length;
+    const rotatingBody = BootstrapInstance.solver.rigidBodies[count - 1];
+    if (rotatingBody._angle === undefined) {
+        rotatingBody._angle = 0;
+        rotatingBody._position = rotatingBody.position;
+    }
+
+    rotatingBody._angle += Math.PI / 2 * delta;
+    rotatingBody.position = rotatingBody._position.rotated(rotatingBody._angle, new Vector2(center.x, center.y));
+
+    for (const body of BootstrapInstance.solver.rigidBodies) {
+        if (body === rotatingBody) {
+            continue;
+        }
+
+        body.angularVelocity *= 0.3;
+        body.angle += body.angularVelocity * delta;
+        body.setVelocity(rotatingBody.position.delta(body.position).scaled(0.1));
+    }
+}, timeout);

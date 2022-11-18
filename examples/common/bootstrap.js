@@ -18,6 +18,7 @@ export class Bootstrap {
     #canvas;
     #ctx;
 
+    #statsElement;
     #stats = {
         elapsed: 0,
         physicsTime: 0,
@@ -45,20 +46,26 @@ export class Bootstrap {
      * @param {HTMLCanvasElement} canvas
      * @param {{
      *          debug?: boolean, slowMotionRate?: number,
-     *          showBoundary?: boolean, showVectorLength?: boolean, showVector?: boolean
+     *          showBoundary?: boolean, showVectorLength?: boolean, showVector?: boolean,
+     *          statistics?: boolean
      * }} options
      */
-    constructor(canvas, options) {
+    constructor(canvas, options = {}) {
         this.#canvas = canvas;
         this.#ctx = canvas.getContext("2d");
 
         this.#debug = options.debug;
-        this.#slowMotion = options.slowMotionRate;
+        this.#slowMotion = Math.max(0.01, Math.min(2, options.slowMotionRate ?? 1));
 
         this.#debugInstance = new Debug(options);
         window.__app = {DebugInstance: this.#debugInstance};
 
         this.#solver = new ImpulseBasedSolver();
+        if (options.statistics) {
+            this.#statsElement = document.createElement("pre");
+            document.body.appendChild(this.#statsElement);
+        }
+
         this.#init();
     }
 
@@ -123,6 +130,13 @@ export class Bootstrap {
         this.#canvas.height = this.canvasHeight * this.dpr;
 
         this.#ctx.scale(this.dpr, this.dpr);
+
+        if (this.#statsElement) {
+            this.#statsElement.style.position = "absolute";
+            this.#statsElement.style.left = "1rem";
+            this.#statsElement.style.bottom = "1rem";
+            this.#statsElement.style.margin = "0";
+        }
     }
 
     #step() {
@@ -175,6 +189,16 @@ export class Bootstrap {
 
         if (this.#debug) {
             this.#debugInstance.render(this.#ctx, this.#solver.rigidBodies);
+        }
+
+        if (this.#statsElement) {
+            this.#statsElement.innerText = [
+                `Bodies: ${this.#stats.bodiesCount}`,
+                `Collisions: ${this.#stats.collisionCount}`,
+                `FPS: ${(1000 / this.#stats.elapsed).toFixed(0)}`,
+                `Physics time: ${this.#stats.physicsTime.toFixed(2)}ms`,
+                `Render time: ${this.#stats.renderTime.toFixed(2)}ms`,
+            ].join("\n");
         }
     }
 }
