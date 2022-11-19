@@ -179,7 +179,7 @@ export class Collider {
      * @return {*}
      */
     static #detectPointsCollision(points1, points2, testedNormals) {
-        let minInterval = null;
+        let minInterval = {overlap: Number.POSITIVE_INFINITY};
         for (let i = 0; i < points1.length; i++) {
             const p1 = points1[i];
             const p2 = points1[(i + 1) % points1.length];
@@ -195,12 +195,12 @@ export class Collider {
                 return {result: false};
             }
 
-            if (minInterval === null || minInterval.overlap > check.overlap) {
+            if (minInterval.overlap > check.overlap) {
                 minInterval = {...check, normal, origin: delta.scaled(0.5).add(p1)};
             }
         }
 
-        return {result: minInterval !== null, ...minInterval};
+        return {result: points1.length > 0 && points2.length > 0, ...minInterval};
     }
 
     /**
