@@ -152,7 +152,7 @@ export class ImpulseBasedSolver {
         const collision = body1.collider.collision;
         this.stepInfo.collisionCount += 1;
         this.debug?.addCollision(collision.aContact);
-        this.debug?.addVector(collision.aContact, collision.penetration.negated(), "violet");
+        this.debug?.addVector(collision.aContact, collision.tangent.scaled(-collision.overlap), "violet");
 
         const velocityDelta = body1.velocity.delta(body2.velocity);
         const projectedVelocity = collision.tangent.dot(velocityDelta);
@@ -171,15 +171,14 @@ export class ImpulseBasedSolver {
         this.#storeImpulse(body1, collision.tangent.scaled(-velocity1), collision.aContact, ImpulseType.scalar);
         this.#storeImpulse(body2, collision.tangent.scaled(velocity2), collision.bContact, ImpulseType.scalar);
 
-        const overlap = collision.penetration.dot(collision.tangent);
         if (body1.active && body2.active) {
             const totalMass = (body1.mass + body2.mass);
-            this.#storeImpulse(body1, collision.tangent.scaled(overlap * body2.mass / totalMass), body1.position, ImpulseType.pseudo);
-            this.#storeImpulse(body2, collision.tangent.scaled(-overlap * body1.mass / totalMass), body2.position, ImpulseType.pseudo);
+            this.#storeImpulse(body1, collision.tangent.scaled(collision.overlap * body2.mass / totalMass), body1.position, ImpulseType.pseudo);
+            this.#storeImpulse(body2, collision.tangent.scaled(-collision.overlap * body1.mass / totalMass), body2.position, ImpulseType.pseudo);
         } else if (body1.active) {
-            this.#storeImpulse(body1, collision.penetration, body1.position, ImpulseType.pseudo);
+            this.#storeImpulse(body1, collision.tangent.scaled(collision.overlap), body1.position, ImpulseType.pseudo);
         } else {
-            this.#storeImpulse(body2, collision.tangent.scaled(-overlap), body2.position, ImpulseType.pseudo);
+            this.#storeImpulse(body2, collision.tangent.scaled(-collision.overlap), body2.position, ImpulseType.pseudo);
         }
     }
 

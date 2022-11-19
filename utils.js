@@ -20,9 +20,10 @@ export function isRangeIntersects(start1, end1, start2, end2) {
 /**
  * @param {Vector2} tangent
  * @param {BoundaryBox} box
+ * @param {boolean} [local=true]
  * @return {Vector2}
  */
-export function getBoxPoint(tangent, box) {
+export function getBoxPoint(tangent, box, local = true) {
     const xRad = box.width / 2;
     const yRad = box.height / 2;
     const tan = tangent.y / tangent.x;
@@ -44,7 +45,8 @@ export function getBoxPoint(tangent, box) {
         }
     }
 
-    return point;
+    return local ? point : point.add(box.center);
+
 }
 
 /**
@@ -113,7 +115,7 @@ export function findIntersections(pointA1, pointA2, pointB1, pointB2) {
  * @param {Vector2} projection
  * @param {Vector2[]} points1
  * @param {Vector2[]} points2
- * @return {{result: boolean, overlap: number}}
+ * @return {{result: boolean, overlap: number, i1: {min, max}, i2: {min, max}}}
  */
 export function getProjectionIntersectionInfo(projection, points1, points2) {
     const i1 = this.getProjectedInterval(projection, points1);

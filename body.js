@@ -24,13 +24,17 @@ export class BoundaryBox {
         this.center = new Vector2(this.left + this.width / 2, this.top + this.height / 2);
     }
 
-    rotatedPoints(angle) {
+    points() {
         return [
             new Vector2(this.left, this.top),
             new Vector2(this.right, this.top),
             new Vector2(this.right, this.bottom),
             new Vector2(this.left, this.bottom)
-        ].map(p => p.rotated(angle, this.center));
+        ]
+    }
+
+    rotatedPoints(angle) {
+        return this.points().map(p => p.rotated(angle, this.center));
     }
 
     rotated(angle) {
