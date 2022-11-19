@@ -121,6 +121,12 @@ export class Body {
     }
 
     /** @return {T} */
+    setMass(value) {
+        this.mass = value;
+        return this;
+    }
+
+    /** @return {T} */
     setVelocity(vector) {
         this.velocity = vector;
         return this;
