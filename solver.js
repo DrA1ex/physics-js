@@ -63,6 +63,19 @@ export class ImpulseBasedSolver {
             return;
         }
 
+        for (const body of this.rigidBodies) {
+            if (!body.active) {
+                body.velocity.zero();
+                continue;
+            }
+
+            body.applyVelocity(body.velocity.scaled(this.stepInfo.delta), body.angularVelocity * this.stepInfo.delta);
+            //TODO: implement friction
+            body.angularVelocity *= 0.99;
+
+            this.debug?.addVector(body.position, body.velocity, "red");
+        }
+
         // Forces
         for (const force of this.forces) {
             for (const body of this.rigidBodies) {
@@ -95,19 +108,6 @@ export class ImpulseBasedSolver {
                 }
 
             }
-        }
-
-        for (const body of this.rigidBodies) {
-            if (!body.active) {
-                body.velocity.zero();
-                continue;
-            }
-
-            body.applyVelocity(body.velocity.scaled(this.stepInfo.delta), body.angularVelocity * this.stepInfo.delta);
-            //TODO: implement friction
-            body.angularVelocity *= 0.99;
-
-            this.debug?.addVector(body.position, body.velocity, "red");
         }
     }
 
