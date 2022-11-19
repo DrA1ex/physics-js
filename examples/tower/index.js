@@ -58,6 +58,15 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
     creatingBody.setActive(false);
 }
 
+function _constraintVectorLength(vector, maxLength) {
+    const length = vector.length();
+    const direction = vector.normalize()
+
+    return direction.scale(Math.min(length, maxLength));
+}
+
+const maxSpeed = options.gravity * 10;
+const maxDisplaySpeed = 100;
 canvas.onmousemove = canvas.ontouchmove = (e) => {
     if (!startPoint) {
         return;
@@ -67,7 +76,7 @@ canvas.onmousemove = canvas.ontouchmove = (e) => {
     const pos = getMousePos(e);
 
     if (vectorId !== null) BootstrapInstance.removeVector(vectorId);
-    vectorId = BootstrapInstance.addVector(startPoint, startPoint.delta(pos).scale(0.5), "red");
+    vectorId = BootstrapInstance.addVector(startPoint, _constraintVectorLength(startPoint.delta(pos), maxDisplaySpeed), "red");
 }
 
 canvas.onmouseup = canvas.ontouchend = (e) => {
@@ -79,7 +88,7 @@ canvas.onmouseup = canvas.ontouchend = (e) => {
     const pos = getMousePos(e);
 
     creatingBody.setActive(true);
-    creatingBody.setVelocity(startPoint.delta(pos).scale(2));
+    creatingBody.setVelocity(_constraintVectorLength(startPoint.delta(pos).scale(maxSpeed / maxDisplaySpeed), maxSpeed));
 
     BootstrapInstance.removeVector(vectorId);
     startPoint = null;

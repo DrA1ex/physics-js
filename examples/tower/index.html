@@ -23,10 +23,34 @@
             bottom: calc(50px + 2rem) !important;
             left: 2rem !important;
         }
+
+        .hint {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            right: 1rem;
+            text-align: center;
+
+            font-size: 2rem;
+            text-shadow: 0 0 2px #9f9f9f;
+        }
+
+        .fading-out {
+            animation-duration: 1s;
+            animation-delay: 2s;
+            animation-fill-mode: forwards;
+            animation-name: fading-out;
+        }
+
+        @keyframes fading-out {
+            from {opacity: 100%;}
+            to {opacity: 0;}
+        }
     </style>
 </head>
 <body>
 <canvas id="canvas"></canvas>
+<div class="hint fading-out">Click to strike / pull to set speed</div>
 </body>
 <script type="module" src="index.js"></script>
 </html>
