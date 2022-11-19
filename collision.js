@@ -55,7 +55,7 @@ export class Collider {
         const body1 = this.body
 
         for (const [type1, types2, detectorFn] of Collider.#collisionDetectTypes) {
-            const type1Constraint = body1 instanceof type1;
+            const type1Constraint = body1.active && body1 instanceof type1;
             const type2Constraint = type1Constraint && types2.some(t => body2 instanceof t);
 
             if (type1Constraint && type2Constraint) {
