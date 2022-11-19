@@ -145,6 +145,16 @@ export class Bootstrap {
         }
     }
 
+    enableHotKeys() {
+        document.body.onkeydown = (e) => {
+            if (e.code === "Escape") this.state === State.play ? this.pause() : this.play();
+            else if (e.code === "Space") this.stepMode();
+            else return;
+
+            e.preventDefault();
+        }
+    }
+
     #init() {
         const rect = canvas.getBoundingClientRect();
 

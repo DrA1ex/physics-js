@@ -1,4 +1,4 @@
-import {Bootstrap, State} from "../common/bootstrap.js";
+import {Bootstrap} from "../common/bootstrap.js";
 import {BoundaryBox, CircleBody, RectBody} from "../../body.js";
 import {GravityForce, ResistanceForce} from "../../force.js";
 import {ConstraintType} from "../../enum.js";
@@ -93,21 +93,5 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
     }
 }
 
-document.body.onkeydown = function (e) {
-    switch (e.code) {
-        case "Escape":
-            BootstrapInstance.state === State.play ? BootstrapInstance.pause() : BootstrapInstance.play();
-            break;
-
-        case "Space":
-            BootstrapInstance.stepMode();
-            break;
-
-        default:
-            return;
-    }
-
-    e.preventDefault();
-}
-
+BootstrapInstance.enableHotKeys();
 BootstrapInstance.run();

@@ -96,4 +96,5 @@ canvas.onmouseup = canvas.ontouchend = (e) => {
     creatingBody = null;
 }
 
+BootstrapInstance.enableHotKeys();
 BootstrapInstance.run();

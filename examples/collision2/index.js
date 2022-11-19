@@ -25,10 +25,11 @@ const trianglePoints = [new Vector2(0, -size / 2), new Vector2(size / 2, size / 
 BootstrapInstance.addRigidBody(new PolygonBody(center.x + distance, center.y - distance, trianglePoints, 1).setActive(false));
 BootstrapInstance.addRigidBody(new PolygonBody(center.x - distance, center.y - distance, trianglePoints, 1).setAngle(Math.PI / 4).setActive(false));
 
-BootstrapInstance.addRigidBody(new CircleBody(center.x + distance * 2, center.y + distance + 1, size / 2).setVelocity(new Vector2(-speed, 0)));
+BootstrapInstance.addRigidBody(new PolygonBody(center.x + distance * 2, center.y + distance - 1, trianglePoints).setVelocity(new Vector2(-speed, 0)));
 BootstrapInstance.addRigidBody(new RectBody(center.x - distance * 2, center.y + distance + 1, size, size).setVelocity(new Vector2(speed, 0)));
 
 BootstrapInstance.addRigidBody(new CircleBody(center.x + distance * 2, center.y - distance - 1, size / 2).setVelocity(new Vector2(-speed, 0)));
-BootstrapInstance.addRigidBody(new PolygonBody(center.x - distance * 2, center.y - distance - 1, trianglePoints).setVelocity(new Vector2(speed, 0)));
+BootstrapInstance.addRigidBody(new CircleBody(center.x - distance * 2, center.y - distance + 1, size / 2).setVelocity(new Vector2(speed, 0)));
 
+BootstrapInstance.enableHotKeys();
 BootstrapInstance.run();

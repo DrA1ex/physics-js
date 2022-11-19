@@ -34,6 +34,7 @@ for (let i = 0; i < count; i++) {
 
 BootstrapInstance.addRigidBody(new CircleBody(center.x + distance / 2, center.y + distance / 2, size, 1).setActive(false));
 
+BootstrapInstance.enableHotKeys();
 BootstrapInstance.run();
 
 const timeout = 1000 / 60;
