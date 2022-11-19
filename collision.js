@@ -370,7 +370,7 @@ export class CircleCollider extends Collider {
                 return this.#circleCollision(boundaryCollision, body1, body2);
             } else if (body2 instanceof LineBody) {
                 return this.#rectCollision(boundaryCollision, body1, body2.boundary);
-            } else if (body2 instanceof RectBody || body2.angle === 0) {
+            } else if (body2 instanceof RectBody && body2.angle === 0) {
                 return this.#rectCollision(boundaryCollision, body1, body2.boundary);
             } else if (body2 instanceof PolygonBody) {
                 return this.#polyCollision(boundaryCollision, body1, body2);

@@ -50,7 +50,7 @@ export class BodyRenderer {
  */
 export class PolygonBodyRenderer extends BodyRenderer {
     _renderBody(ctx) {
-        const points = this.body.points;
+        const {points, position} = this.body;
         if (points.length === 0) {
             return;
         }
@@ -62,7 +62,12 @@ export class PolygonBodyRenderer extends BodyRenderer {
             ctx.lineTo(point.x, point.y);
         }
 
-        if (this.body.active) ctx.stroke();
+        if (this.body.active) ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(position.x, position.y);
+        ctx.lineTo(points[0].x, points[0].y);
         ctx.stroke();
     }
 }
