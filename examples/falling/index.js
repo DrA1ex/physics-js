@@ -73,7 +73,7 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
     const body = BootstrapInstance.solver.rigidBodies.find(b => Collider.detectBoundaryCollision(pointBox, b.boundary).result);
     if (body) {
         const angle = Math.random() * Math.PI * 2;
-        const force = Math.random() * Gravity * 10 * body.mass;
+        const force = Math.random() * options.gravity * 10 * body.mass;
 
         body.applyImpulse(new Vector2(Math.cos(angle), Math.sin(angle)).scale(force), body.position);
     } else {
