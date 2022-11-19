@@ -79,7 +79,7 @@ export class RectBodyRenderer extends BodyRenderer {
         ctx.rotate(angle);
 
         ctx.beginPath();
-        ctx.rect(-width / 2, -width / 2, width, height);
+        ctx.rect(-width / 2, -height / 2, width, height);
         if (active) ctx.fill();
         ctx.stroke();
 

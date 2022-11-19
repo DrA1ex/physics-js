@@ -1,6 +1,6 @@
 import {Vector2} from "./vector.js";
 import * as Utils from "./utils.js";
-import {Body, BoundaryBox, CircleBody, PolygonBody, RectBody} from "./body.js";
+import {Body, BoundaryBox, CircleBody, LineBody, PolygonBody, RectBody} from "./body.js";
 
 export class Collision {
     result = false;
@@ -26,17 +26,12 @@ export class Collision {
 export class Collider {
     static #collisionDetectTypes = null
     static #collisionDetectTypesInitializer = () => [
-        [CircleBody, CircleBody, CircleCollider.detectCollision.bind(CircleCollider)],
-        [CircleBody, Body, CircleCollider.detectCollision.bind(CircleCollider)],
-        [Body, CircleBody, (b1, b2) => Collider.#flipAfterDetect(b1, b2, CircleCollider.detectCollision.bind(CircleCollider))],
+        [CircleBody, [CircleBody, Body], CircleCollider.detectCollision.bind(CircleCollider)],
+        [LineBody, [Body], LineCollider.detectCollision.bind(LineCollider)],
+        [RectBody, [Body], RectCollider.detectCollision.bind(RectCollider)],
+        [PolygonBody, [Body], PolygonCollider.detectCollision.bind(PolygonCollider)],
 
-        [RectBody, Body, RectCollider.detectCollision.bind(RectCollider)],
-        [Body, RectBody, (b1, b2) => Collider.#flipAfterDetect(b1, b2, RectCollider.detectCollision.bind(RectCollider))],
-
-        [PolygonCollider, Body, PolygonCollider.detectCollision.bind(PolygonCollider)],
-        [Body, PolygonCollider, (b1, b2) => Collider.#flipAfterDetect(b1, b2, PolygonCollider.detectCollision.bind(PolygonCollider))],
-
-        [Body, Body, (b1, b2) => Collider.detectBoundaryCollision(b1.boundary, b2.boundary)],
+        [Body, [Body], (b1, b2) => Collider.detectBoundaryCollision(b1.boundary, b2.boundary)],
     ];
 
     /**@type {BodyType} */
@@ -59,9 +54,19 @@ export class Collider {
     detectCollision(body2) {
         const body1 = this.body
 
-        for (const [type1, type2, detectorFn] of Collider.#collisionDetectTypes) {
-            if (body1 instanceof type1 && body2 instanceof type2) {
+        for (const [type1, types2, detectorFn] of Collider.#collisionDetectTypes) {
+            const type1Constraint = body1 instanceof type1;
+            const type2Constraint = type1Constraint && types2.some(t => body2 instanceof t);
+
+            if (type1Constraint && type2Constraint) {
                 this.collision = detectorFn(body1, body2);
+                break;
+            }
+
+            const reversedType1Constraint = body2 instanceof type1;
+            const reversedType2Constraint = reversedType1Constraint && types2.some(t => body1 instanceof t);
+            if (reversedType1Constraint && reversedType2Constraint) {
+                this.collision = Collider.#flipAfterDetect(body1, body2, detectorFn);
                 break;
             }
         }
@@ -335,11 +340,13 @@ export class PolygonCollider extends Collider {
     }
 }
 
-export class RectCollider extends PolygonCollider {
-    constructor(body) {
-        super(body);
+export class LineCollider extends PolygonCollider {
+    static detectCollision(body1, body2) {
+        return Collider.detectBoundaryCollision(body1.boundary, body2.boundary);
     }
+}
 
+export class RectCollider extends PolygonCollider {
     static detectCollision(body1, body2) {
         if (body1 instanceof RectBody && body2 instanceof RectBody && body1.angle === 0 && body2.angle === 0) {
             return Collider.detectBoundaryCollision(body1.boundary, body2.boundary);
@@ -350,10 +357,6 @@ export class RectCollider extends PolygonCollider {
 }
 
 export class CircleCollider extends Collider {
-    constructor(body) {
-        super(body);
-    }
-
     /**
      * @param {CircleBody} body1
      * @param {Body} body2
@@ -365,7 +368,11 @@ export class CircleCollider extends Collider {
         if (boundaryCollision.result) {
             if (body2 instanceof CircleBody) {
                 return this.#circleCollision(boundaryCollision, body1, body2);
-            } else if (body2 instanceof PolygonBody || body2 instanceof RectBody && body2.angle !== 0) {
+            } else if (body2 instanceof LineBody) {
+                return this.#rectCollision(boundaryCollision, body1, body2.boundary);
+            } else if (body2 instanceof RectBody || body2.angle === 0) {
+                return this.#rectCollision(boundaryCollision, body1, body2.boundary);
+            } else if (body2 instanceof PolygonBody) {
                 return this.#polyCollision(boundaryCollision, body1, body2);
             }
 

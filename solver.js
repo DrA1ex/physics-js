@@ -54,7 +54,7 @@ export class ImpulseBasedSolver {
      * @param {number} delta
      */
     solve(delta) {
-        this.debug.reset();
+        this.debug?.reset();
         this.stepInfo.delta = Math.max(0, Math.min(0.1, delta));
         this.stepInfo.impulses.clear();
         this.stepInfo.collisionCount = 0;
@@ -79,12 +79,12 @@ export class ImpulseBasedSolver {
                 switch (type) {
                     case ImpulseType.regular:
                         body.applyImpulse(impulse, point);
-                        this.debug.addVector(body.position, impulse.scaled(1 / body.mass));
+                        this.debug?.addVector(body.position, impulse.scaled(1 / body.mass));
                         break;
 
                     case ImpulseType.scalar:
                         body.applyImpulse(impulse.scaled(body.mass), point);
-                        this.debug.addVector(body.position, impulse);
+                        this.debug?.addVector(body.position, impulse);
                         break;
 
                     case ImpulseType.pseudo:
@@ -107,7 +107,7 @@ export class ImpulseBasedSolver {
             //TODO: implement friction
             body.angularVelocity *= 0.99;
 
-            this.debug.addVector(body.position, body.velocity, "red");
+            this.debug?.addVector(body.position, body.velocity, "red");
         }
     }
 
@@ -146,14 +146,13 @@ export class ImpulseBasedSolver {
      * @param {Body} body2
      */
     #processCollision(body1, body2) {
-        if (!body1.collider.detectCollision(body2)) {
-            return
-        }
+        if (!body1.active && !body2.active) return;
+        if (!body1.collider.detectCollision(body2)) return;
 
         const collision = body1.collider.collision;
         this.stepInfo.collisionCount += 1;
-        this.debug.addCollision(collision.aContact);
-        this.debug.addVector(collision.aContact, collision.penetration.negated(), "violet");
+        this.debug?.addCollision(collision.aContact);
+        this.debug?.addVector(collision.aContact, collision.penetration.negated(), "violet");
 
         const velocityDelta = body1.velocity.delta(body2.velocity);
         const projectedVelocity = collision.tangent.dot(velocityDelta);
@@ -172,7 +171,16 @@ export class ImpulseBasedSolver {
         this.#storeImpulse(body1, collision.tangent.scaled(-velocity1), collision.aContact, ImpulseType.scalar);
         this.#storeImpulse(body2, collision.tangent.scaled(velocity2), collision.bContact, ImpulseType.scalar);
 
-        this.#storeImpulse(body1, collision.penetration, body1.position, ImpulseType.pseudo);
+        const overlap = collision.penetration.dot(collision.tangent);
+        if (body1.active && body2.active) {
+            const totalMass = (body1.mass + body2.mass);
+            this.#storeImpulse(body1, collision.tangent.scaled(overlap * body2.mass / totalMass), body1.position, ImpulseType.pseudo);
+            this.#storeImpulse(body2, collision.tangent.scaled(-overlap * body1.mass / totalMass), body2.position, ImpulseType.pseudo);
+        } else if (body1.active) {
+            this.#storeImpulse(body1, collision.penetration, body1.position, ImpulseType.pseudo);
+        } else {
+            this.#storeImpulse(body2, collision.tangent.scaled(-overlap), body2.position, ImpulseType.pseudo);
+        }
     }
 
     /**
@@ -224,6 +232,6 @@ export class ImpulseBasedSolver {
         this.#storeImpulse(body, impulse, collision, ImpulseType.scalar);
         this.#storeImpulse(body, penetration.negated(), body.position, ImpulseType.pseudo);
 
-        this.debug.addCollision(collision);
+        this.debug?.addCollision(collision);
     }
 }

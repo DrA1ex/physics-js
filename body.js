@@ -94,7 +94,7 @@ export class Body {
     angularVelocity = 0;
     restitution = 1;
 
-    constructor(x, y, mass) {
+    constructor(x, y, mass = 1) {
         this.position.x = x;
         this.position.y = y;
         this._mass = mass;
@@ -182,7 +182,7 @@ export class Body {
 }
 
 export class PolygonBody extends Body {
-    constructor(x, y, points, mass) {
+    constructor(x, y, points, mass = 1) {
         super(x, y, mass);
         this._points = points;
 
@@ -210,13 +210,25 @@ export class PolygonBody extends Body {
 }
 
 /**
+ * @extends Body<LineBody>
+ */
+export class LineBody extends PolygonBody {
+    constructor(x1, y1, x2, y2, mass = 1) {
+        const center = new Vector2((x2 - x1) / 2, (y2 - y1) / 2);
+        const points = [new Vector2(x1 - center.x, y1 - center.y), new Vector2(x1 + center.x, y1 + center.y)];
+
+        super(center.x, center.y, points, mass);
+    }
+}
+
+/**
  * @extends Body<RectBody>
  */
 export class RectBody extends PolygonBody {
     width = 0;
     height = 0;
 
-    constructor(x, y, width, height, mass) {
+    constructor(x, y, width, height, mass = 1) {
         const points = [
             new Vector2(-width / 2, -height / 2),
             new Vector2(width / 2, -height / 2),
@@ -240,7 +252,7 @@ export class RectBody extends PolygonBody {
 export class CircleBody extends Body {
     radius = 0;
 
-    constructor(x, y, radius, mass) {
+    constructor(x, y, radius, mass = 1) {
         super(x, y, mass);
 
         this.radius = radius;
