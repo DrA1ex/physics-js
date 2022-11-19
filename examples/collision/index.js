@@ -1,4 +1,4 @@
-import {Bootstrap} from "../common/bootstrap.js";
+import {Bootstrap, State} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
 import {BoundaryBox, CircleBody, RectBody} from "../../body.js";
 import {Vector2} from "../../vector.js";
@@ -29,10 +29,10 @@ for (let i = 0; i < count; i++) {
         body = new RectBody(position.x, position.y, size, size, 1);
     }
 
-    BootstrapInstance.addRigidBody(body);
+    BootstrapInstance.addRigidBody(body.setRestitution(0.3));
 }
 
-BootstrapInstance.addRigidBody(new CircleBody(center.x + distance / 2, center.y + distance / 2, size, 1).setActive(false));
+BootstrapInstance.addRigidBody(new CircleBody(center.x + distance / 2, center.y + distance / 2, size));
 
 BootstrapInstance.enableHotKeys();
 BootstrapInstance.run();
@@ -40,15 +40,20 @@ BootstrapInstance.run();
 const timeout = 1000 / 60;
 const delta = timeout / 1000 * options.slowMotion;
 setInterval(() => {
+    if (BootstrapInstance.state !== State.play) {
+        return;
+    }
+
     const count = BootstrapInstance.solver.rigidBodies.length;
     const rotatingBody = BootstrapInstance.solver.rigidBodies[count - 1];
     if (rotatingBody._angle === undefined) {
         rotatingBody._angle = 0;
-        rotatingBody._position = rotatingBody.position;
+        rotatingBody._position = rotatingBody.position.copy();
     }
 
     rotatingBody._angle += Math.PI / 2 * delta;
-    rotatingBody.position = rotatingBody._position.rotated(rotatingBody._angle, new Vector2(center.x, center.y));
+    const nextPosition = rotatingBody._position.rotated(rotatingBody._angle, new Vector2(center.x, center.y));
+    rotatingBody.setVelocity(nextPosition.delta(rotatingBody.position).scale(2));
 
     for (const body of BootstrapInstance.solver.rigidBodies) {
         if (body === rotatingBody) {
@@ -57,6 +62,6 @@ setInterval(() => {
 
         body.angularVelocity *= 0.3;
         body.angle += body.angularVelocity * delta;
-        body.velocity.add(rotatingBody.position.delta(body.position).scaled(0.1 * delta));
+        body.velocity.add(rotatingBody.position.delta(body.position).scaled(0.3 * delta));
     }
 }, timeout);
