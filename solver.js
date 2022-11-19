@@ -157,13 +157,13 @@ export class ImpulseBasedSolver {
         const velocityDelta = body1.velocity.delta(body2.velocity);
         const projectedVelocity = collision.tangent.dot(velocityDelta);
 
-        const aToContact = collision.aContact.delta(body1.position);
-        const bToContact = collision.aContact.delta(body2.position);
+        const b1CentreDelta = collision.bContact.delta(body1.position);
+        const b2CentreDelta = collision.aContact.delta(body2.position);
+        const b1ToContactNormal = b1CentreDelta.cross(collision.bContact.normal());
+        const b2ToContactNormal = b2CentreDelta.cross(collision.aContact.normal());
 
-        const aToContactNormal = aToContact.cross(collision.aContact.normal());
-        const bToContactNormal = bToContact.cross(collision.bContact.normal());
-        const effectiveMass = body1.mass + Math.pow(aToContactNormal, 2) / body1.inertia +
-            body2.mass + Math.pow(bToContactNormal, 2) / body2.inertia;
+        const effectiveMass = body1.mass + Math.pow(b1ToContactNormal, 2) / body1.inertia +
+            body2.mass + Math.pow(b2ToContactNormal, 2) / body2.inertia;
 
         const velocity1 = (1 + body1.restitution) * body2.mass / effectiveMass * projectedVelocity;
         const velocity2 = (1 + body2.restitution) * body1.mass / effectiveMass * projectedVelocity;

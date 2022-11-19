@@ -95,12 +95,7 @@ export class Vector2 {
     }
 
     cross(vector) {
-        const reversed = vector.reversed();
-        return this.#aggregate((acc, value, dimension) => acc - value * reversed[dimension]);
-    }
-
-    reversed() {
-        return new Vector2(...this.constructor.DIMENSIONS.map(d => this[d]).reverse());
+        return this.x * vector.y - this.y * vector.x;
     }
 
     perpendicular() {
