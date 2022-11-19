@@ -17,6 +17,17 @@ export function isRangeIntersects(start1, end1, start2, end2) {
     return end1 >= start2 && start1 <= end2;
 }
 
+/***
+ * @param {number} start1
+ * @param {number} end1
+ * @param {number} start2
+ * @param {number} end2
+ * @return {number}
+ */
+export function rangeIntersection(start1, end1, start2, end2) {
+    return Math.min(end1, end2) - Math.max(start1, start2)
+}
+
 /**
  * @param {Vector2} tangent
  * @param {BoundaryBox} box
@@ -123,7 +134,7 @@ export function getProjectionIntersectionInfo(projection, points1, points2) {
 
     return {
         result: isRangeIntersects(i1.min, i1.max, i2.min, i2.max),
-        overlap: Math.min(i1.max, i2.max) - Math.max(i1.min, i2.min),
+        overlap: rangeIntersection(i1.min, i1.max, i2.min, i2.max),
         i1, i2
     };
 }

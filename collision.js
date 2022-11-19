@@ -89,25 +89,29 @@ export class Collider {
             return new Collision(false);
         }
 
-        const delta = box1.center.delta(box2.center);
-        const centralTangent = delta.normalized();
-        const b2ApproxCollision = Utils.getBoxPoint(centralTangent, box2, false);
-        const normal = Utils.getSideNormal(b2ApproxCollision, box2);
+        const xIntersection = Utils.rangeIntersection(box1.left, box1.right, box2.left, box2.right);
+        const yIntersection = Utils.rangeIntersection(box1.top, box1.bottom, box2.top, box2.bottom);
+        const overlap = Math.min(xIntersection, yIntersection);
 
-        const points1 = box1.points(), points2 = box2.points();
-        const {overlap: normalOverlap} = Utils.getProjectionIntersectionInfo(normal, points1, points2);
-
-        const perpendicular = normal.perpendicular();
-        const {i1, i2, overlap: perpOverlap} = Utils.getProjectionIntersectionInfo(perpendicular, points1, points2);
-        const collisionProjection = Math.max(i1.min, i2.min) + perpOverlap / 2;
-        const contactB = normal.negated().mul(b2ApproxCollision).add(perpendicular.scaled(collisionProjection));
+        let normal;
+        let aContact = new Vector2();
+        if (xIntersection < yIntersection) {
+            const box1Lefter = box1.center.x < box2.center.x;
+            normal = box1Lefter ? new Vector2(-1, 0) : new Vector2(1, 0);
+            aContact.x = box1Lefter ? box2.left : box2.right;
+            aContact.y = box2.top + yIntersection / 2
+        } else {
+            const box1Higher = box1.center.y < box2.center.y;
+            normal = box1Higher ? new Vector2(0, -1) : new Vector2(0, 1);
+            aContact.x = box2.left + xIntersection / 2
+            aContact.y = box1Higher ? box2.top : box2.bottom;
+        }
 
         const collision = new Collision(true);
-
         collision.tangent = normal;
-        collision.aContact = normal.scaled(normalOverlap).add(contactB);
-        collision.bContact = contactB;
-        collision.overlap = normalOverlap;
+        collision.aContact = aContact;
+        collision.bContact = normal.scaled(-overlap).add(aContact);
+        collision.overlap = overlap;
 
         return collision;
     }
