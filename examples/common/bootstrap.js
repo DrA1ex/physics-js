@@ -51,7 +51,7 @@ export class Bootstrap {
     /**
      * @param {HTMLCanvasElement} canvas
      * @param {{
-     *          debug?: boolean, slowMotionRate?: number,
+     *          debug?: boolean, slowMotion?: number,
      *          showBoundary?: boolean, showVectorLength?: boolean, showVector?: boolean,
      *          statistics?: boolean
      * }} options
@@ -61,7 +61,7 @@ export class Bootstrap {
         this.#ctx = canvas.getContext("2d");
 
         this.#debug = options.debug;
-        this.#slowMotion = Math.max(0.01, Math.min(2, options.slowMotionRate ?? 1));
+        this.#slowMotion = Math.max(0.01, Math.min(2, options.slowMotion ?? 1));
 
         this.#debugInstance = new Debug(options);
         window.__app = {DebugInstance: this.#debugInstance};
