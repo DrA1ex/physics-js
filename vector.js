@@ -18,19 +18,28 @@ export class Vector2 {
     }
 
     copy() {
-        return new Vector2(...this.elements());
+        return new Vector2(this.x, this.y);
     }
 
     add(vector) {
-        return this.#apply((value, dimension) => value + vector[dimension]);
+        this.x += vector.x;
+        this.y += vector.y;
+
+        return this;
     }
 
     sub(vector) {
-        return this.#apply((value, dimension) => value - vector[dimension]);
+        this.x -= vector.x;
+        this.y -= vector.y;
+
+        return this;
     }
 
     delta(vector) {
-        return this.copy().sub(vector);
+        return new Vector2(
+            this.x - vector.x,
+            this.y - vector.y
+        );
     }
 
     tangent(vector) {
@@ -38,15 +47,24 @@ export class Vector2 {
     }
 
     mul(vector) {
-        return this.#apply((value, dimension) => value * vector[dimension]);
+        this.x *= vector.x;
+        this.y *= vector.y;
+
+        return this;
     }
 
     div(vector) {
-        return this.#apply((value, dimension) => value / vector[dimension]);
+        this.x /= vector.x;
+        this.y /= vector.y;
+
+        return this;
     }
 
     negate() {
-        return this.#apply(value => -value);
+        this.x = -this.x;
+        this.y = -this.y;
+
+        return this;
     }
 
     negated() {
@@ -54,17 +72,26 @@ export class Vector2 {
     }
 
     invert() {
-        return this.#apply(value => 1 / value);
+        this.x = 1 / this.x;
+        this.y = 1 / this.y;
+
+        return this;
     }
 
     zero() {
-        return this.#apply(() => 0);
+        this.x = 0;
+        this.y = 0;
+
+        return this;
     }
 
     normalize() {
         const length = this.length();
         if (length > 0) {
-            return this.#apply(value => value / length);
+            this.x /= length;
+            this.y /= length;
+
+            return this;
         }
 
         return this.zero();
@@ -75,7 +102,10 @@ export class Vector2 {
     }
 
     scale(scalar) {
-        return this.#apply(value => value * scalar);
+        this.x *= scalar;
+        this.y *= scalar;
+
+        return this;
     }
 
     scaled(scalar) {
@@ -83,7 +113,7 @@ export class Vector2 {
     }
 
     dot(vector) {
-        return this.#aggregate((acc, value, dimension) => acc + value * vector[dimension]);
+        return this.x * vector.x + this.y * vector.y;
     }
 
     length() {
@@ -116,32 +146,5 @@ export class Vector2 {
             cos * (this.x - anchor.x) - sin * (this.y - anchor.y) + anchor.x,
             sin * (this.x - anchor.x) + cos * (this.y - anchor.y) + anchor.y
         );
-    }
-
-    /**
-     * @param {function(value: number, dimension: string )} fn
-     * @return {Vector2}
-     */
-    #apply(fn) {
-        for (const dimension of this.constructor.DIMENSIONS) {
-            this[dimension] = fn(this[dimension], dimension);
-        }
-
-        return this;
-    }
-
-    /**
-     *
-     * @param {function(acc: number, value: number, dimension: string )} fn
-     * @param {number} [init=0]
-     * @return {number}
-     */
-    #aggregate(fn, init = 0) {
-        let acc = init;
-        for (const dimension of this.constructor.DIMENSIONS) {
-            acc = fn(acc, this[dimension], dimension);
-        }
-
-        return acc;
     }
 }
