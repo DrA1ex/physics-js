@@ -1,6 +1,6 @@
+import {Body, CircleBody, LineBody, PolygonBody, RectBody} from "./body.js";
 import {Vector2} from "./vector.js";
 import * as Utils from "./utils.js";
-import {Body, CircleBody, LineBody, PolygonBody, RectBody} from "./body.js";
 
 export class Collision {
     result = false;
@@ -9,6 +9,7 @@ export class Collision {
     tangent = null;
     /**@type{Vector2}*/
     aContact = null;
+    /**@type{Vector2}*/
     bContact = null;
 
     overlap = 0;
