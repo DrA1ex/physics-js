@@ -21,6 +21,10 @@ export class Debug {
      * @param {boolean|null} [labeled=null]
      */
     addVector(position, size, color = null, labeled = true) {
+        if (!this.showVector) {
+            return;
+        }
+
         this.vectors.push({position, size, color, labeled});
     }
 
@@ -29,7 +33,7 @@ export class Debug {
      * @param {string|null} [color=null]
      * @param {number|null} [size=null]
      */
-    addCollision(position, color = null, size = null) {
+    addPoint(position, color = null, size = null) {
         this.collisions.push({position, color, size});
     }
 

@@ -26,7 +26,7 @@ export class ImpulseBasedSolver {
     }
 
     constructor() {
-        this.debug = window.__app.DebugInstance;
+        this.debug = window.__app?.DebugInstance;
     }
 
     /**
@@ -93,6 +93,8 @@ export class ImpulseBasedSolver {
                 body.position.add(position);
                 body.angularVelocity += angularVelocity;
                 body.angle += angle;
+
+                this.debug?.addVector(body.position, velocity);
             }
         }
     }
@@ -153,7 +155,7 @@ export class ImpulseBasedSolver {
 
         const collision = body1.collider.collision;
         this.stepInfo.collisionCount += 1;
-        this.debug?.addCollision(collision.aContact);
+        this.debug?.addPoint(collision.aContact);
         this.debug?.addVector(collision.aContact, collision.tangent.scaled(-collision.overlap), "violet");
 
         const velocityDelta = body1.velocity.delta(body2.velocity);
@@ -237,6 +239,6 @@ export class ImpulseBasedSolver {
         this.#storeImpulse(body, impulse, collision, ImpulseType.scalar);
         this.#storeImpulse(body, penetration.negated(), body.position, ImpulseType.pseudo);
 
-        this.debug?.addCollision(collision);
+        this.debug?.addPoint(collision);
     }
 }

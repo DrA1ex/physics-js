@@ -63,8 +63,10 @@ export class Bootstrap {
         this.#debug = options.debug;
         this.#slowMotion = Math.max(0.01, Math.min(2, options.slowMotion ?? 1));
 
-        this.#debugInstance = new Debug(options);
-        window.__app = {DebugInstance: this.#debugInstance};
+        if (options.debug) {
+            this.#debugInstance = new Debug(options);
+            window.__app = {DebugInstance: this.#debugInstance};
+        }
 
         this.#solver = new ImpulseBasedSolver();
         if (options.statistics) {
