@@ -7,7 +7,7 @@ import {ConstraintType, ImpulseType} from "./enum.js";
  *
  * @typedef {InsetConstraint} Constraint
  *
- * @typedef {type: ImpulseType, impulse: Vector2, point: Vector2} Impulse
+ * @typedef {{velocity: Vector2, position: Vector2, angularVelocity: number, angle: number}} AccumulatedParameters
  */
 
 export class ImpulseBasedSolver {
@@ -20,8 +20,8 @@ export class ImpulseBasedSolver {
 
     stepInfo = {
         delta: 0,
-        /** @type {Map<Body, Impulse[]>}*/
-        impulses: new Map(),
+        /** @type {Map<Body, AccumulatedParameters>}*/
+        accumulatedInfo: new Map(),
         collisionCount: 0
     }
 
@@ -56,7 +56,7 @@ export class ImpulseBasedSolver {
     solve(delta) {
         this.debug?.reset();
         this.stepInfo.delta = Math.max(0, Math.min(0.1, delta));
-        this.stepInfo.impulses.clear();
+        this.stepInfo.accumulatedInfo.clear();
         this.stepInfo.collisionCount = 0;
 
         if (this.stepInfo.delta === 0) {
@@ -87,26 +87,12 @@ export class ImpulseBasedSolver {
         this.step();
 
         for (const body of this.rigidBodies) {
-            const impulses = this.stepInfo.impulses.get(body) || [];
-            for (const {type, impulse, point} of impulses) {
-                switch (type) {
-                    case ImpulseType.regular:
-                        body.applyImpulse(impulse, point);
-                        this.debug?.addVector(body.position, impulse.scaled(1 / body.mass));
-                        break;
-
-                    case ImpulseType.scalar:
-                        body.applyImpulse(impulse.scaled(body.mass), point);
-                        this.debug?.addVector(body.position, impulse);
-                        break;
-
-                    case ImpulseType.pseudo:
-                        if (body.active) {
-                            body.applyVelocity(impulse, point.delta(body.position).cross(impulse));
-                        }
-                        break;
-                }
-
+            if (this.stepInfo.accumulatedInfo.has(body)) {
+                const {velocity, position, angularVelocity, angle} = this.stepInfo.accumulatedInfo.get(body);
+                body.velocity.add(velocity);
+                body.position.add(position);
+                body.angularVelocity += angularVelocity;
+                body.angle += angle;
             }
         }
     }
@@ -134,11 +120,23 @@ export class ImpulseBasedSolver {
      * @param {ImpulseType} [type=ImpulseType.regular]
      */
     #storeImpulse(body, impulse, point, type = ImpulseType.regular) {
-        if (!this.stepInfo.impulses.has(body)) {
-            this.stepInfo.impulses.set(body, []);
+        if (type === ImpulseType.regular) {
+            impulse = impulse.scaled(1 / body.mass);
         }
 
-        this.stepInfo.impulses.get(body).push({type, impulse, point});
+        if (!this.stepInfo.accumulatedInfo.has(body)) {
+            this.stepInfo.accumulatedInfo.set(body, {velocity: new Vector2(), position: new Vector2(), angularVelocity: 0, angle: 0});
+        }
+
+        const info = this.stepInfo.accumulatedInfo.get(body);
+        const angularImpulse = point.delta(body.position).cross(impulse);
+        if (type === ImpulseType.pseudo) {
+            info.position.add(impulse);
+            info.angle += angularImpulse;
+        } else {
+            info.velocity.add(impulse);
+            info.angularVelocity += angularImpulse / body.inertia;
+        }
     }
 
     /**
