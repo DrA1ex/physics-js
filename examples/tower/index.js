@@ -10,7 +10,7 @@ const options = Params.parse()
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
 
 const size = 25;
-const towerWidth = 4;
+const towerWidth = 5;
 const widthDecrease = 3;
 const towerHeight = towerWidth * widthDecrease;
 const bottom = BootstrapInstance.canvasHeight - size * 2;

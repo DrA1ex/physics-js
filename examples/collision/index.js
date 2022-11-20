@@ -23,8 +23,8 @@ BootstrapInstance.addConstraint({
     damper: new Vector2(0.3, 0.3),
 });
 
-const count = 25;
-const size = 50;
+const count = 50;
+const size = 25;
 const distance = 200;
 const center = new Vector2(BootstrapInstance.canvasWidth / 2, BootstrapInstance.canvasHeight / 2);
 
@@ -47,7 +47,7 @@ for (let i = 0; i < count; i++) {
     BootstrapInstance.addRigidBody(body.setRestitution(Math.random()).setMass(1 + Math.random() * 5));
 }
 
-BootstrapInstance.addRigidBody(new CircleBody(center.x + distance / 2, center.y + distance / 2, size, 10));
+BootstrapInstance.addRigidBody(new CircleBody(center.x + distance / 2, center.y + distance / 2, size * 2, 20));
 
 BootstrapInstance.enableHotKeys();
 BootstrapInstance.run();
