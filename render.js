@@ -6,6 +6,7 @@ import {Vector2} from "./vector.js";
 export class BodyRenderer {
     /** @type {T} */
     body;
+    renderDirection = true;
 
     /**
      * @param {T} body
@@ -65,11 +66,20 @@ export class PolygonBodyRenderer extends BodyRenderer {
         if (this.body.active) ctx.fill();
         ctx.stroke();
 
-        ctx.beginPath();
-        ctx.moveTo(position.x, position.y);
-        ctx.lineTo(points[0].x, points[0].y);
-        ctx.stroke();
+        if (this.renderDirection) {
+            ctx.beginPath();
+            ctx.moveTo(position.x, position.y);
+            ctx.lineTo(points[0].x, points[0].y);
+            ctx.stroke();
+        }
     }
+}
+
+/***
+ * @extends BodyRenderer<LineBody>
+ */
+export class LineRenderer extends PolygonBodyRenderer {
+    renderDirection = false;
 }
 
 /**
@@ -106,9 +116,11 @@ export class CircleBodyRenderer extends BodyRenderer {
         if (active) ctx.fill();
         ctx.stroke();
 
-        ctx.beginPath();
-        ctx.moveTo(position.x, position.y);
-        ctx.lineTo(...Vector2.fromAngle(angle).scale(radius).add(position).elements());
-        ctx.stroke();
+        if (this.renderDirection) {
+            ctx.beginPath();
+            ctx.moveTo(position.x, position.y);
+            ctx.lineTo(...Vector2.fromAngle(angle).scale(radius).add(position).elements());
+            ctx.stroke();
+        }
     }
 }

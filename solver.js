@@ -120,6 +120,10 @@ export class ImpulseBasedSolver {
      * @param {ImpulseType} [type=ImpulseType.regular]
      */
     #storeImpulse(body, impulse, point, type = ImpulseType.regular) {
+        if (!body.active) {
+            return;
+        }
+
         if (type === ImpulseType.regular) {
             impulse = impulse.scaled(1 / body.mass);
         }
@@ -185,6 +189,10 @@ export class ImpulseBasedSolver {
      * @param {Constraint} constraint
      */
     #processConstraint(body, constraint) {
+        if (!body.active) {
+            return;
+        }
+
         switch (constraint.type) {
             case ConstraintType.inset:
                 this.#processInsetConstraint(body, constraint);

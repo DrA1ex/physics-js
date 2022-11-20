@@ -1,6 +1,6 @@
 import {Vector2} from "./vector.js";
 import {CircleCollider, PolygonCollider, RectCollider} from "./collision.js";
-import {BodyRenderer, CircleBodyRenderer, PolygonBodyRenderer, RectBodyRenderer} from "./render.js";
+import {BodyRenderer, CircleBodyRenderer, LineRenderer, PolygonBodyRenderer, RectBodyRenderer} from "./render.js";
 
 /** @typedef {Body|CircleBody} BodyType */
 
@@ -166,6 +166,14 @@ export class Body {
         return new BoundaryBox(this.position.x, this.position.x, this.position.y, this.position.y);
     }
 
+
+    /**
+     * @return {Array<Vector2>}
+     */
+    get points() {
+        return this.boundary.points();
+    }
+
     /**
      * @param {Vector2} impulse
      * @param {Vector2} point
@@ -203,9 +211,6 @@ export class PolygonBody extends Body {
         this.renderer = new PolygonBodyRenderer(this);
     }
 
-    /**
-     * @return {Array<Vector2>}
-     */
     get points() {
         if (this.angle === 0) {
             return this._points.map(p => p.copy().add(this.position));
@@ -225,9 +230,11 @@ export class PolygonBody extends Body {
 export class LineBody extends PolygonBody {
     constructor(x1, y1, x2, y2, mass = 1) {
         const center = new Vector2((x2 - x1) / 2, (y2 - y1) / 2);
-        const points = [new Vector2(x1 - center.x, y1 - center.y), new Vector2(x1 + center.x, y1 + center.y)];
+        const points = [new Vector2(-center.x, -center.y), new Vector2(center.x, center.y)];
 
-        super(center.x, center.y, points, mass);
+        super(x1 + center.x, y1 + center.y, points, mass);
+
+        this.renderer = new LineRenderer(this);
     }
 }
 
