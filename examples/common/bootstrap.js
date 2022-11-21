@@ -1,5 +1,6 @@
 import {ImpulseBasedSolver} from "../../solver.js";
 import {Debug} from "../../debug.js";
+import * as Utils from "../../utils.js";
 
 
 /*** @enum {number} */
@@ -47,6 +48,8 @@ export class Bootstrap {
     get canvasHeight() {return this.#canvasHeight;}
 
     get stats() {return {...this.#stats};}
+    get rigidBodies() {return this.#solver.rigidBodies;}
+
 
     /**
      * @param {HTMLCanvasElement} canvas
@@ -243,9 +246,18 @@ export class Bootstrap {
         }
 
         if (this.#statsElement) {
+            let eMovement = 0, eRotation = 0;
+            for (const body of this.#solver.rigidBodies) {
+                eMovement += body.mass / 2 * Math.pow(body.velocity.length(), 2);
+                eRotation += body.inertia / 2 * Math.pow(body.angularVelocity, 2);
+            }
+
             this.#statsElement.innerText = [
                 `Bodies: ${this.#stats.bodiesCount}`,
                 `Collisions: ${this.#stats.collisionCount}`,
+                `Total energy: ${Utils.formatStandardUnit(eMovement + eRotation, "J")}`,
+                ` - movement: ${Utils.formatStandardUnit(eMovement, "J")}`,
+                ` - rotation: ${Utils.formatStandardUnit(eRotation, "J")}`,
                 `FPS: ${(1000 / this.#stats.elapsed).toFixed(0)}`,
                 `Physics time: ${this.#stats.physicsTime.toFixed(2)}ms`,
                 `Render time: ${this.#stats.renderTime.toFixed(2)}ms`,

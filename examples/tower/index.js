@@ -34,6 +34,10 @@ for (let i = 0; i < towerHeight; i++) {
     currentY -= size;
 }
 
+for (const body of BootstrapInstance.rigidBodies) {
+    body.setFriction(options.friction);
+    body.setRestitution(options.restitution);
+}
 
 function getMousePos(e) {
     const point = (e.touches && e.touches[0] || e.changedTouches && e.changedTouches[0]) ?? e;

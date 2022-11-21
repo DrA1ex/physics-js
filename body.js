@@ -86,23 +86,23 @@ export class Body {
     collider;
     /*** @type {BodyRenderer} */
     renderer
-    active = true;
+    _active = true;
 
     _mass = 0;
-    inertia = 0;
+    _inertia = 0;
 
     position = new Vector2();
     angle = 0;
 
     velocity = new Vector2();
     angularVelocity = 0;
-    restitution = 1;
+    restitution = 0.5;
+    friction = 0.2;
 
     constructor(x, y, mass = 1) {
         this.position.x = x;
         this.position.y = y;
-        this._mass = mass;
-        this.inertia = this.mass / 2;
+        this.mass = mass;
 
         this.collider = new RectCollider(this);
         this.renderer = new BodyRenderer(this);
@@ -110,7 +110,12 @@ export class Body {
 
     /** @return {T} */
     setActive(value) {
-        this.active = value;
+        this._active = value;
+
+        this._invertedMass = Number.NaN;
+        this._inertia = Number.NaN;
+        this._invertedInertia = Number.NaN;
+
         return this;
     }
 
@@ -121,8 +126,17 @@ export class Body {
     }
 
     /** @return {T} */
+    setFriction(value) {
+        this.friction = value;
+        return this;
+    }
+
+    /** @return {T} */
     setMass(value) {
-        this.mass = value;
+        this._mass = value;
+        this._invertedMass = Number.NaN;
+        this._inertia = Number.NaN;
+        this._invertedInertia = Number.NaN;
         return this;
     }
 
@@ -150,12 +164,43 @@ export class Body {
         return this;
     }
 
-    get mass() {
-        return this.active ? this._mass : 10e9;
+    get active() {return this._active;}
+
+    get mass() {return this.active ? this._mass : 1e12;}
+    set mass(value) {this.setMass(value);}
+
+    get invertedInertia() {
+        if (Number.isNaN(this._invertedInertia)) {
+            this._invertedInertia = this.active ? 1 / this.inertia : 0;
+        }
+
+        return this._invertedInertia
     }
 
-    set mass(value) {
-        this._mass = value;
+    get invertedMass() {
+        if (Number.isNaN(this._invertedMass)) {
+            this._invertedMass = this.active ? 1 / this.mass : 0;
+        }
+
+        return this._invertedMass
+    }
+
+    get inertia() {
+        if (Number.isNaN(this._inertia)) {
+            this._inertia = this._calcInertia(this.mass);
+        }
+
+        return this._inertia
+    }
+
+
+    /**
+     * @param {number} mass
+     * @return {number}
+     * @protected
+     */
+    _calcInertia(mass) {
+        return mass / 2;
     }
 
     /**
@@ -179,9 +224,13 @@ export class Body {
      * @param {Vector2} point
      */
     applyImpulse(impulse, point) {
-        const scaledImpulse = impulse.scaled(1 / this.mass);
-        this.velocity.add(scaledImpulse);
-        this.angularVelocity += point.delta(this.position).cross(impulse) / this.inertia;
+        this.velocity.add(impulse.scaled(this.invertedMass));
+        this.angularVelocity += point.delta(this.position).cross(impulse) * this.invertedInertia;
+    }
+
+    applyPseudoImpulse(impulse, point) {
+        this.position.add(impulse);
+        this.angle += point.delta(this.position).cross(impulse) * this.invertedInertia;
     }
 
     /**
@@ -204,11 +253,13 @@ export class PolygonBody extends Body {
         super(x, y, mass);
         this._points = points;
 
-        const boundary = this.boundary;
-        this.inertia = (this.mass / 12) * (boundary.width + Math.pow(boundary.height, 2));
-
         this.collider = new PolygonCollider(this);
         this.renderer = new PolygonBodyRenderer(this);
+    }
+
+    _calcInertia(mass) {
+        const boundary = this.boundary;
+        return (mass / 12) * (Math.pow(boundary.width, 2) + Math.pow(boundary.height, 2))
     }
 
     get points() {
@@ -257,9 +308,12 @@ export class RectBody extends PolygonBody {
 
         this.width = width;
         this.height = height;
-        this.inertia = (this.mass / 12) * (this.width + Math.pow(this.height, 2));
 
         this.renderer = new RectBodyRenderer(this);
+    }
+
+    _calcInertia(mass) {
+        return (mass / 12) * (Math.pow(this.width, 2) + Math.pow(this.height, 2));
     }
 }
 
@@ -273,10 +327,13 @@ export class CircleBody extends Body {
         super(x, y, mass);
 
         this.radius = radius;
-        this.inertia = this.mass * Math.pow(this.radius, 2) / 2;
 
         this.collider = new CircleCollider(this);
         this.renderer = new CircleBodyRenderer(this);
+    }
+
+    _calcInertia(mass) {
+        return this.mass * Math.pow(this.radius, 2) / 2;
     }
 
     get boundary() {

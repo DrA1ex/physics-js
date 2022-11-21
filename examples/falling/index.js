@@ -55,7 +55,10 @@ for (const pattern of initBodies) {
         );
     }
 
-    BootstrapInstance.addRigidBody(body);
+    BootstrapInstance.addRigidBody(body
+        .setFriction(options.friction)
+        .setRestitution(options.restitution));
+
     last = body;
 }
 
@@ -79,14 +82,18 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
     } else {
         for (let k = 0; k < 5; k++) {
             const size = Math.floor(1 + Math.random() * 4) * 10;
-            const body = new RectBody(x + 10 - Math.random() * 5, y + 10 - Math.random() * 5, size, size, size / 10);
+            const body = new RectBody(x + 10 - Math.random() * 5, y + 10 - Math.random() * 5, size, size, size / 10)
+                .setFriction(options.friction)
+                .setRestitution(options.restitution);
 
             setTimeout(() => BootstrapInstance.solver.addRigidBody(body), 33 * k);
         }
 
         for (let k = 0; k < 5; k++) {
             const size = Math.floor(1 + Math.random() * 4) * 10;
-            const body = new CircleBody(x + 10 - Math.random() * 5, y + 10 - Math.random() * 5, size / 2, size / 10);
+            const body = new CircleBody(x + 10 - Math.random() * 5, y + 10 - Math.random() * 5, size / 2, size / 10)
+                .setFriction(options.friction)
+                .setRestitution(options.restitution);
 
             setTimeout(() => BootstrapInstance.solver.addRigidBody(body), 33 * (k + 5));
         }

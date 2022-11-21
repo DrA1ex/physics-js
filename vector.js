@@ -124,8 +124,18 @@ export class Vector2 {
         return this.dot(this);
     }
 
+    /**
+     * @param {Vector2} vector
+     */
     cross(vector) {
         return this.x * vector.y - this.y * vector.x;
+    }
+
+    /**
+     * @param {number} scalar
+     */
+    crossScalar(scalar) {
+        return new Vector2(-scalar * this.y, scalar * this.x);
     }
 
     perpendicular() {

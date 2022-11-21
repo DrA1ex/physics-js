@@ -5,7 +5,7 @@ export class IForce {
     /**
      * @param {number} delta
      * @param {Body} body
-     * @return {Impulse}
+     * @return {{impulse: Vector2, point: Vector2, type: ImpulseType}}
      *
      * @abstract
      */
@@ -42,9 +42,10 @@ export class ResistanceForce extends IForce {
 
     impulse(delta, body) {
         const k = -(1 - this.resistance);
+
         return {
-            type: ImpulseType.scalar,
-            impulse: body.velocity.scaled(k),
+            type: ImpulseType.regular,
+            impulse: body.velocity.scaled(body.mass * k * delta * 60),
             point: body.position.copy()
         }
     }

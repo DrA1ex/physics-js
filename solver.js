@@ -1,5 +1,6 @@
 import {Vector2} from "./vector.js";
 import {ConstraintType, ImpulseType} from "./enum.js";
+import * as Utils from "./utils.js";
 
 /**
  * @typedef {{type: ConstraintType}} ConstraintBase
@@ -126,22 +127,28 @@ export class ImpulseBasedSolver {
             return;
         }
 
-        if (type === ImpulseType.regular) {
-            impulse = impulse.scaled(1 / body.mass);
-        }
-
         if (!this.stepInfo.accumulatedInfo.has(body)) {
             this.stepInfo.accumulatedInfo.set(body, {velocity: new Vector2(), position: new Vector2(), angularVelocity: 0, angle: 0});
         }
 
         const info = this.stepInfo.accumulatedInfo.get(body);
         const angularImpulse = point.delta(body.position).cross(impulse);
-        if (type === ImpulseType.pseudo) {
-            info.position.add(impulse);
-            info.angle += angularImpulse;
-        } else {
-            info.velocity.add(impulse);
-            info.angularVelocity += angularImpulse / body.inertia;
+
+        switch (type) {
+            case ImpulseType.regular:
+                info.velocity.add(impulse.scaled(body.invertedMass));
+                info.angularVelocity += angularImpulse * body.invertedInertia;
+                break;
+
+            case ImpulseType.scalar:
+                info.velocity.add(impulse);
+                info.angularVelocity += angularImpulse;
+                break;
+
+            case ImpulseType.pseudo:
+                info.position.add(impulse);
+                info.angle += angularImpulse * body.invertedInertia;
+                break;
         }
     }
 
@@ -158,32 +165,58 @@ export class ImpulseBasedSolver {
         this.debug?.addPoint(collision.aContact);
         this.debug?.addVector(collision.aContact, collision.tangent.scaled(-collision.overlap), "violet");
 
-        const velocityDelta = body1.velocity.delta(body2.velocity);
-        const projectedVelocity = collision.tangent.dot(velocityDelta);
+        const b1Delta = collision.bContact.delta(body1.position);
+        const b2Delta = collision.aContact.delta(body2.position);
+        const normal = collision.tangent;
+        const tangent = normal.perpendicular();
 
-        const b1CentreDelta = collision.bContact.delta(body1.position);
-        const b2CentreDelta = collision.aContact.delta(body2.position);
-        const b1ToContactNormal = b1CentreDelta.cross(collision.bContact.normal());
-        const b2ToContactNormal = b2CentreDelta.cross(collision.aContact.normal());
+        const {normalMass, tangentMass, velocityDelta} = this.#calcCollisionInfo(body1, body2, b1Delta, b2Delta, normal, tangent);
+        const restitution = body1.restitution * body2.restitution;
+        const friction = Math.sqrt(body1.friction * body2.friction);
 
-        const effectiveMass = body1.mass + Math.pow(b1ToContactNormal, 2) / body1.inertia +
-            body2.mass + Math.pow(b2ToContactNormal, 2) / body2.inertia;
+        const normalVelocity = normal.dot(velocityDelta);
+        const normalImpulse = normal.scaled((1 + restitution) * normalVelocity / normalMass);
+        this.#storeImpulse(body1, normalImpulse.negated(), collision.bContact);
+        this.#storeImpulse(body2, normalImpulse, collision.aContact);
 
-        const velocity1 = (1 + body1.restitution) * body2.mass / effectiveMass * projectedVelocity;
-        const velocity2 = (1 + body2.restitution) * body1.mass / effectiveMass * projectedVelocity;
-
-        this.#storeImpulse(body1, collision.tangent.scaled(-velocity1), collision.aContact, ImpulseType.scalar);
-        this.#storeImpulse(body2, collision.tangent.scaled(velocity2), collision.bContact, ImpulseType.scalar);
+        const maxFriction = Math.abs(normalVelocity) * friction;
+        const tangentVelocity = Utils.clamp(-maxFriction, maxFriction, tangent.dot(velocityDelta));
+        const tangentImpulse = tangent.scaled(tangentVelocity / tangentMass);
+        this.#storeImpulse(body1, tangentImpulse.negated(), collision.bContact);
+        this.#storeImpulse(body2, tangentImpulse, collision.aContact);
 
         if (body1.active && body2.active) {
             const totalMass = (body1.mass + body2.mass);
-            this.#storeImpulse(body1, collision.tangent.scaled(collision.overlap * body2.mass / totalMass), body1.position, ImpulseType.pseudo);
-            this.#storeImpulse(body2, collision.tangent.scaled(-collision.overlap * body1.mass / totalMass), body2.position, ImpulseType.pseudo);
+            this.#storeImpulse(body1, collision.tangent.scaled(collision.overlap * body2.mass / totalMass), collision.bContact, ImpulseType.pseudo);
+            this.#storeImpulse(body2, collision.tangent.scaled(-collision.overlap * body1.mass / totalMass), collision.aContact, ImpulseType.pseudo);
         } else if (body1.active) {
-            this.#storeImpulse(body1, collision.tangent.scaled(collision.overlap), body1.position, ImpulseType.pseudo);
+            this.#storeImpulse(body1, collision.tangent.scaled(collision.overlap), collision.bContact, ImpulseType.pseudo);
         } else {
-            this.#storeImpulse(body2, collision.tangent.scaled(-collision.overlap), body2.position, ImpulseType.pseudo);
+            this.#storeImpulse(body2, collision.tangent.scaled(-collision.overlap), collision.aContact, ImpulseType.pseudo);
         }
+    }
+
+    #calcCollisionInfo(body1, body2, b1Delta, b2Delta, normal, tangent) {
+        return {
+            normalMass: this.#calcEffectiveMass(b1Delta, b2Delta, normal, body1, body2),
+            tangentMass: this.#calcEffectiveMass(b1Delta, b2Delta, tangent, body1, body2),
+            velocityDelta: this.#calcVelocityDelta(b1Delta, b2Delta, body1, body2)
+        }
+    }
+
+    #calcEffectiveMass(b1Delta, b2Delta, tangent, body1, body2) {
+        const b1Moment = b1Delta.cross(tangent);
+        const b2Moment = b2Delta.cross(tangent);
+
+        return body1.invertedMass + body2.invertedMass +
+            Math.pow(b1Moment, 2) * body1.invertedInertia +
+            Math.pow(b2Moment, 2) * body2.invertedInertia;
+    }
+
+    #calcVelocityDelta(b1Delta, b2Delta, body1, body2) {
+        const b1TotalVelocity = b1Delta.crossScalar(body1.angularVelocity).add(body1.velocity);
+        const b2TotalVelocity = b2Delta.crossScalar(body2.angularVelocity).add(body2.velocity);
+        return b1TotalVelocity.delta(b2TotalVelocity);
     }
 
     /**

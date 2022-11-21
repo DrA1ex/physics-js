@@ -4,7 +4,7 @@ import {BoundaryBox, CircleBody, PolygonBody, RectBody} from "../../body.js";
 import {Vector2} from "../../vector.js";
 import {ConstraintType} from "../../enum.js";
 
-const options = Params.parse()
+const options = Params.parse({restitution: 1});
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
 
 BootstrapInstance.addConstraint({
@@ -30,6 +30,11 @@ BootstrapInstance.addRigidBody(new RectBody(center.x - distance * 2, center.y + 
 
 BootstrapInstance.addRigidBody(new CircleBody(center.x + distance * 2, center.y - distance - 1, size / 2).setVelocity(new Vector2(-speed, 0)));
 BootstrapInstance.addRigidBody(new CircleBody(center.x - distance * 2, center.y - distance + 1, size / 2).setVelocity(new Vector2(speed, 0)));
+
+for (const body of BootstrapInstance.rigidBodies) {
+    body.setFriction(options.friction);
+    body.setRestitution(options.restitution);
+}
 
 BootstrapInstance.enableHotKeys();
 BootstrapInstance.run();
