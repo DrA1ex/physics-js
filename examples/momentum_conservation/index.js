@@ -4,7 +4,7 @@ import {BoundaryBox, CircleBody, RectBody} from "../../body.js";
 import {Vector2} from "../../vector.js";
 import {ConstraintType} from "../../enum.js";
 
-const options = Params.parse({friction: 1, restitution: 1})
+const options = Params.parse({friction: 0, restitution: 1})
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
 
 BootstrapInstance.addConstraint({
