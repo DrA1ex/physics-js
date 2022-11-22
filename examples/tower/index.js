@@ -1,9 +1,9 @@
 import {Bootstrap} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
-import {BoundaryBox, CircleBody, RectBody} from "../../body.js";
-import {Vector2} from "../../vector.js";
-import {GravityForce, ResistanceForce} from "../../force.js";
-import {InsetConstraint} from "../../constraint.js";
+import {BoundaryBox, CircleBody, RectBody} from "../../lib/physics/body.js";
+import {Vector2} from "../../lib/utils/vector.js";
+import {GravityForce, ResistanceForce} from "../../lib/physics/force.js";
+import {InsetConstraint} from "../../lib/physics/constraint.js";
 
 
 const options = Params.parse()

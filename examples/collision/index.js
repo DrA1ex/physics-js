@@ -1,8 +1,8 @@
 import {Bootstrap, State} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
-import {BoundaryBox, CircleBody, PolygonBody, RectBody} from "../../body.js";
-import {Vector2} from "../../vector.js";
-import {InsetConstraint} from "../../constraint.js";
+import {BoundaryBox, CircleBody, PolygonBody, RectBody} from "../../lib/physics/body.js";
+import {Vector2} from "../../lib/utils/vector.js";
+import {InsetConstraint} from "../../lib/physics/constraint.js";
 
 function _generatePoly(angleCnt) {
     const angleStep = Math.PI * 2 / angleCnt;
@@ -42,7 +42,11 @@ for (let i = 0; i < count; i++) {
         }
     }
 
-    BootstrapInstance.addRigidBody(body.setRestitution(Math.random()).setMass(1 + Math.random() * 5));
+    BootstrapInstance.addRigidBody(
+        body.setFriction(options.friction)
+            .setRestitution(Math.random())
+            .setMass(1 + Math.random() * 5)
+    );
 }
 
 BootstrapInstance.addRigidBody(new CircleBody(center.x + distance / 2, center.y + distance / 2, size * 2, 20));
@@ -57,8 +61,8 @@ setInterval(() => {
         return;
     }
 
-    const count = BootstrapInstance.solver.rigidBodies.length;
-    const rotatingBody = BootstrapInstance.solver.rigidBodies[count - 1];
+    const count = BootstrapInstance.rigidBodies.length;
+    const rotatingBody = BootstrapInstance.rigidBodies[count - 1];
     if (rotatingBody._angle === undefined) {
         rotatingBody._angle = 0;
         rotatingBody._position = rotatingBody.position.copy();
@@ -68,7 +72,7 @@ setInterval(() => {
     const nextPosition = rotatingBody._position.rotated(rotatingBody._angle, new Vector2(center.x, center.y));
     rotatingBody.setVelocity(nextPosition.delta(rotatingBody.position));
 
-    for (const body of BootstrapInstance.solver.rigidBodies) {
+    for (const body of BootstrapInstance.rigidBodies) {
         if (body === rotatingBody) {
             continue;
         }

@@ -1,7 +1,8 @@
-import {ImpulseBasedSolver} from "../../solver.js";
-import {Debug} from "../../debug.js";
-import * as Utils from "../../utils.js";
-
+import {ImpulseBasedSolver} from "../../lib/physics/solver.js";
+import {Debug} from "../../lib/debug.js";
+import * as Utils from "../../lib/utils/common.js";
+import {Body} from "../../lib/physics/body.js";
+import {RendererMapping} from "../../lib/render/renderer.js";
 
 /*** @enum {number} */
 export const State = {
@@ -23,6 +24,7 @@ export class Bootstrap {
     #drawingPoints = new Map();
     #vectorId = 0;
     #drawingVectors = new Map();
+    #renderers = new Map();
 
     #statsElement;
     #stats = {
@@ -40,7 +42,6 @@ export class Bootstrap {
     #canvasWidth;
     #canvasHeight;
 
-    get solver() {return this.#solver;}
     get state() {return this.#state;}
 
     get dpr() {return this.#dpr;}
@@ -49,6 +50,7 @@ export class Bootstrap {
 
     get stats() {return {...this.#stats};}
     get rigidBodies() {return this.#solver.rigidBodies;}
+    get constraints() {return this.#solver.constraints;}
 
 
     /**
@@ -66,12 +68,13 @@ export class Bootstrap {
         this.#debug = options.debug;
         this.#slowMotion = Math.max(0.01, Math.min(2, options.slowMotion ?? 1));
 
+        this.#solver = new ImpulseBasedSolver();
         if (options.debug) {
             this.#debugInstance = new Debug(options);
+            this.#solver.setDebugger(this.#debugInstance);
             window.__app = {DebugInstance: this.#debugInstance};
         }
 
-        this.#solver = new ImpulseBasedSolver();
         if (options.statistics) {
             this.#statsElement = document.createElement("pre");
             document.body.appendChild(this.#statsElement);
@@ -83,6 +86,8 @@ export class Bootstrap {
     /** @param {Body} body */
     addRigidBody(body) {
         this.#solver.addRigidBody(body);
+        const rendererClass = RendererMapping.has(body.constructor) ? RendererMapping.get(body.constructor) : RendererMapping.get(Body);
+        this.#renderers.set(body, new rendererClass(body));
     }
 
     /** @param constraint */
@@ -229,8 +234,8 @@ export class Bootstrap {
 
         this.#ctx.strokeStyle = "lightgrey";
         this.#ctx.fillStyle = "black";
-        for (const body of this.#solver.rigidBodies) {
-            body.renderer.render(this.#ctx);
+        for (const renderer of this.#renderers.values()) {
+            renderer.render(this.#ctx);
         }
 
         if (this.#debug) {

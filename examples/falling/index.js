@@ -1,10 +1,10 @@
 import {Bootstrap} from "../common/bootstrap.js";
-import {BoundaryBox, CircleBody, RectBody} from "../../body.js";
-import {GravityForce, ResistanceForce} from "../../force.js";
-import {Vector2} from "../../vector.js";
-import {Collider} from "../../collision.js";
+import {BoundaryBox, CircleBody, RectBody} from "../../lib/physics/body.js";
+import {GravityForce, ResistanceForce} from "../../lib/physics/force.js";
+import {Vector2} from "../../lib/utils/vector.js";
+import {Collider} from "../../lib/physics/collision.js";
 import * as Params from "../common/params.js";
-import {InsetConstraint} from "../../constraint.js";
+import {InsetConstraint} from "../../lib/physics/constraint.js";
 
 const options = Params.parse()
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
@@ -33,7 +33,7 @@ const initBodies = [
 
 let last = null;
 for (const pattern of initBodies) {
-    const yOffset = last?.position.y ?? BootstrapInstance.solver.constraints[0]?.box.bottom ?? 0;
+    const yOffset = last?.position.y ?? BootstrapInstance.constraints[0]?.box.bottom ?? 0;
 
     let body;
     if (last instanceof CircleBody) {
@@ -71,7 +71,7 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
     const y = point.clientY - bcr.y;
 
     const pointBox = new BoundaryBox(x, x, y, y);
-    const body = BootstrapInstance.solver.rigidBodies.find(b => b.active && Collider.isBoundaryCollide(pointBox, b.boundary));
+    const body = BootstrapInstance.rigidBodies.find(b => b.active && Collider.isBoundaryCollide(pointBox, b.boundary));
     if (body) {
         const angle = Math.random() * Math.PI * 2;
         const force = Math.random() * options.gravity * 10 * body.mass;
@@ -84,7 +84,7 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
                 .setFriction(options.friction)
                 .setRestitution(options.restitution);
 
-            setTimeout(() => BootstrapInstance.solver.addRigidBody(body), 33 * k);
+            setTimeout(() => BootstrapInstance.addRigidBody(body), 33 * k);
         }
 
         for (let k = 0; k < 5; k++) {
@@ -93,7 +93,7 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
                 .setFriction(options.friction)
                 .setRestitution(options.restitution);
 
-            setTimeout(() => BootstrapInstance.solver.addRigidBody(body), 33 * (k + 5));
+            setTimeout(() => BootstrapInstance.addRigidBody(body), 33 * (k + 5));
         }
     }
 }
