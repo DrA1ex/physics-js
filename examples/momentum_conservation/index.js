@@ -2,16 +2,14 @@ import {Bootstrap} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
 import {BoundaryBox, CircleBody, RectBody} from "../../body.js";
 import {Vector2} from "../../vector.js";
-import {ConstraintType} from "../../enum.js";
+import {InsetConstraint} from "../../constraint.js";
 
 const options = Params.parse({friction: 0, restitution: 1})
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
 
-BootstrapInstance.addConstraint({
-    type: ConstraintType.inset,
-    box: new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, BootstrapInstance.canvasHeight),
-    damper: new Vector2(1, 1),
-});
+BootstrapInstance.addConstraint(
+    new InsetConstraint(new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, BootstrapInstance.canvasHeight), 1)
+);
 
 const blockSide = 500;
 const blockWidth = 20;

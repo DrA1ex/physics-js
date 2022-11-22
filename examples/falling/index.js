@@ -1,10 +1,10 @@
 import {Bootstrap} from "../common/bootstrap.js";
 import {BoundaryBox, CircleBody, RectBody} from "../../body.js";
 import {GravityForce, ResistanceForce} from "../../force.js";
-import {ConstraintType} from "../../enum.js";
 import {Vector2} from "../../vector.js";
 import {Collider} from "../../collision.js";
 import * as Params from "../common/params.js";
+import {InsetConstraint} from "../../constraint.js";
 
 const options = Params.parse()
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
@@ -12,11 +12,9 @@ const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), optio
 BootstrapInstance.addForce(new GravityForce(options.gravity));
 BootstrapInstance.addForce(new ResistanceForce(options.resistance));
 
-BootstrapInstance.addConstraint({
-    type: ConstraintType.inset,
-    box: new BoundaryBox(1, BootstrapInstance.canvasWidth, 1, BootstrapInstance.canvasHeight - 120 - 1),
-    damper: new Vector2(0.5, 0.3),
-});
+BootstrapInstance.addConstraint(
+    new InsetConstraint(new BoundaryBox(1, BootstrapInstance.canvasWidth - 1, 1, BootstrapInstance.canvasHeight - 120 - 1), 0.3)
+);
 
 const initBodies = [
     {xOffset: 0, size: 60},

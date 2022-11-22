@@ -2,8 +2,8 @@ import {Bootstrap} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
 import {BoundaryBox, CircleBody, RectBody} from "../../body.js";
 import {Vector2} from "../../vector.js";
-import {ConstraintType} from "../../enum.js";
 import {GravityForce, ResistanceForce} from "../../force.js";
+import {InsetConstraint} from "../../constraint.js";
 
 
 const options = Params.parse()
@@ -17,11 +17,9 @@ const bottom = BootstrapInstance.canvasHeight - size * 2;
 
 BootstrapInstance.addForce(new GravityForce(options.gravity));
 BootstrapInstance.addForce(new ResistanceForce(options.resistance));
-BootstrapInstance.addConstraint({
-    type: ConstraintType.inset,
-    box: new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, bottom),
-    damper: new Vector2(0.3, 0.3),
-});
+BootstrapInstance.addConstraint(
+    new InsetConstraint(new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, bottom), 0.3)
+);
 
 const x = BootstrapInstance.canvasWidth / 2;
 let currentY = bottom - size / 2;

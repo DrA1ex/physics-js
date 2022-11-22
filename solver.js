@@ -1,13 +1,10 @@
 import {Vector2} from "./vector.js";
-import {ConstraintType, ImpulseType} from "./enum.js";
+import {ImpulseType} from "./enum.js";
 import * as Utils from "./utils.js";
+import {Collision} from "./collision.js";
+import {Body} from "./body.js";
 
 /**
- * @typedef {{type: ConstraintType}} ConstraintBase
- * @typedef {ConstraintBase & {box: BoundaryBox, damper: Vector2}} InsetConstraint
- *
- * @typedef {InsetConstraint} Constraint
- *
  * @typedef {{velocity: Vector2, position: Vector2, angularVelocity: number, angle: number}} AccumulatedParameters
  */
 
@@ -23,8 +20,12 @@ export class ImpulseBasedSolver {
         delta: 0,
         /** @type {Map<Body, AccumulatedParameters>}*/
         accumulatedInfo: new Map(),
+        collisions: [],
         collisionCount: 0
     }
+
+    /** @type {Map<Constraint, Body>} */
+    #constraintBodies = new Map();
 
     constructor() {
         this.debug = window.__app?.DebugInstance;
@@ -41,6 +42,7 @@ export class ImpulseBasedSolver {
      * @param {Constraint} constraint
      */
     addConstraint(constraint) {
+        this.#constraintBodies.set(constraint, new Body(0, 0).setActive(false));
         this.constraints.push(constraint);
     }
 
@@ -58,35 +60,70 @@ export class ImpulseBasedSolver {
         this.debug?.reset();
         this.stepInfo.delta = Math.max(0, Math.min(0.1, delta));
         this.stepInfo.accumulatedInfo.clear();
+        this.stepInfo.collisions.splice(0);
         this.stepInfo.collisionCount = 0;
 
         if (this.stepInfo.delta === 0) {
             return;
         }
 
-        for (const body of this.rigidBodies) {
-            if (!body.active) {
-                body.velocity.zero();
-                continue;
-            }
+        this.#applyVelocity();
 
-            body.applyVelocity(body.velocity.scaled(this.stepInfo.delta), body.angularVelocity * this.stepInfo.delta);
-            //TODO: implement friction
-            body.angularVelocity *= 0.99;
+        this.#applyForces();
+        this.#collectCollisions();
 
-            this.debug?.addVector(body.position, body.velocity, "red");
+        for (const collision of this.stepInfo.collisions) {
+            this.#processCollision(collision);
         }
 
-        // Forces
+        this.#applyImpulses();
+    }
+
+    #applyForces() {
         for (const force of this.forces) {
             for (const body of this.rigidBodies) {
                 const {impulse, point, type} = force.impulse(this.stepInfo.delta, body);
                 this.#storeImpulse(body, impulse, point, type);
             }
         }
+    }
 
-        this.step();
+    #applyVelocity() {
+        for (const body of this.rigidBodies) {
+            if (body.active) {
+                body.applyVelocity(body.velocity.scaled(this.stepInfo.delta), body.angularVelocity * this.stepInfo.delta);
+                this.debug?.addVector(body.position, body.velocity, "red");
+            } else {
+                body.velocity.zero();
+            }
+        }
+    }
 
+    #collectCollisions() {
+        for (let i = 0; i < this.rigidBodies.length; i++) {
+            const body1 = this.rigidBodies[i];
+            for (const constraint of this.constraints) {
+                if (!body1.active) continue;
+                const collision = constraint.processConstraint(body1);
+                if (collision.result) {
+                    this.stepInfo.collisions.push(collision);
+                }
+            }
+
+            for (let j = i + 1; j < this.rigidBodies.length; j++) {
+                const body2 = this.rigidBodies[j];
+
+                if (!body1.active && !body2.active) continue;
+                if (body1.collider.detectCollision(body2)) {
+                    this.stepInfo.collisions.push(body1.collider.collision);
+                }
+            }
+        }
+
+        this.stepInfo.collisionCount = this.stepInfo.collisions.length;
+    }
+
+    #applyImpulses() {
         for (const body of this.rigidBodies) {
             if (this.stepInfo.accumulatedInfo.has(body)) {
                 const {velocity, position, angularVelocity, angle} = this.stepInfo.accumulatedInfo.get(body);
@@ -96,22 +133,6 @@ export class ImpulseBasedSolver {
                 body.angle += angle;
 
                 this.debug?.addVector(body.position, velocity);
-            }
-        }
-    }
-
-    step() {
-        // Constraints
-        for (let i = 0; i < this.rigidBodies.length; i++) {
-            const body1 = this.rigidBodies[i];
-
-            for (const constraint of this.constraints) {
-                this.#processConstraint(body1, constraint);
-            }
-
-            for (let j = i + 1; j < this.rigidBodies.length; j++) {
-                const body2 = this.rigidBodies[j];
-                this.#processCollision(body1, body2);
             }
         }
     }
@@ -153,18 +174,14 @@ export class ImpulseBasedSolver {
     }
 
     /**
-     * @param {Body} body1
-     * @param {Body} body2
+     * @param {Collision} collision
      */
-    #processCollision(body1, body2) {
-        if (!body1.active && !body2.active) return;
-        if (!body1.collider.detectCollision(body2)) return;
-
-        const collision = body1.collider.collision;
-        this.stepInfo.collisionCount += 1;
+    #processCollision(collision) {
         this.debug?.addPoint(collision.aContact);
         this.debug?.addVector(collision.aContact, collision.tangent.scaled(-collision.overlap), "violet");
 
+        const body1 = collision.bBody;
+        const body2 = collision.aBody;
         const b1Delta = collision.bContact.delta(body1.position);
         const b2Delta = collision.aContact.delta(body2.position);
         const normal = collision.tangent;
@@ -174,7 +191,7 @@ export class ImpulseBasedSolver {
         const restitution = body1.restitution * body2.restitution;
         const friction = Math.sqrt(body1.friction * body2.friction);
 
-        const normalVelocity = normal.dot(velocityDelta);
+        const normalVelocity = Math.min(0, normal.dot(velocityDelta));
         const normalImpulse = normal.scaled((1 + restitution) * normalVelocity / normalMass);
         this.#storeImpulse(body1, normalImpulse.negated(), collision.bContact);
         this.#storeImpulse(body2, normalImpulse, collision.aContact);
@@ -217,61 +234,5 @@ export class ImpulseBasedSolver {
         const b1TotalVelocity = b1Delta.crossScalar(body1.angularVelocity).add(body1.velocity);
         const b2TotalVelocity = b2Delta.crossScalar(body2.angularVelocity).add(body2.velocity);
         return b1TotalVelocity.delta(b2TotalVelocity);
-    }
-
-    /**
-     * @param {Body} body
-     * @param {Constraint} constraint
-     */
-    #processConstraint(body, constraint) {
-        if (!body.active) {
-            return;
-        }
-
-        switch (constraint.type) {
-            case ConstraintType.inset:
-                this.#processInsetConstraint(body, constraint);
-                break;
-        }
-    }
-
-    /**
-     *
-     * @param {Body} body
-     * @param {InsetConstraint} constraint
-     */
-    #processInsetConstraint(body, constraint) {
-        const {x: xDamper, y: yDamper} = constraint.damper;
-        const {box: cBox} = constraint;
-        const box = body.boundary;
-
-
-        const penetration = new Vector2();
-        if (box.left < cBox.left) {
-            penetration.x = box.left - cBox.left;
-        } else if (box.right > cBox.right) {
-            penetration.x = box.right - cBox.right;
-        }
-
-        if (box.top < cBox.top) {
-            penetration.y = box.top - cBox.top;
-        } else if (box.bottom > cBox.bottom) {
-            penetration.y = box.bottom - cBox.bottom;
-        }
-
-        if (penetration.x === 0 && penetration.y === 0) {
-            return;
-        }
-
-        const hasCollision = new Vector2(penetration.x !== 0, penetration.y !== 0);
-        const impulse = new Vector2(1 + xDamper, 1 + yDamper).mul(body.velocity).mul(hasCollision).negate();
-
-        const tangent = penetration.normalized();
-        const collision = tangent.copy().mul(new Vector2(box.width / 2, box.height / 2)).add(penetration).add(body.position);
-
-        this.#storeImpulse(body, impulse, collision, ImpulseType.scalar);
-        this.#storeImpulse(body, penetration.negated(), body.position, ImpulseType.pseudo);
-
-        this.debug?.addPoint(collision);
     }
 }

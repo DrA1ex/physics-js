@@ -2,7 +2,7 @@ import {Bootstrap, State} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
 import {BoundaryBox, CircleBody, PolygonBody, RectBody} from "../../body.js";
 import {Vector2} from "../../vector.js";
-import {ConstraintType} from "../../enum.js";
+import {InsetConstraint} from "../../constraint.js";
 
 function _generatePoly(angleCnt) {
     const angleStep = Math.PI * 2 / angleCnt;
@@ -17,11 +17,9 @@ function _generatePoly(angleCnt) {
 const options = Params.parse()
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
 
-BootstrapInstance.addConstraint({
-    type: ConstraintType.inset,
-    box: new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, BootstrapInstance.canvasHeight),
-    damper: new Vector2(0.3, 0.3),
-});
+BootstrapInstance.addConstraint(
+    new InsetConstraint(new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, BootstrapInstance.canvasHeight), 0.3)
+);
 
 const count = 50;
 const size = 25;

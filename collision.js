@@ -12,6 +12,11 @@ export class Collision {
     /**@type{Vector2}*/
     bContact = null;
 
+    /**@type{Body}*/
+    aBody = null;
+    /**@type{Body}*/
+    bBody = null;
+
     overlap = 0;
 
     constructor(result = false) {
@@ -56,28 +61,22 @@ export class Collider {
 
             if (type1Constraint && type2Constraint) {
                 this.collision = detectorFn(body1, body2);
+                this.collision.aBody = body2;
+                this.collision.bBody = body1;
                 break;
             }
 
             const reversedType1Constraint = body2 instanceof type1;
             const reversedType2Constraint = reversedType1Constraint && types2.some(t => body1 instanceof t);
             if (reversedType1Constraint && reversedType2Constraint) {
-                this.collision = Collider.#flipAfterDetect(body1, body2, detectorFn);
+                this.collision = detectorFn(body2, body1);
+                this.collision.aBody = body1;
+                this.collision.bBody = body2;
                 break;
             }
         }
 
         return this.collision.result;
-    }
-
-    static #flipAfterDetect(body1, body2, detectionFn) {
-        const collision = detectionFn(body2, body1);
-        if (collision.result) {
-            [collision.aContact, collision.bContact] = [collision.bContact, collision.aContact];
-            collision.overlap = -collision.overlap;
-        }
-
-        return collision;
     }
 
     static isBoundaryCollide(box1, box2) {
