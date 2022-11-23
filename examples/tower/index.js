@@ -13,20 +13,22 @@ const size = 25;
 const towerWidth = 5;
 const widthDecrease = 3;
 const towerHeight = towerWidth * widthDecrease;
-const bottom = BootstrapInstance.canvasHeight - size * 2;
+const bottom = BootstrapInstance.canvasHeight - 60 - 1;
 
 BootstrapInstance.addForce(new GravityForce(options.gravity));
 BootstrapInstance.addForce(new ResistanceForce(options.resistance));
-BootstrapInstance.addConstraint(
-    new InsetConstraint(new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, bottom), 0.3)
-);
+BootstrapInstance.addConstraint(new InsetConstraint(new BoundaryBox(1, BootstrapInstance.canvasWidth - 1, 1, bottom), 0.3));
 
 const x = BootstrapInstance.canvasWidth / 2;
 let currentY = bottom - size / 2;
 for (let i = 0; i < towerHeight; i++) {
-    for (let j = 0; j < towerWidth - Math.floor(i / widthDecrease); j++) {
-        BootstrapInstance.addRigidBody(new RectBody(x + size / 2 + j * size, currentY, size, size, 1));
-        BootstrapInstance.addRigidBody(new RectBody(x - size / 2 - j * size, currentY, size, size, 1));
+    if (widthDecrease !== 0) {
+        for (let j = 0; j < towerWidth - Math.floor(i / widthDecrease); j++) {
+            BootstrapInstance.addRigidBody(new RectBody(x + size / 2 + j * size, currentY, size, size, 1));
+            BootstrapInstance.addRigidBody(new RectBody(x - size / 2 - j * size, currentY, size, size, 1));
+        }
+    } else {
+        BootstrapInstance.addRigidBody(new RectBody(x + size / 2, currentY, size, size, 1));
     }
 
     currentY -= size;

@@ -15,7 +15,7 @@ function _generatePoly(angleCnt) {
 }
 
 const options = Params.parse()
-const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
+const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), Object.assign({solverBias: 0.1}, options));
 
 BootstrapInstance.addConstraint(
     new InsetConstraint(new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, BootstrapInstance.canvasHeight), 0.3)

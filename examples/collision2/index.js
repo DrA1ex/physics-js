@@ -5,10 +5,10 @@ import {Vector2} from "../../lib/utils/vector.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
 
 const options = Params.parse({restitution: 1});
-const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
+const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), Object.assign({solverBias: 0.01}, options));
 
 BootstrapInstance.addConstraint(
-    new InsetConstraint(new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, BootstrapInstance.canvasHeight), 0, 1)
+    new InsetConstraint(new BoundaryBox(1, BootstrapInstance.canvasWidth, 1, BootstrapInstance.canvasHeight - 1), 0, 1)
 );
 
 const size = 100;

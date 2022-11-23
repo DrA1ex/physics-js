@@ -5,7 +5,7 @@ import {Vector2} from "../../lib/utils/vector.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
 
 const options = Params.parse({friction: 0, restitution: 1})
-const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
+const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), Object.assign({solverBias: 0}, options));
 
 BootstrapInstance.addConstraint(
     new InsetConstraint(new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, BootstrapInstance.canvasHeight), 1)
