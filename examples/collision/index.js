@@ -1,18 +1,9 @@
 import {Bootstrap, State} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
-import {BoundaryBox, CircleBody, PolygonBody, RectBody} from "../../lib/physics/body.js";
+import {BoundaryBox, CircleBody} from "../../lib/physics/body.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
-
-function _generatePoly(angleCnt) {
-    const angleStep = Math.PI * 2 / angleCnt;
-    const result = new Array(angleCnt);
-    for (let i = 0; i < angleCnt; i++) {
-        result[i] = Vector2.fromAngle(i * angleStep).scaled(size / 2);
-    }
-
-    return result;
-}
+import * as Utils from "../common/utils.js";
 
 const options = Params.parse()
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), Object.assign({solverBias: 0.1}, options));
@@ -35,11 +26,7 @@ for (let i = 0; i < count; i++) {
         body = new CircleBody(position.x, position.y, size / 2);
     } else {
         const angleCount = 3 + Math.floor(Math.random() * 7);
-        if (angleCount === 4) {
-            body = new RectBody(position.x, position.y, size, size);
-        } else {
-            body = new PolygonBody(position.x, position.y, _generatePoly(angleCount));
-        }
+        body = Utils.createRegularPoly(position, angleCount, size);
     }
 
     BootstrapInstance.addRigidBody(

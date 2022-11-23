@@ -36,5 +36,8 @@ export function parse(def = {}) {
         resistance: Math.min(1, Math.max(0, parseNumber(params["resistance"], Number.parseFloat) ?? 0.99)),
         friction: Math.min(1, Math.max(0, parseNumber(params["friction"], Number.parseFloat) ?? 0.2)),
         restitution: Math.min(1, Math.max(0, parseNumber(params["restitution"], Number.parseFloat) ?? 0.5)),
+
+        solverBias: parseNumber(params["bias"], Number.parseFloat),
+        solverSteps: parseNumber(params["steps"], Number.parseInt)
     }
 }
