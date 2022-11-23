@@ -9,10 +9,16 @@ import {InsetConstraint} from "../../lib/physics/constraint.js";
 const options = Params.parse()
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
 
-const size = 25;
-const towerWidth = 5;
-const widthDecrease = 3;
-const towerHeight = towerWidth * widthDecrease;
+const minBallSize = 10;
+const maxBallSize = 30;
+
+const blockWidth = 40;
+const blockHeight = 30;
+
+const widthDecrease = 0.7;
+const towerWidth = 10;
+const towerHeight = widthDecrease > 0 ? towerWidth / widthDecrease : towerWidth;
+
 const bottom = BootstrapInstance.canvasHeight - 60 - 1;
 
 BootstrapInstance.addForce(new GravityForce(options.gravity));
@@ -20,18 +26,15 @@ BootstrapInstance.addForce(new ResistanceForce(options.resistance));
 BootstrapInstance.addConstraint(new InsetConstraint(new BoundaryBox(1, BootstrapInstance.canvasWidth - 1, 1, bottom), 0.3));
 
 const x = BootstrapInstance.canvasWidth / 2;
-let currentY = bottom - size / 2;
+let currentY = bottom - blockHeight / 2;
 for (let i = 0; i < towerHeight; i++) {
-    if (widthDecrease !== 0) {
-        for (let j = 0; j < towerWidth - Math.floor(i / widthDecrease); j++) {
-            BootstrapInstance.addRigidBody(new RectBody(x + size / 2 + j * size, currentY, size, size, 1));
-            BootstrapInstance.addRigidBody(new RectBody(x - size / 2 - j * size, currentY, size, size, 1));
-        }
-    } else {
-        BootstrapInstance.addRigidBody(new RectBody(x + size / 2, currentY, size, size, 1));
+    const width = Math.round(towerWidth - i * widthDecrease);
+    const xRowOffset = x - width * blockWidth / 2;
+    for (let j = 0; j < width; j++) {
+        BootstrapInstance.addRigidBody(new RectBody(xRowOffset + j * blockWidth + j, currentY, blockWidth, blockHeight, blockHeight * blockWidth));
     }
 
-    currentY -= size - 1;
+    currentY -= blockHeight - 1;
 }
 
 for (const body of BootstrapInstance.rigidBodies) {
@@ -54,7 +57,8 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
     startPoint = getMousePos(e)
 
     if (!creatingBody) {
-        creatingBody = new CircleBody(startPoint.x, startPoint.y, size, 50);
+        const size = minBallSize + Math.random() * (maxBallSize - minBallSize);
+        creatingBody = new CircleBody(startPoint.x, startPoint.y, size, Math.PI * size * size);
         BootstrapInstance.addRigidBody(creatingBody);
     }
 
@@ -70,7 +74,7 @@ function _constraintVectorLength(vector, maxLength) {
 }
 
 const maxSpeed = options.gravity * 10;
-const maxDisplaySpeed = 100;
+const maxDisplaySpeed = 50;
 canvas.onmousemove = canvas.ontouchmove = (e) => {
     if (!startPoint) {
         return;
