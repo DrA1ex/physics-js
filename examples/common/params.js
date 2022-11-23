@@ -24,7 +24,7 @@ export function parse(def = {}) {
         }
     }
 
-    return {
+    const result = {
         debug: parseBool(params["debug"]) ?? false,
         statistics: parseBool(params["stats"]) ?? true,
         showVector: parseBool(params["debug_vector"]),
@@ -39,5 +39,13 @@ export function parse(def = {}) {
 
         solverBias: parseNumber(params["bias"], Number.parseFloat),
         solverSteps: parseNumber(params["steps"], Number.parseInt)
-    }
+    };
+
+    return Object.keys(result).reduce((res, key) => {
+        if (result[key] !== null) {
+            res[key] = result[key];
+        }
+
+        return res;
+    }, {});
 }
