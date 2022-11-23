@@ -13,7 +13,7 @@ const size = 100;
 const speed = Math.PI * 8;
 const boxCount = 8;
 const {canvasWidth, canvasHeight} = BootstrapInstance;
-const bottom = canvasHeight - 1 - size / 4;
+const bottom = canvasHeight - 1 - size / 4 - 100;
 
 BootstrapInstance.addConstraint(new InsetConstraint(new BoundaryBox(1, canvasWidth, 1, bottom), 0, 1));
 BootstrapInstance.addForce(new GravityForce(options.gravity));
