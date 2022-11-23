@@ -6,6 +6,7 @@ import * as Params from "../common/params.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
 import * as Utils from "../common/utils.js";
 import {Vector2} from "../../lib/utils/vector.js";
+import * as CommonUtils from "../../lib/utils/common.js";
 
 function _createBody(position, size) {
     let body;
@@ -29,10 +30,14 @@ function _accelerateBody(body) {
     body.applyImpulse(new Vector2(Math.cos(angle), Math.sin(angle)).scale(force), body.position);
 }
 
-function _createBodies(x, y) {
+function _createBodies(x, y, box) {
     for (let k = 0; k < 10; k++) {
         const size = Math.floor(1 + Math.random() * 4) * 10;
         const pos = Vector2.fromAngle(Math.random() * Math.PI * 2).scale(size).add(new Vector2(x, y));
+
+        pos.x = CommonUtils.clamp(box.left + size, box.right - size, pos.x);
+        pos.y = CommonUtils.clamp(box.top + size, box.bottom - size, pos.y);
+
         const body = _createBody(pos, size);
 
         setTimeout(() => BootstrapInstance.addRigidBody(body), 16 * k);
@@ -102,7 +107,7 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
     if (body) {
         _accelerateBody(body)
     } else {
-        _createBodies(x, y);
+        _createBodies(x, y, BootstrapInstance.constraints[0].box);
     }
 }
 
