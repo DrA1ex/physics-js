@@ -103,6 +103,14 @@ export class Bootstrap {
         this.#solver.addForce(force);
     }
 
+    /**
+     * @param {Body} body
+     * @return {BodyRenderer}
+     */
+    getRenderer(body) {
+        return this.#renderers.get(body);
+    }
+
     run() {
         if (this.state === State.play) {
             return;
@@ -235,8 +243,6 @@ export class Bootstrap {
             this.#ctx.strokeRect(box.left, box.top, box.width, box.height);
         }
 
-        this.#ctx.strokeStyle = "lightgrey";
-        this.#ctx.fillStyle = "black";
         for (const renderer of this.#renderers.values()) {
             renderer.render(this.#ctx);
         }
