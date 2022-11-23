@@ -31,7 +31,7 @@ for (let i = 0; i < towerHeight; i++) {
         BootstrapInstance.addRigidBody(new RectBody(x + size / 2, currentY, size, size, 1));
     }
 
-    currentY -= size;
+    currentY -= size - 1;
 }
 
 for (const body of BootstrapInstance.rigidBodies) {
