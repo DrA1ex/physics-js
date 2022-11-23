@@ -1,8 +1,8 @@
 # physics-js
 
-Yet another physics engine implementation
+Yet another physics engine implementation.
 
-![image](https://user-images.githubusercontent.com/1194059/201300307-5bf1a4e6-1073-456e-a240-445a31ff2eb2.png)
+![image](https://user-images.githubusercontent.com/1194059/203562067-41b3fcb0-a169-46e8-bcb9-04db29d6e556.png)
 
 ## Examples
 
