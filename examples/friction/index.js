@@ -6,7 +6,7 @@ import {InsetConstraint} from "../../lib/physics/constraint.js";
 import * as Utils from "../common/utils.js";
 import {GravityForce} from "../../lib/physics/force.js";
 
-const options = Params.parse({friction: 0.8});
+const options = Params.parse({friction: 0.8, restitution: 0.3});
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
 
 const size = 100;
@@ -18,7 +18,6 @@ const bottom = canvasHeight - 1 - size / 4 - 100;
 BootstrapInstance.addConstraint(new InsetConstraint(new BoundaryBox(1, canvasWidth, 1, bottom), 0, 1));
 BootstrapInstance.addForce(new GravityForce(options.gravity));
 
-BootstrapInstance.addRigidBody(new RectBody(canvasWidth / 2, bottom - size / 8, canvasWidth, size / 4).setActive(false))
 BootstrapInstance.addRigidBody(new CircleBody(size / 2 + 1, bottom - size - 1, size / 2, 3).setAngularVelocity(speed));
 
 const ramp = Utils.createRegularPoly(new Vector2(), 3, size,)
@@ -29,8 +28,19 @@ const ramp = Utils.createRegularPoly(new Vector2(), 3, size,)
 ramp.setPosition(new Vector2(canvasWidth / 2 - ramp.boundary.width / 2, bottom - (ramp.boundary.bottom - ramp.position.y) - size / 4));
 BootstrapInstance.addRigidBody(ramp);
 
+const rampRenderer = BootstrapInstance.getRenderer(ramp);
+rampRenderer.fill = true;
+rampRenderer.renderDirection = false;
+rampRenderer.fillStyle = "#3f3f3f";
+
+const floor = new RectBody(canvasWidth / 2, bottom - size / 8, canvasWidth, size / 4).setActive(false);
+BootstrapInstance.addRigidBody(floor);
+const floorRenderer = BootstrapInstance.getRenderer(floor);
+floorRenderer.fill = true;
+floorRenderer.fillStyle = "#3f3f3f";
+
 for (let i = 0; i < boxCount; i++) {
-    const y = bottom - size / 2 - i * size/2;
+    const y = bottom - size / 2 - i * size / 2;
     BootstrapInstance.addRigidBody(new RectBody(canvasWidth / 2 + ramp.boundary.width + size, y, size / 2, size / 2))
 }
 

@@ -36,7 +36,9 @@ for (let i = 0; i < count; i++) {
     );
 }
 
-BootstrapInstance.addRigidBody(new CircleBody(center.x + distance / 2, center.y + distance / 2, size * 2, 20));
+const rotatingBody = new CircleBody(center.x + distance / 2, center.y + distance / 2, size * 2, 20);
+BootstrapInstance.addRigidBody(rotatingBody);
+BootstrapInstance.getRenderer(rotatingBody).fill = false;
 
 BootstrapInstance.enableHotKeys();
 BootstrapInstance.run();
@@ -49,7 +51,6 @@ setInterval(() => {
     }
 
     const count = BootstrapInstance.rigidBodies.length;
-    const rotatingBody = BootstrapInstance.rigidBodies[count - 1];
     if (rotatingBody._angle === undefined) {
         rotatingBody._angle = 0;
         rotatingBody._position = rotatingBody.position.copy();
