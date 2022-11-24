@@ -35,10 +35,10 @@ const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), optio
 const {canvasWidth, canvasHeight} = BootstrapInstance;
 const bottom = canvasHeight - 120;
 
-const rampSegments = 50;
+const rampSegments = 100;
 const rampWidth = canvasWidth * 2 / 3;
 const rampHeight = canvasHeight / 2;
-const ballRadius = 50;
+const ballRadius = 40;
 
 BootstrapInstance.addConstraint(new InsetConstraint(new BoundaryBox(1, canvasWidth, 1, bottom), 0, 1));
 BootstrapInstance.addForce(new GravityForce(options.gravity));
@@ -68,7 +68,7 @@ for (let i = 1; i < rampPoints.length; i++) {
 }
 
 const balls = [new CircleBody(xOffset + ballRadius + rampWidth * 0.05, yOffset - ballRadius - rampHeight * 0.05, ballRadius, 50)];
-for (let i = 0; i < 5; i++) {
+for (let i = 0; i < 6; i++) {
     const xPos = i % 2 === 0 ? ballRadius + rampWidth * 0.05 : -ballRadius + rampWidth * 0.95
     const vertexCount = 5 + i * 3;
 
@@ -87,7 +87,7 @@ for (const ball of balls) {
 
     const {renderer} = BootstrapInstance.addRigidBody(ball);
     renderer.strokeStyle = "green";
-    renderer.fillStyle = Utils.randomColor(128, 192, 0.5);
+    renderer.fillStyle = Utils.randomColor(128, 192, 0.3);
 }
 
 for (const body of BootstrapInstance.rigidBodies) {
