@@ -38,6 +38,7 @@ export function parse(def = {}) {
         restitution: Math.min(1, Math.max(0, parseNumber(params["restitution"], Number.parseFloat) ?? 0.5)),
 
         solverBias: parseNumber(params["bias"], Number.parseFloat),
+        solverBeta: parseNumber(params["beta"], Number.parseFloat),
         solverSteps: parseNumber(params["steps"], Number.parseInt)
     };
 

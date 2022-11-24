@@ -4,8 +4,8 @@ import {BoundaryBox, CircleBody, RectBody} from "../../lib/physics/body.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
 
-const options = Params.parse({friction: 0, restitution: 1})
-const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), Object.assign({solverBias: 0, solverSteps: 2}, options));
+const options = Params.parse({friction: 0, restitution: 1, bias: 0, steps: 1, beta: 1})
+const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
 
 BootstrapInstance.addConstraint(
     new InsetConstraint(new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, BootstrapInstance.canvasHeight), 1)

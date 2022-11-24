@@ -6,7 +6,7 @@ import {GravityForce, ResistanceForce} from "../../lib/physics/force.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
 
 
-const options = Params.parse()
+const options = Params.parse({beta: 0.8, bias: 0.2});
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
 
 const minBallSize = 10;

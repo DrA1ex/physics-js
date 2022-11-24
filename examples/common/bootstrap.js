@@ -58,7 +58,7 @@ export class Bootstrap {
      * @param {{
      *          debug?: boolean, slowMotion?: number,
      *          showBoundary?: boolean, showVectorLength?: boolean, showVector?: boolean,
-     *          statistics?: boolean, solverSteps?: number, solverBias?: number
+     *          statistics?: boolean, solverSteps?: number, solverBias?: number, solverBeta?: number
      * }} options
      */
     constructor(canvas, options = {}) {
@@ -70,7 +70,8 @@ export class Bootstrap {
 
         this.#solver = new ImpulseBasedSolver();
         if (Number.isFinite(options.solverSteps)) this.#solver.steps = options.solverSteps;
-        if (Number.isFinite(options.solverBias)) this.#solver.biasFactor = options.solverBias;
+        if (Number.isFinite(options.solverBias)) this.#solver.velocityBiasFactor = options.solverBias;
+        if (Number.isFinite(options.solverBeta)) this.#solver.positionCorrectionBeta = options.solverBeta;
 
         if (options.debug) {
             this.#debugInstance = new Debug(options);
