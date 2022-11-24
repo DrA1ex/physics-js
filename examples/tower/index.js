@@ -1,9 +1,9 @@
 import {Bootstrap} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
 import {BoundaryBox, CircleBody, RectBody} from "../../lib/physics/body.js";
-import {Vector2} from "../../lib/utils/vector.js";
 import {GravityForce, ResistanceForce} from "../../lib/physics/force.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
+import * as Utils from "../common/utils.js";
 
 
 const options = Params.parse({beta: 0.8, bias: 0.2});
@@ -42,19 +42,12 @@ for (const body of BootstrapInstance.rigidBodies) {
     body.setRestitution(options.restitution);
 }
 
-function getMousePos(e) {
-    const point = (e.touches && e.touches[0] || e.changedTouches && e.changedTouches[0]) ?? e;
-    const bcr = e.target.getBoundingClientRect();
-
-    return new Vector2(point.clientX - bcr.x, point.clientY - bcr.y);
-}
-
 let startPoint = null;
 let vectorId = null;
 let creatingBody = null;
 canvas.onmousedown = canvas.ontouchstart = (e) => {
     e.preventDefault();
-    startPoint = getMousePos(e)
+    startPoint = Utils.getMousePos(e)
 
     if (!creatingBody) {
         const size = minBallSize + Math.random() * (maxBallSize - minBallSize);
@@ -81,7 +74,7 @@ canvas.onmousemove = canvas.ontouchmove = (e) => {
     }
 
     e.preventDefault();
-    const pos = getMousePos(e);
+    const pos = Utils.getMousePos(e);
 
     if (vectorId !== null) BootstrapInstance.removeVector(vectorId);
     vectorId = BootstrapInstance.addVector(startPoint, _constraintVectorLength(startPoint.delta(pos), maxDisplaySpeed), "red");
@@ -93,7 +86,7 @@ canvas.onmouseup = canvas.ontouchend = (e) => {
     }
 
     e.preventDefault();
-    const pos = getMousePos(e);
+    const pos = Utils.getMousePos(e);
 
     creatingBody.setActive(true);
     creatingBody.setVelocity(_constraintVectorLength(startPoint.delta(pos).scale(maxSpeed / maxDisplaySpeed), maxSpeed));

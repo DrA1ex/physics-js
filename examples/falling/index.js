@@ -1,12 +1,12 @@
 import {Bootstrap} from "../common/bootstrap.js";
 import {BoundaryBox, CircleBody, RectBody} from "../../lib/physics/body.js";
 import {GravityForce, ResistanceForce} from "../../lib/physics/force.js";
-import {Collider} from "../../lib/physics/collision.js";
 import * as Params from "../common/params.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
 import * as Utils from "../common/utils.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import * as CommonUtils from "../../lib/utils/common.js";
+import {Collider} from "../../lib/physics/collision.js";
 
 function _createBody(position, size) {
     let body;
@@ -30,18 +30,17 @@ function _accelerateBody(body) {
     body.applyImpulse(new Vector2(Math.cos(angle), Math.sin(angle)).scale(force), body.position);
 }
 
-function _createBodies(x, y, box) {
-    for (let k = 0; k < 10; k++) {
-        const size = Math.floor(1 + Math.random() * 4) * 10;
-        const pos = Vector2.fromAngle(Math.random() * Math.PI * 2).scale(size).add(new Vector2(x, y));
+function _createBodies(origin, box) {
+    if (origin.y >= bottom) return;
 
-        pos.x = CommonUtils.clamp(box.left + size, box.right - size, pos.x);
-        pos.y = CommonUtils.clamp(box.top + size, box.bottom - size, pos.y);
+    const border = 5;
+    const size = Math.floor(1 + Math.random() * 4) * 10;
 
-        const body = _createBody(pos, size);
+    const pos = Vector2.fromAngle(Math.random() * Math.PI * 2).scale(size).add(origin);
+    pos.x = CommonUtils.clamp(box.left + size + border, box.right - size - border, pos.x);
+    pos.y = CommonUtils.clamp(box.top + size + border, box.bottom - size - border, pos.y);
 
-        setTimeout(() => BootstrapInstance.addRigidBody(body), 16 * k);
-    }
+    BootstrapInstance.addRigidBody(_createBody(pos, size))
 }
 
 function _createBodiesByPattern(initBodies) {
@@ -89,26 +88,46 @@ BootstrapInstance.addRigidBody(
         .setRestitution(0.3)
 );
 
+let spawnPosition = null;
+let intervalId = null;
+let spawnedCount = 0;
 canvas.oncontextmenu = () => false;
 canvas.onmousedown = canvas.ontouchstart = (e) => {
-    e.preventDefault();
-
-    const point = e.touches ? e.touches[0] : e;
-    const bcr = e.target.getBoundingClientRect();
-
-    const x = point.clientX - bcr.x;
-    const y = point.clientY - bcr.y;
-    if (y > bottom) {
-        return;
-    }
-
-    const pointBox = new BoundaryBox(x, x, y, y);
+    const pos = Utils.getMousePos(e);
+    const pointBox = BoundaryBox.fromDimensions(pos.x, pos.y);
     const body = BootstrapInstance.rigidBodies.find(b => b.active && Collider.isBoundaryCollide(pointBox, b.boundary));
     if (body) {
         _accelerateBody(body)
     } else {
-        _createBodies(x, y, BootstrapInstance.constraints[0].box);
+        spawnPosition = pos;
+        spawnedCount = 0;
+        intervalId = setInterval(() => {
+            _createBodies(spawnPosition, BootstrapInstance.constraints[0].box);
+            ++spawnedCount;
+        }, 33)
     }
+
+    e.preventDefault();
+}
+
+canvas.onmousemove = canvas.ontouchmove = (e) => {
+    if (spawnPosition === null) return;
+
+    spawnPosition = Utils.getMousePos(e);
+    e.preventDefault();
+}
+
+canvas.onmouseup = canvas.ontouchend = (e) => {
+    clearInterval(intervalId);
+
+    if (spawnedCount === 0) {
+        _createBodies(spawnPosition, BootstrapInstance.constraints[0].box);
+    }
+
+    spawnPosition = null;
+    intervalId = null;
+
+    e.preventDefault();
 }
 
 _createBodiesByPattern([
