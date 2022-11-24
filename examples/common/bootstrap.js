@@ -87,11 +87,18 @@ export class Bootstrap {
         this.#init();
     }
 
-    /** @param {Body} body */
+    /**
+     * @param {Body} body
+     * @return {{body: Body, renderer: BodyRenderer}}
+     */
     addRigidBody(body) {
         this.#solver.addRigidBody(body);
+
         const rendererClass = RendererMapping.has(body.constructor) ? RendererMapping.get(body.constructor) : RendererMapping.get(Body);
-        this.#renderers.set(body, new rendererClass(body));
+        const renderer = new rendererClass(body);
+        this.#renderers.set(body, renderer);
+
+        return {body, renderer};
     }
 
     /** @param constraint */
