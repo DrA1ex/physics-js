@@ -30,6 +30,10 @@ export function parse(def = {}) {
         showVector: parseBool(params["debug_vector"]),
         showVectorLength: parseBool(params["debug_vector_length"]),
         showBoundary: parseBool(params["debug_boundary"]),
+        showVelocityVector: parseBool(params["debug_velocity"]),
+        showNormalVector: parseBool(params["debug_normal"]),
+        showTangentVector: parseBool(params["debug_tangent"]),
+        showContactVector: parseBool(params["debug_contact"]),
 
         slowMotion: parseNumber(params["slow_motion"], Number.parseFloat) ?? 1,
         gravity: parseNumber(params["g"], Number.parseFloat) ?? 100,
