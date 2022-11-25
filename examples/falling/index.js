@@ -120,7 +120,7 @@ canvas.onmousemove = canvas.ontouchmove = (e) => {
 canvas.onmouseup = canvas.ontouchend = (e) => {
     clearInterval(intervalId);
 
-    if (spawnedCount === 0) {
+    if (spawnPosition && spawnedCount === 0) {
         _createBodies(spawnPosition, BootstrapInstance.constraints[0].box);
     }
 
