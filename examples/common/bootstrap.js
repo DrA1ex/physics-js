@@ -57,8 +57,8 @@ export class Bootstrap {
      * @param {HTMLCanvasElement} canvas
      * @param {{
      *          debug?: boolean, slowMotion?: number,
-     *          showBoundary?: boolean, showVectorLength?: boolean, showVector?: boolean,
-     *          statistics?: boolean, solverSteps?: number, solverBias?: number, solverBeta?: number
+     *          showBoundary?: boolean, showVectorLength?: boolean, showVector?: boolean, statistics?: boolean,
+     *          solverSteps?: number, solverBias?: number, solverBeta?: number, solverWarming?: boolean
      * }} options
      */
     constructor(canvas, options = {}) {
@@ -72,6 +72,7 @@ export class Bootstrap {
         if (Number.isFinite(options.solverSteps)) this.#solver.steps = options.solverSteps;
         if (Number.isFinite(options.solverBias)) this.#solver.velocityBiasFactor = options.solverBias;
         if (Number.isFinite(options.solverBeta)) this.#solver.positionCorrectionBeta = options.solverBeta;
+        if (options.solverWarming !== undefined) this.#solver.warming = options.solverWarming;
 
         if (options.debug) {
             this.#debugInstance = new Debug(options);

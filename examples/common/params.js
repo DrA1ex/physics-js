@@ -34,6 +34,7 @@ export function parse(def = {}) {
         showNormalVector: parseBool(params["debug_normal"]),
         showTangentVector: parseBool(params["debug_tangent"]),
         showContactVector: parseBool(params["debug_contact"]),
+        showWarmVector: parseBool(params["debug_warming"]),
 
         slowMotion: parseNumber(params["slow_motion"], Number.parseFloat) ?? 1,
         gravity: parseNumber(params["g"], Number.parseFloat) ?? 100,
@@ -43,7 +44,8 @@ export function parse(def = {}) {
 
         solverBias: parseNumber(params["bias"], Number.parseFloat),
         solverBeta: parseNumber(params["beta"], Number.parseFloat),
-        solverSteps: parseNumber(params["steps"], Number.parseInt)
+        solverSteps: parseNumber(params["steps"], Number.parseInt),
+        solverWarming: parseBool(params["warming"]),
     };
 
     return Object.keys(result).reduce((res, key) => {
