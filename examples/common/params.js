@@ -27,13 +27,16 @@ export function parse(def = {}) {
     const result = {
         debug: parseBool(params["debug"]) ?? false,
         statistics: parseBool(params["stats"]) ?? true,
+        showBodies: parseBool(params["debug_body"]) ?? true,
         showVector: parseBool(params["debug_vector"]),
+        showPoints: parseBool(params["debug_point"]),
         showVectorLength: parseBool(params["debug_vector_length"]),
         showBoundary: parseBool(params["debug_boundary"]),
         showVelocityVector: parseBool(params["debug_velocity"]),
         showNormalVector: parseBool(params["debug_normal"]),
         showTangentVector: parseBool(params["debug_tangent"]),
         showContactVector: parseBool(params["debug_contact"]),
+        showTree: parseBool(params["debug_tree"]),
         showWarmVector: parseBool(params["debug_warming"]),
 
         slowMotion: parseNumber(params["slow_motion"], Number.parseFloat) ?? 1,
@@ -45,6 +48,8 @@ export function parse(def = {}) {
         solverBias: parseNumber(params["bias"], Number.parseFloat),
         solverBeta: parseNumber(params["beta"], Number.parseFloat),
         solverSteps: parseNumber(params["steps"], Number.parseInt),
+        solverTreeDivider: parseNumber(params["tree_divider"], Number.parseInt),
+        solverTreeMaxCount: parseNumber(params["tree_cnt"], Number.parseInt),
         solverWarming: parseBool(params["warming"]),
     };
 

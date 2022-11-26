@@ -21,8 +21,7 @@ class NonInteractionCollider extends Collider {
 
     detectCollision(body2) {
         if (body2.collider instanceof NonInteractionCollider) {
-            this.collision = new Collision(false);
-            return false;
+            return new Collision(false);
         }
 
         return this.#collider.detectCollision(body2);

@@ -15,9 +15,13 @@ export const State = {
 export class Bootstrap {
     /** @type {State} */
     #state = State.stop;
+    /** @type {Debug} */
     #debugInstance;
+    /** @type {ImpulseBasedSolver} */
     #solver;
+    /** @type {HTMLCanvasElement} */
     #canvas;
+    /** @type {CanvasRenderingContext2D} */
     #ctx;
 
     #pointId = 0;
@@ -30,10 +34,13 @@ export class Bootstrap {
     #stats = {
         elapsed: 0,
         physicsTime: 0,
+        treeTime: 0,
+        collisionTime: 0,
+        renderTime: 0,
         bodiesCount: 0,
         collisionCount: 0,
+        checkCount: 0,
         lastStepTime: 0,
-        renderTime: 0,
     };
 
     #debug = false;
@@ -58,7 +65,8 @@ export class Bootstrap {
      * @param {{
      *          debug?: boolean, slowMotion?: number,
      *          showBoundary?: boolean, showVectorLength?: boolean, showVector?: boolean, statistics?: boolean,
-     *          solverSteps?: number, solverBias?: number, solverBeta?: number, solverWarming?: boolean
+     *          solverSteps?: number, solverBias?: number, solverBeta?: number, solverWarming?: boolean,
+     *          solverTreeDivider?: number, solverTreeMaxCount?: number
      * }} options
      */
     constructor(canvas, options = {}) {
@@ -72,6 +80,8 @@ export class Bootstrap {
         if (Number.isFinite(options.solverSteps)) this.#solver.steps = options.solverSteps;
         if (Number.isFinite(options.solverBias)) this.#solver.velocityBiasFactor = options.solverBias;
         if (Number.isFinite(options.solverBeta)) this.#solver.positionCorrectionBeta = options.solverBeta;
+        if (Number.isFinite(options.solverTreeDivider)) this.#solver.treeDivider = options.solverTreeDivider;
+        if (Number.isFinite(options.solverTreeMaxCount)) this.#solver.treeMaxCount = options.solverTreeMaxCount;
         if (options.solverWarming !== undefined) this.#solver.warming = options.solverWarming;
 
         if (options.debug) {
@@ -206,6 +216,7 @@ export class Bootstrap {
             this.#statsElement.style.left = "1rem";
             this.#statsElement.style.bottom = "1rem";
             this.#statsElement.style.margin = "0";
+            this.#statsElement.style.fontSize = "0.6rem";
             this.#statsElement.style.textShadow = "0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white";
         }
     }
@@ -225,8 +236,11 @@ export class Bootstrap {
         }
 
         this.#stats.physicsTime = performance.now() - t;
+        this.#stats.treeTime = this.#solver.stepInfo.treeTime;
+        this.#stats.collisionTime = this.#solver.stepInfo.collisionTime;
         this.#stats.bodiesCount = this.#solver.rigidBodies.length
         this.#stats.collisionCount = this.#solver.stepInfo.collisionCount;
+        this.#stats.checkCount = this.#solver.stepInfo.checkCount;
 
         requestAnimationFrame(timestamp => {
             this.#stats.elapsed = timestamp - this.#stats.lastStepTime;
@@ -252,12 +266,14 @@ export class Bootstrap {
             this.#ctx.strokeRect(box.left, box.top, box.width, box.height);
         }
 
-        for (const renderer of this.#renderers.values()) {
-            renderer.render(this.#ctx);
+        if (!this.#debug || this.#debugInstance.showBodies) {
+            for (const renderer of this.#renderers.values()) {
+                renderer.render(this.#ctx);
+            }
         }
 
         if (this.#debug) {
-            this.#debugInstance.render(this.#ctx, this.#solver.rigidBodies);
+            this.#debugInstance.render(this.#ctx, this.#solver.rigidBodies, this.#solver.stepInfo.tree);
         }
 
         for (const {point, color} of this.#drawingPoints.values()) {
@@ -278,11 +294,14 @@ export class Bootstrap {
             this.#statsElement.innerText = [
                 `Bodies: ${this.#stats.bodiesCount}`,
                 `Collisions: ${this.#stats.collisionCount}`,
+                `Checks: ${this.#stats.checkCount} (${Math.pow(this.#stats.bodiesCount, 2)})`,
                 `Total energy: ${Utils.formatStandardUnit(eMovement + eRotation, "J")}`,
                 ` - movement: ${Utils.formatStandardUnit(eMovement, "J")}`,
                 ` - rotation: ${Utils.formatStandardUnit(eRotation, "J")}`,
                 `FPS: ${(1000 / this.#stats.elapsed).toFixed(0)}`,
                 `Physics time: ${this.#stats.physicsTime.toFixed(2)}ms`,
+                ` - tree: ${this.#stats.treeTime.toFixed(2)}ms`,
+                ` - collision: ${this.#stats.collisionTime.toFixed(2)}ms`,
                 `Render time: ${this.#stats.renderTime.toFixed(2)}ms`,
             ].join("\n");
         }

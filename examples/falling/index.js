@@ -74,8 +74,10 @@ function _createBodiesByPattern(initBodies) {
     }
 }
 
+
 const options = Params.parse()
-const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
+const canvas = document.getElementById("canvas")
+const BootstrapInstance = new Bootstrap(canvas, options);
 
 BootstrapInstance.addForce(new GravityForce(options.gravity));
 BootstrapInstance.addForce(new ResistanceForce(options.resistance));
@@ -104,7 +106,7 @@ canvas.onmousedown = canvas.ontouchstart = (e) => {
         intervalId = setInterval(() => {
             _createBodies(spawnPosition, BootstrapInstance.constraints[0].box);
             ++spawnedCount;
-        }, 33)
+        }, 5)
     }
 
     e.preventDefault();
