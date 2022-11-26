@@ -6,6 +6,7 @@ import {Collider} from "../../lib/physics/collision.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import * as Utils from "../common/utils.js";
 import {GravityForce, ResistanceForce} from "../../lib/physics/force.js";
+import * as GeomUtils from "../../lib/utils/geom.js";
 
 
 const options = Params.parse({g: 500, steps: 20, bias: 0.1, beta: 0.8});
@@ -69,7 +70,7 @@ setInterval(() => {
     if (BootstrapInstance.state === State.pause) return;
 
     const [{body: crusher1}, {body: crusher2}] = crushers;
-    if (crusher1.position.x < crusherWidth || Collider.isBoundaryCollide(crusher1.boundary, crusher2.boundary)) {
+    if (crusher1.position.x < crusherWidth || GeomUtils.isBoundaryCollide(crusher1.boundary, crusher2.boundary)) {
         direction *= -1;
     }
 

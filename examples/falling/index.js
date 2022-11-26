@@ -7,6 +7,7 @@ import * as Utils from "../common/utils.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import * as CommonUtils from "../../lib/utils/common.js";
 import {Collider} from "../../lib/physics/collision.js";
+import * as GeomUtils from "../../lib/utils/geom.js";
 
 function _createBody(position, size) {
     let body;
@@ -97,7 +98,7 @@ canvas.oncontextmenu = () => false;
 canvas.onmousedown = canvas.ontouchstart = (e) => {
     const pos = Utils.getMousePos(e);
     const pointBox = BoundaryBox.fromDimensions(pos.x, pos.y);
-    const body = BootstrapInstance.rigidBodies.find(b => b.active && Collider.isBoundaryCollide(pointBox, b.boundary));
+    const body = BootstrapInstance.rigidBodies.find(b => b.active && GeomUtils.isBoundaryCollide(pointBox, b.boundary));
     if (body) {
         _accelerateBody(body)
     } else {
