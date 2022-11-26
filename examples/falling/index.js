@@ -6,7 +6,6 @@ import {InsetConstraint} from "../../lib/physics/constraint.js";
 import * as Utils from "../common/utils.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import * as CommonUtils from "../../lib/utils/common.js";
-import {Collider} from "../../lib/physics/collision.js";
 import * as GeomUtils from "../../lib/utils/geom.js";
 
 function _createBody(position, size) {
