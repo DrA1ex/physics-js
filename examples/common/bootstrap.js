@@ -294,7 +294,7 @@ export class Bootstrap {
             this.#statsElement.innerText = [
                 `Bodies: ${this.#stats.bodiesCount}`,
                 `Collisions: ${this.#stats.collisionCount}`,
-                `Checks: ${this.#stats.checkCount} (${Math.pow(this.#stats.bodiesCount, 2)})`,
+                `Checks: ${this.#stats.checkCount} (${this.#stats.bodiesCount * (this.#stats.bodiesCount + 1) / 2})`,
                 `Total energy: ${Utils.formatStandardUnit(eMovement + eRotation, "J")}`,
                 ` - movement: ${Utils.formatStandardUnit(eMovement, "J")}`,
                 ` - rotation: ${Utils.formatStandardUnit(eRotation, "J")}`,
