@@ -37,6 +37,8 @@ export function parse(def = {}) {
         showTangentVector: parseBool(params["debug_tangent"]),
         showContactVector: parseBool(params["debug_contact"]),
         showTree: parseBool(params["debug_tree"]),
+        showTreeLeafs: parseBool(params["debug_tree_leafs"]),
+        showTreeSegments: parseBool(params["debug_tree_segments"]),
         showWarmVector: parseBool(params["debug_warming"]),
 
         slowMotion: parseNumber(params["slow_motion"], Number.parseFloat) ?? 1,
