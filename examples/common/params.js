@@ -39,6 +39,7 @@ export function parse(def = {}) {
         showTree: parseBool(params["debug_tree"]),
         showTreeLeafs: parseBool(params["debug_tree_leafs"]),
         showTreeSegments: parseBool(params["debug_tree_segments"]),
+        showTreeBoundaryCollision: parseBool(params["debug_tree_collision"]),
         showWarmVector: parseBool(params["debug_warming"]),
 
         slowMotion: parseNumber(params["slow_motion"], Number.parseFloat) ?? 1,
