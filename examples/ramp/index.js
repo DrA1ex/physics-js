@@ -5,7 +5,8 @@ import {InsetConstraint} from "../../lib/physics/constraint.js";
 import {GravityForce} from "../../lib/physics/force.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import * as Utils from "../common/utils.js";
-import {Collider, Collision} from "../../lib/physics/collision.js";
+import {Collider} from "../../lib/physics/collision.js";
+import {NoCollision} from "../../lib/utils/collision.js";
 
 function cycloid(t, r) {
     return new Vector2(r * (t - Math.sin(t)), r * (1 - Math.cos(t)));
@@ -21,7 +22,7 @@ class NonInteractionCollider extends Collider {
 
     detectCollision(body2) {
         if (body2.collider instanceof NonInteractionCollider) {
-            return new Collision(false);
+            return NoCollision;
         }
 
         return this.#collider.detectCollision(body2);
