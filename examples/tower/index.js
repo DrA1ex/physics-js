@@ -56,13 +56,13 @@ for (const body of BootstrapInstance.rigidBodies) {
 let startPoint = null;
 let vectorId = null;
 let creatingBody = null;
-canvas.onmousedown = canvas.ontouchstart = (e) => {
+document.onmousedown = document.ontouchstart = (e) => {
     e.preventDefault();
     startPoint = Utils.getMousePos(e)
 
     if (!creatingBody) {
         const size = minBallSize + Math.random() * (maxBallSize - minBallSize);
-        creatingBody = new CircleBody(0, 0, size, Math.PI * size * size);
+        creatingBody = new CircleBody(0, 0, size, Math.PI * size * size * 5);
         BootstrapInstance.addRigidBody(creatingBody);
     }
 
@@ -79,9 +79,9 @@ function _constraintVectorLength(vector, maxLength) {
     return direction.scale(Math.min(length, maxLength));
 }
 
-const maxSpeed = options.gravity * 10;
+const maxSpeed = options.gravity * 20;
 const maxDisplaySpeed = 50;
-canvas.onmousemove = canvas.ontouchmove = (e) => {
+document.onmousemove = document.ontouchmove = (e) => {
     if (!startPoint) {
         return;
     }
@@ -93,7 +93,7 @@ canvas.onmousemove = canvas.ontouchmove = (e) => {
     vectorId = BootstrapInstance.addVector(startPoint, _constraintVectorLength(startPoint.delta(pos), maxDisplaySpeed), "red");
 }
 
-canvas.onmouseup = canvas.ontouchend = (e) => {
+document.onmouseup = document.ontouchend = (e) => {
     if (!startPoint) {
         return;
     }

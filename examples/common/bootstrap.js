@@ -196,7 +196,7 @@ export class Bootstrap {
     }
 
     #init() {
-        const rect = canvas.getBoundingClientRect();
+        const rect = this.#canvas.getBoundingClientRect();
 
         this.#dpr = window.devicePixelRatio;
         this.#canvasWidth = rect.width;
