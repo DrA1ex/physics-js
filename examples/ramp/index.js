@@ -5,7 +5,7 @@ import {InsetConstraint} from "../../lib/physics/constraint.js";
 import {GravityForce} from "../../lib/physics/force.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import * as Utils from "../common/utils.js";
-import {Collider} from "../../lib/physics/collision.js";
+import {Collider} from "../../lib/physics/collider.js";
 import {NoCollision} from "../../lib/utils/collision.js";
 
 function cycloid(t, r) {

@@ -65,7 +65,7 @@ export class Bootstrap {
      * @param {{
      *          debug?: boolean, slowMotion?: number,
      *          showBoundary?: boolean, showVectorLength?: boolean, showVector?: boolean, statistics?: boolean,
-     *          solverSteps?: number, solverBias?: number, solverBeta?: number, solverWarming?: boolean,
+     *          solverSteps?: number, solverBias?: number, solverBeta?: number, allowedOverlap?: boolean, solverWarming?: boolean,
      *          solverTreeDivider?: number, solverTreeMaxCount?: number
      * }} options
      */
@@ -80,6 +80,7 @@ export class Bootstrap {
         if (Number.isFinite(options.solverSteps)) this.#solver.steps = options.solverSteps;
         if (Number.isFinite(options.solverBias)) this.#solver.velocityBiasFactor = options.solverBias;
         if (Number.isFinite(options.solverBeta)) this.#solver.positionCorrectionBeta = options.solverBeta;
+        if (Number.isFinite(options.allowedOverlap)) this.#solver.allowedOverlap = options.allowedOverlap;
         if (Number.isFinite(options.solverTreeDivider)) this.#solver.treeDivider = options.solverTreeDivider;
         if (Number.isFinite(options.solverTreeMaxCount)) this.#solver.treeMaxCount = options.solverTreeMaxCount;
         if (options.solverWarming !== undefined) this.#solver.warming = options.solverWarming;
@@ -100,16 +101,36 @@ export class Bootstrap {
 
     /**
      * @param {Body} body
+     * @param {BodyRenderer} [renderer=null]
      * @return {{body: Body, renderer: BodyRenderer}}
      */
-    addRigidBody(body) {
+    addRigidBody(body, renderer = null) {
+        if (!body) {
+            throw new Error("Body should be specified");
+        }
+
         this.#solver.addRigidBody(body);
 
-        const rendererClass = RendererMapping.has(body.constructor) ? RendererMapping.get(body.constructor) : RendererMapping.get(Body);
-        const renderer = new rendererClass(body);
-        this.#renderers.set(body, renderer);
+        if (renderer === null) {
+            const rendererClass = RendererMapping.has(body.constructor) ? RendererMapping.get(body.constructor) : RendererMapping.get(Body);
+            renderer = new rendererClass(body);
+        }
 
+        this.#renderers.set(body, renderer);
         return {body, renderer};
+    }
+
+    /**
+     * @param {Body} body
+     */
+    destroyBody(body) {
+        const index = this.#solver.rigidBodies.indexOf(body);
+        if (index !== -1) {
+            this.#solver.rigidBodies.splice(index, 1);
+            this.#renderers.delete(body);
+        } else {
+            console.warn(`Unable to find object ${body}`);
+        }
     }
 
     /** @param constraint */
@@ -229,6 +250,11 @@ export class Bootstrap {
         const t = performance.now();
         if (this.state !== State.pause) {
             this.#physicsStep(this.#stats.elapsed / 1000);
+
+            for (const collision of this.#solver.stepInfo.collisions) {
+                collision.aBody.collider.onCollide(collision, collision.bBody);
+                collision.bBody.collider.onCollide(collision, collision.aBody);
+            }
         }
 
         if (this.state === State.step) {

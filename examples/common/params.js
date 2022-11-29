@@ -1,5 +1,5 @@
 function parseBool(param) {
-    if (param instanceof Boolean) return param;
+    if (typeof param === "boolean") return param;
 
     if (param === "1") return true;
     else if (param === "0") return false;
@@ -7,7 +7,7 @@ function parseBool(param) {
 }
 
 function parseNumber(param, parser) {
-    if (param instanceof Number) return param;
+    if (typeof param === "number") return param;
 
     const value = parser(param);
     if (Number.isFinite(value)) return value;
@@ -50,6 +50,7 @@ export function parse(def = {}) {
 
         solverBias: parseNumber(params["bias"], Number.parseFloat),
         solverBeta: parseNumber(params["beta"], Number.parseFloat),
+        allowedOverlap: parseNumber(params["overlap"], Number.parseFloat),
         solverSteps: parseNumber(params["steps"], Number.parseInt),
         solverTreeDivider: parseNumber(params["tree_divider"], Number.parseInt),
         solverTreeMaxCount: parseNumber(params["tree_cnt"], Number.parseInt),

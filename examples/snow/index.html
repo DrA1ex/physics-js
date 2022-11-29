@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>physics.js: Falling Demo</title>
+    <title>physics.js: Snow Demo</title>
     <style>
         html, body {
             height: 100%;
@@ -21,14 +21,17 @@
 
         .hint {
             position: absolute;
-            bottom: 1rem;
+            top: 50%;
             left: 1rem;
             right: 1rem;
             text-align: center;
             pointer-events: none;
 
-            font-size: 2rem;
-            text-shadow: 0 0 2px #9f9f9f;
+            font-size: 3rem;
+            font-family: fantasy;
+            transform: translateY(-50%);
+            color: #6dabbd;
+            text-shadow: 3px 2px 6px #2494ae
         }
 
         .fading-out {
@@ -39,14 +42,18 @@
         }
 
         @keyframes fading-out {
-            from {opacity: 100%;}
-            to {opacity: 0;}
+            from {
+                opacity: 100%;
+            }
+            to {
+                opacity: 0;
+            }
         }
     </style>
 </head>
 <body>
 <canvas id="canvas"></canvas>
-<div class="hint fading-out">Click to spawn <br/> Click body to accelerate</div>
+<div class="hint fading-out">Click to snow</div>
 </body>
 <script type="module" src="index.js"></script>
 </html>

@@ -1,5 +1,6 @@
 import {Vector2} from "../../lib/utils/vector.js";
 import {PolygonBody, RectBody} from "../../lib/physics/body.js";
+import * as CommonUtils from "../../lib/utils/common.js";
 
 /**
  * @param {Vector2} position
@@ -47,4 +48,17 @@ export function randomColor(minComponent, maxComponent, alpha = 1) {
     components[3] = Math.floor(alpha * 255);
 
     return "#" + components.map(v => Math.min(255, Math.max(0, v)).toString(16)).join("");
+}
+
+
+/***
+ * @param {Vector2} pos
+ * @param {BoundaryBox} box
+ * @param {number} size
+ * @param {number} [border=0]
+ * @return {void}
+ */
+export function clampBodyPosition(pos, box, size, border = 0) {
+    pos.x = CommonUtils.clamp(box.left + size + border, box.right - size - border, pos.x);
+    pos.y = CommonUtils.clamp(box.top + size + border, box.bottom - size - border, pos.y);
 }
