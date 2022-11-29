@@ -7,11 +7,15 @@ import * as Params from "../common/params.js";
 import * as CommonUtils from "../common/utils.js";
 import {SnowCloud, SnowDrift} from "./snow.js";
 import {WorldBorderCollider} from "./misc.js";
+import {BackgroundDrawer} from "./background.js";
 
 
 const options = Params.parse({restitution: 0, friction: 0.8, overlap: 0.5, beta: 1, stats: false, tree_cnt: 13, warming: false});
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
 const {canvasWidth, canvasHeight} = BootstrapInstance;
+
+const bgDrawer = new BackgroundDrawer();
+bgDrawer.run();
 
 BootstrapInstance.addForce(new GravityForce(options.gravity));
 BootstrapInstance.addForce(new ResistanceForce(options.resistance));
@@ -67,3 +71,5 @@ const snowDrift = new SnowDrift(BootstrapInstance, worldBox, snowdriftSegmentCou
 
 BootstrapInstance.enableHotKeys();
 BootstrapInstance.run();
+
+document.getElementById("hint").style.display = null;

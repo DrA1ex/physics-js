@@ -10,16 +10,18 @@
 
         body {
             box-sizing: border-box;
+            padding: 0;
             margin: 0;
-            padding: 1rem;
         }
 
-        #canvas {
+        .canvas {
+            position: absolute;
             width: 100%;
             height: 100%;
         }
 
         .hint {
+            z-index: 1001;
             position: absolute;
             top: 50%;
             left: 1rem;
@@ -27,11 +29,16 @@
             text-align: center;
             pointer-events: none;
 
-            font-size: 3rem;
+            font-size: 4rem;
             font-family: fantasy;
             transform: translateY(-50%);
-            color: #6dabbd;
-            text-shadow: 3px 2px 6px #2494ae
+            color: #81c2d5;
+            text-shadow: 3px 2px 6px #177c94
+        }
+
+        pre {
+            z-index: 1002;
+            font-size: 1rem !important;
         }
 
         .fading-out {
@@ -52,8 +59,8 @@
     </style>
 </head>
 <body>
-<canvas id="canvas"></canvas>
-<div class="hint fading-out">Click to snow</div>
+<canvas class="canvas" id="canvas" style="z-index: 1000"></canvas>
+<div id="hint" class="hint fading-out" style="display: none">Click to snow</div>
 </body>
 <script type="module" src="index.js"></script>
 </html>

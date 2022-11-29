@@ -3,6 +3,7 @@ import {Debug} from "../../lib/debug.js";
 import * as Utils from "../../lib/utils/common.js";
 import {Body} from "../../lib/physics/body.js";
 import {RendererMapping} from "../../lib/render/renderer.js";
+import * as CommonUtils from "./utils.js";
 
 /*** @enum {number} */
 export const State = {
@@ -217,16 +218,11 @@ export class Bootstrap {
     }
 
     #init() {
-        const rect = this.#canvas.getBoundingClientRect();
+        const {dpr, canvasWidth, canvasHeight} = CommonUtils.initCanvas(this.#canvas);
 
-        this.#dpr = window.devicePixelRatio;
-        this.#canvasWidth = rect.width;
-        this.#canvasHeight = rect.height;
-
-        this.#canvas.style.width = this.canvasWidth + "px";
-        this.#canvas.style.height = this.canvasHeight + "px";
-        this.#canvas.width = this.canvasWidth * this.dpr;
-        this.#canvas.height = this.canvasHeight * this.dpr;
+        this.#dpr = dpr;
+        this.#canvasWidth = canvasWidth;
+        this.#canvasHeight = canvasHeight;
 
         this.#ctx.scale(this.dpr, this.dpr);
 

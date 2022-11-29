@@ -62,3 +62,23 @@ export function clampBodyPosition(pos, box, size, border = 0) {
     pos.x = CommonUtils.clamp(box.left + size + border, box.right - size - border, pos.x);
     pos.y = CommonUtils.clamp(box.top + size + border, box.bottom - size - border, pos.y);
 }
+
+
+/**
+ * @param {HTMLCanvasElement} canvas
+ * @return {{canvasWidth: number, dpr: number, canvasHeight: number}}
+ */
+export function initCanvas(canvas) {
+    const rect = canvas.getBoundingClientRect();
+
+    const dpr = window.devicePixelRatio;
+    const canvasWidth = rect.width;
+    const canvasHeight = rect.height;
+
+    canvas.style.width = canvasWidth + "px";
+    canvas.style.height = canvasHeight + "px";
+    canvas.width = canvasWidth * dpr;
+    canvas.height = canvasHeight * dpr;
+
+    return {dpr, canvasWidth, canvasHeight};
+}
