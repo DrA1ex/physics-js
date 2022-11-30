@@ -2,6 +2,7 @@ import * as CommonUtils from "../common/utils.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import {BoundaryBox} from "../../lib/physics/body.js";
 import * as SnowUtils from "./utils.js";
+import {EasingFunctions, ParametricAnimation, SkewAnimationAxis, SkewLayerAnimation} from "../../lib/render/animation.js";
 
 const LayerType = {
     mountain: "mountain",
@@ -28,6 +29,8 @@ const TreePalette = [
     {fill: "#618f9c", stroke: "transparent"}
 ];
 
+const TreeWiggle = Math.PI / 180 * 10;
+const TreeWiggleSpeed = Math.PI / 180 * 3;
 
 export class BackgroundDrawer {
     #dpr;
@@ -42,8 +45,8 @@ export class BackgroundDrawer {
         this.#drawStaticContent();
     }
 
-    render() {
-        this.#drawDynamicContent();
+    render(_, delta) {
+        this.#drawDynamicContent(delta);
     }
 
     #drawStaticContent() {
@@ -52,29 +55,12 @@ export class BackgroundDrawer {
         }
     }
 
-    #drawDynamicContent() {
+    #drawDynamicContent(delta) {
         for (const layer of this.#dynamicLayers) {
             layer.ctx.clearRect(0, 0, this.#canvasWidth, this.#canvasHeight);
-            layer.ctx.save();
 
-            const {animation} = layer
-            if (animation) {
-                const xOffset = layer.boundary.center.x;
-                const yOffset = layer.boundary.bottom + layer.boundary.height * 2 / 3;
-
-                layer.ctx.translate(xOffset, yOffset);
-                layer.ctx.transform(1, 0, animation.current, 1, 0, 0);
-                layer.ctx.translate(-xOffset, -yOffset);
-
-                animation.current += animation.step;
-
-                if (animation.current >= animation.max || animation.current <= animation.min) {
-                    animation.step *= -1;
-                }
-            }
-
+            layer.animation?.apply(layer, delta);
             this.#drawLayers(layer.ctx, layer.paths);
-            layer.ctx.restore();
         }
     }
 
@@ -191,17 +177,29 @@ export class BackgroundDrawer {
         // FG Layer 1
         fgLayer1.paths.push(...this.#generateTreeLayerForMountain(50, TreePalette[0], bgLayer2.paths[0].points));
         fgLayer1.boundary = BoundaryBox.fromPoints(fgLayer1.paths.map(c => c.points).flat());
-        fgLayer1.animation = this.#createLayerAnimation(0.0005, -0.05, 0.05);
+        fgLayer1.animation = new SkewLayerAnimation(
+            SkewAnimationAxis.x,
+            new ParametricAnimation(-TreeWiggle, TreeWiggle, TreeWiggleSpeed / 3).setEasing(EasingFunctions.easeInOutSine),
+            new Vector2(0, 1)
+        )
 
         // FG Layer 2
         fgLayer2.paths.push(...this.#generateTreeLayerForMountain(75, TreePalette[1], bgLayer3.paths[0].points));
         fgLayer2.boundary = BoundaryBox.fromPoints(fgLayer1.paths.map(c => c.points).flat());
-        fgLayer2.animation = this.#createLayerAnimation(0.0007, -0.05, 0.05);
+        fgLayer2.animation = new SkewLayerAnimation(
+            SkewAnimationAxis.x,
+            new ParametricAnimation(-TreeWiggle, TreeWiggle, TreeWiggleSpeed / 2).setEasing(EasingFunctions.easeInOutSine),
+            new Vector2(0, 1)
+        )
 
         // FG Layer 3
         fgLayer3.paths.push(...this.#generateTreeLayerForMountain(150, TreePalette[2], bgLayer4.paths[0].points, 3));
         fgLayer3.boundary = BoundaryBox.fromPoints(fgLayer1.paths.map(c => c.points).flat());
-        fgLayer3.animation = this.#createLayerAnimation(0.0009, -0.1, 0.1);
+        fgLayer3.animation = new SkewLayerAnimation(
+            SkewAnimationAxis.x,
+            new ParametricAnimation(-TreeWiggle, TreeWiggle, TreeWiggleSpeed).setEasing(EasingFunctions.easeInOutSine),
+            new Vector2(0, 1)
+        )
     }
 
     #createLayer(dynamic) {
@@ -215,11 +213,6 @@ export class BackgroundDrawer {
         }
 
         return layer;
-    }
-
-    #createLayerAnimation(step, min, max) {
-        const current = min + Math.random() * (max - min);
-        return {current, step, min, max};
     }
 
     #generateTreeLayerForMountain(height, palette, mountainPath, step = 1) {

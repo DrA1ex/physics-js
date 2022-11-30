@@ -274,7 +274,7 @@ export class Bootstrap {
             this.#stats.lastStepTime = timestamp;
 
             const t = performance.now();
-            this.#render();
+            this.#render(this.#solver.stepInfo.delta);
             this.#stats.renderTime = performance.now() - t;
 
             setTimeout(() => this.#step());
@@ -285,7 +285,7 @@ export class Bootstrap {
         this.#solver.solve(elapsed * this.#slowMotion);
     }
 
-    #render() {
+    #render(delta) {
         this.#ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
         this.#ctx.strokeStyle = "black";
@@ -294,7 +294,7 @@ export class Bootstrap {
         }
 
         for (const renderer of this.#renderSteps) {
-            renderer.render(this.#ctx);
+            renderer.render(this.#ctx, delta);
         }
 
         if (!this.#debug || this.#debugInstance.showBodies) {
