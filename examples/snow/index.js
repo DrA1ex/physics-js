@@ -15,7 +15,7 @@ const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), optio
 const {canvasWidth, canvasHeight} = BootstrapInstance;
 
 const bgDrawer = new BackgroundDrawer();
-bgDrawer.run();
+BootstrapInstance.addRenderStep(bgDrawer);
 
 BootstrapInstance.addForce(new GravityForce(options.gravity));
 BootstrapInstance.addForce(new ResistanceForce(options.resistance));

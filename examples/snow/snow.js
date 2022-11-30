@@ -185,7 +185,7 @@ export class SnowDrift {
     }
 
     onCollide(collision, segment, body) {
-        const growthSizeFactor = 0.03;
+        const growthSizeFactor = 0.015;
 
         if (collision.result && body.active && body.tag === Tags.snowflake) {
             const index = this.segments.indexOf(segment);

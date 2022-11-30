@@ -30,6 +30,7 @@ export class Bootstrap {
     #vectorId = 0;
     #drawingVectors = new Map();
     #renderers = new Map();
+    #renderSteps = [];
 
     #statsElement;
     #stats = {
@@ -119,6 +120,10 @@ export class Bootstrap {
 
         this.#renderers.set(body, renderer);
         return {body, renderer};
+    }
+
+    addRenderStep(renderer) {
+        this.#renderSteps.push(renderer);
     }
 
     /**
@@ -286,6 +291,10 @@ export class Bootstrap {
         this.#ctx.strokeStyle = "black";
         for (const {box} of this.#solver.constraints) {
             this.#ctx.strokeRect(box.left, box.top, box.width, box.height);
+        }
+
+        for (const renderer of this.#renderSteps) {
+            renderer.render(this.#ctx);
         }
 
         if (!this.#debug || this.#debugInstance.showBodies) {
