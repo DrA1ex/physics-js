@@ -297,7 +297,7 @@ export class Bootstrap {
         }
 
         for (const renderer of this.#renderSteps) {
-            renderer.render(this.#ctx, delta);
+            renderer.render(this.#ctx, this.state === State.play ? delta : 0);
         }
 
         if (!this.#debug || this.#debugInstance.showBodies) {
