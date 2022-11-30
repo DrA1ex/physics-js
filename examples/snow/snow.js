@@ -125,7 +125,7 @@ export class SnowCloud {
     #emitSnow(origin) {
         if (origin.y >= this.#worldBox.bottom) return;
 
-        const size = 3 + Math.floor(Math.random() * 5);
+        const size = 1 + Math.floor(Math.random() * 4);
 
         const pos = Vector2.fromAngle(Math.random() * Math.PI * 2).scale(size).add(origin);
         Utils.clampBodyPosition(pos, this.#worldBox, size, this.#border);
@@ -162,14 +162,14 @@ export class SnowDrift {
     }
 
     #init() {
-        const bottom = this.#worldBox.bottom - 1;
+        const bottom = this.#worldBox.bottom - this.initialHeight / 2;
         const xStep = this.#worldBox.width / this.segmentsCount;
         const lastPos = new Vector2(this.#worldBox.left, this.initialHeight / 2);
 
         for (let i = 0; i < this.segmentsCount; i++) {
             const x = lastPos.x + xStep;
 
-            const yOffset = this.initialHeight / 3 - Math.random() * this.initialHeight / 2;
+            const yOffset = (0.5 - Math.random()) * this.initialHeight / 2;
             const y = Math.max(0, Math.min(this.initialHeight, lastPos.y + yOffset));
 
             const segment = new SnowDriftSegmentBody(this, lastPos.x, bottom - lastPos.y, x, bottom - y);
