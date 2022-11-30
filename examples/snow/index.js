@@ -14,9 +14,6 @@ const options = Params.parse({restitution: 0, friction: 0.8, overlap: 0.5, beta:
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
 const {canvasWidth, canvasHeight} = BootstrapInstance;
 
-const bgDrawer = new BackgroundDrawer();
-BootstrapInstance.addRenderStep(bgDrawer);
-
 BootstrapInstance.addForce(new GravityForce(options.gravity));
 BootstrapInstance.addForce(new ResistanceForce(options.resistance));
 BootstrapInstance.addForce(new WindForce(new Vector2(-5, -5)));
@@ -29,6 +26,9 @@ borderConstraint.constraintBody.collider = new WorldBorderCollider(borderConstra
 BootstrapInstance.addConstraint(borderConstraint);
 
 const worldBox = borderConstraint.box;
+
+const bgDrawer = new BackgroundDrawer(worldBox);
+BootstrapInstance.addRenderStep(bgDrawer);
 
 const snowSpawnPeriod = 1000 / 120;
 const snowPeriod = 1000 / 60;

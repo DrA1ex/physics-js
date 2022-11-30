@@ -1,6 +1,5 @@
 import * as CommonUtils from "../common/utils.js";
 import {Vector2} from "../../lib/utils/vector.js";
-import {BoundaryBox} from "../../lib/physics/body.js";
 import * as SnowUtils from "./utils.js";
 import {EasingFunctions, ParametricAnimation, SkewAnimationAxis, SkewLayerAnimation} from "../../lib/render/animation.js";
 import {Layer, Path} from "../../lib/render/layer.js";
@@ -30,13 +29,15 @@ const TreeWiggle = Math.PI / 180 * 10;
 const TreeWiggleSpeed = Math.PI / 180 * 3;
 
 export class BackgroundDrawer extends LayeredRenderer {
+    #worldBox;
     #dpr;
     #canvasWidth;
     #canvasHeight;
 
-    constructor() {
+    constructor(worldBox) {
         super();
 
+        this.#worldBox = worldBox;
         this.#initLayers();
     }
 
@@ -72,7 +73,8 @@ export class BackgroundDrawer extends LayeredRenderer {
         // BG Layer 1
         bgLayer1.canvas.style.background = `linear-gradient(10deg, ${BackgroundPalette.join(", ")})`;
         bgLayer1.addPath(new Path(
-            this.#generateMountainPoints(
+            SnowUtils.generateMountainPoints(
+                this.#worldBox,
                 this.#canvasHeight * 0.1, 100, 200,
                 i => (Math.sin(i / 25) + Math.cos(i / 15) + Math.sin(i / 5)) / 3
             ), MountainPalette[0]
@@ -80,7 +82,8 @@ export class BackgroundDrawer extends LayeredRenderer {
 
         // BG Layer 2
         bgLayer2.addPath(new Path(
-            this.#generateMountainPoints(
+            SnowUtils.generateMountainPoints(
+                this.#worldBox,
                 this.#canvasHeight * 0.3, 100, 200,
                 i => (Math.sin(i / 13) + Math.sin(i / 11) + Math.cos(i / 7) + Math.sin(i / 5)) / 4
             ), MountainPalette[1]
@@ -88,14 +91,16 @@ export class BackgroundDrawer extends LayeredRenderer {
 
         // BG Layer 3
         bgLayer3.addPath(new Path(
-            this.#generateMountainPoints(
+            SnowUtils.generateMountainPoints(
+                this.#worldBox,
                 this.#canvasHeight * 0.5, 70, 200,
                 i => (Math.sin(i / 30) + Math.cos(i / 11) + Math.sin(i / 9)) / 3
             ), MountainPalette[2],
         ));
 
         bgLayer3.addPath(new Path(
-            this.#generateMountainPoints(
+            SnowUtils.generateMountainPoints(
+                this.#worldBox,
                 this.#canvasHeight * 0.6, 70, 200,
                 i => (Math.sin(i / 25) + Math.cos(i / 20) + Math.sin(i / 10)) / 3
             ), MountainPalette[3]
@@ -103,14 +108,16 @@ export class BackgroundDrawer extends LayeredRenderer {
 
         // BG Layer 4
         bgLayer4.addPath(new Path(
-            this.#generateMountainPoints(
+            SnowUtils.generateMountainPoints(
+                this.#worldBox,
                 this.#canvasHeight * 0.7, 40, 200,
                 i => (Math.sin(i / 28) + Math.cos(i / 17) + Math.sin(i / 7)) / 3
             ), MountainPalette[4]
         ));
 
         bgLayer4.addPath(new Path(
-            this.#generateMountainPoints(
+            SnowUtils.generateMountainPoints(
+                this.#worldBox,
                 this.#canvasHeight * 0.8, 40, 200,
                 i => (Math.sin(i / 30) + Math.cos(i / 21) + Math.sin(i / 7)) / 3
             ), MountainPalette[5]
@@ -160,54 +167,11 @@ export class BackgroundDrawer extends LayeredRenderer {
         for (let i = 0; i < mountainPeaks.length; i += step) {
             const point = mountainPeaks[i];
             treePaths.push(new Path(
-                this.#generateTreePoints(point.x, point.y, height, height / 3, 2 + Math.floor(Math.random() * 3)),
+                SnowUtils.generateTreePoints(point.x, point.y, height, height / 3, 2 + Math.floor(Math.random() * 3)),
                 palette
             ));
         }
 
         return treePaths;
-    }
-
-    #generateMountainPoints(yOffset, height, count, fn, border = 20) {
-        const seed = Math.floor(Math.random() * count);
-        const xStep = (this.#canvasWidth + border * 2) / count;
-
-        const points = new Array(count);
-        let x = -border;
-        for (let i = 0; i < points.length; i++) {
-            const y = height * fn(seed + i);
-            points[i] = new Vector2(x, yOffset + y);
-
-            x += xStep;
-        }
-
-        const b = BoundaryBox.fromPoints(points);
-        return [
-            new Vector2(b.left, this.#canvasHeight),
-            ...points,
-            new Vector2(b.right, this.#canvasHeight),
-        ];
-    }
-
-    #generateTreePoints(xOffset, yOffset, height, base, count) {
-        const width = height / 3;
-        const xStep = width * 3 / 5;
-        const result = new Array(5 * count);
-
-        let xCurrent = xOffset - (width + xStep * (count - 1)) / 2;
-        for (let i = 0; i < count; i++) {
-            const treeHeight = height * (2 + Math.random()) / 3;
-            const y = yOffset + base / 2;
-
-            result[i * 5] = new Vector2(xCurrent, y + base);
-            result[i * 5 + 1] = new Vector2(xCurrent, y);
-            result[i * 5 + 2] = new Vector2(xCurrent + width / 2, y - treeHeight);
-            result[i * 5 + 3] = new Vector2(xCurrent + width, y);
-            result[i * 5 + 4] = new Vector2(xCurrent + width, y + base);
-
-            xCurrent += xStep + Math.random() * width * 2 / 5;
-        }
-
-        return result;
     }
 }

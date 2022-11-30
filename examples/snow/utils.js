@@ -5,6 +5,7 @@
  * @return {Vector2[]}
  */
 import {Vector2} from "../../lib/utils/vector.js";
+import {BoundaryBox} from "../../lib/physics/body.js";
 
 export function findPeaks(data, invert = false, tolerance = 10) {
     const peaks = [];
@@ -30,4 +31,47 @@ export function findPeaks(data, invert = false, tolerance = 10) {
     }
 
     return peaks;
+}
+
+export function generateMountainPoints(worldBox, yOffset, height, count, fn, border = 20) {
+    const seed = Math.floor(Math.random() * count);
+    const xStep = (worldBox.width + border * 2) / count;
+
+    const points = new Array(count);
+    let x = -border;
+    for (let i = 0; i < points.length; i++) {
+        const y = height * fn(seed + i);
+        points[i] = new Vector2(x, yOffset + y);
+
+        x += xStep;
+    }
+
+    const b = BoundaryBox.fromPoints(points);
+    return [
+        new Vector2(b.left, worldBox.height),
+        ...points,
+        new Vector2(b.right, worldBox.height),
+    ];
+}
+
+export function generateTreePoints(xOffset, yOffset, height, base, count) {
+    const width = height / 3;
+    const xStep = width * 3 / 5;
+    const result = new Array(5 * count);
+
+    let xCurrent = xOffset - (width + xStep * (count - 1)) / 2;
+    for (let i = 0; i < count; i++) {
+        const treeHeight = height * (2 + Math.random()) / 3;
+        const y = yOffset + base / 2;
+
+        result[i * 5] = new Vector2(xCurrent, y + base);
+        result[i * 5 + 1] = new Vector2(xCurrent, y);
+        result[i * 5 + 2] = new Vector2(xCurrent + width / 2, y - treeHeight);
+        result[i * 5 + 3] = new Vector2(xCurrent + width, y);
+        result[i * 5 + 4] = new Vector2(xCurrent + width, y + base);
+
+        xCurrent += xStep + Math.random() * width * 2 / 5;
+    }
+
+    return result;
 }
