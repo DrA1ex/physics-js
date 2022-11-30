@@ -3,11 +3,8 @@ import {Vector2} from "../../lib/utils/vector.js";
 import {BoundaryBox} from "../../lib/physics/body.js";
 import * as SnowUtils from "./utils.js";
 import {EasingFunctions, ParametricAnimation, SkewAnimationAxis, SkewLayerAnimation} from "../../lib/render/animation.js";
-
-const LayerType = {
-    mountain: "mountain",
-    tree: "tree"
-}
+import {Layer, Path} from "../../lib/render/layer.js";
+import {LayeredRenderer} from "../../lib/render/background.js";
 
 const BackgroundPalette = [
     "#b0cdd9",
@@ -32,64 +29,15 @@ const TreePalette = [
 const TreeWiggle = Math.PI / 180 * 10;
 const TreeWiggleSpeed = Math.PI / 180 * 3;
 
-export class BackgroundDrawer {
+export class BackgroundDrawer extends LayeredRenderer {
     #dpr;
     #canvasWidth;
     #canvasHeight;
 
-    #staticLayers = []
-    #dynamicLayers = []
-
     constructor() {
+        super();
+
         this.#initLayers();
-        this.#drawStaticContent();
-    }
-
-    render(_, delta) {
-        this.#drawDynamicContent(delta);
-    }
-
-    #drawStaticContent() {
-        for (const layer of this.#staticLayers) {
-            this.#drawLayers(layer.ctx, layer.paths);
-        }
-    }
-
-    #drawDynamicContent(delta) {
-        for (const layer of this.#dynamicLayers) {
-            layer.ctx.clearRect(0, 0, this.#canvasWidth, this.#canvasHeight);
-
-            layer.animation?.apply(layer, delta);
-            this.#drawLayers(layer.ctx, layer.paths);
-        }
-    }
-
-    #drawLayers(ctx, layers) {
-        for (const {type, color, alpha, points} of layers) {
-            ctx.globalAlpha = alpha;
-            ctx.fillStyle = color.fill;
-            ctx.strokeStyle = color.stroke;
-
-            if (type === LayerType.mountain) {
-                this.#drawPath(ctx, points);
-            } else if (type === LayerType.tree) {
-                this.#drawPath(ctx, points);
-            }
-        }
-
-        ctx.globalAlpha = 1;
-    }
-
-    #drawPath(ctx, path) {
-        ctx.beginPath();
-        ctx.moveTo(path[0].x, path[0].y)
-        for (let i = 1; i <= path.length; i++) {
-            const point = path[i % path.length];
-            ctx.lineTo(point.x, point.y);
-        }
-
-        ctx.stroke();
-        ctx.fill();
     }
 
     #createCanvas() {
@@ -123,119 +71,104 @@ export class BackgroundDrawer {
 
         // BG Layer 1
         bgLayer1.canvas.style.background = `linear-gradient(10deg, ${BackgroundPalette.join(", ")})`;
-        bgLayer1.paths.push(this.#createLayerPath(
-            LayerType.mountain, MountainPalette[0],
-            this.#generateMountainPath(
+        bgLayer1.addPath(new Path(
+            this.#generateMountainPoints(
                 this.#canvasHeight * 0.1, 100, 200,
                 i => (Math.sin(i / 25) + Math.cos(i / 15) + Math.sin(i / 5)) / 3
-            ),
+            ), MountainPalette[0]
         ));
 
         // BG Layer 2
-
-        bgLayer2.paths.push(this.#createLayerPath(
-            LayerType.mountain, MountainPalette[1],
-            this.#generateMountainPath(
+        bgLayer2.addPath(new Path(
+            this.#generateMountainPoints(
                 this.#canvasHeight * 0.3, 100, 200,
                 i => (Math.sin(i / 13) + Math.sin(i / 11) + Math.cos(i / 7) + Math.sin(i / 5)) / 4
-            )
+            ), MountainPalette[1]
         ));
 
         // BG Layer 3
-        bgLayer3.paths.push(
-            this.#createLayerPath(
-                LayerType.mountain, MountainPalette[2],
-                this.#generateMountainPath(
-                    this.#canvasHeight * 0.5, 70, 200,
-                    i => (Math.sin(i / 30) + Math.cos(i / 11) + Math.sin(i / 9)) / 3
-                )
-            ), this.#createLayerPath(
-                LayerType.mountain, MountainPalette[3],
-                this.#generateMountainPath(
-                    this.#canvasHeight * 0.6, 70, 200,
-                    i => (Math.sin(i / 25) + Math.cos(i / 20) + Math.sin(i / 10)) / 3
-                )
-            )
-        );
+        bgLayer3.addPath(new Path(
+            this.#generateMountainPoints(
+                this.#canvasHeight * 0.5, 70, 200,
+                i => (Math.sin(i / 30) + Math.cos(i / 11) + Math.sin(i / 9)) / 3
+            ), MountainPalette[2],
+        ));
+
+        bgLayer3.addPath(new Path(
+            this.#generateMountainPoints(
+                this.#canvasHeight * 0.6, 70, 200,
+                i => (Math.sin(i / 25) + Math.cos(i / 20) + Math.sin(i / 10)) / 3
+            ), MountainPalette[3]
+        ));
 
         // BG Layer 4
-        bgLayer4.paths.push(this.#createLayerPath(
-                LayerType.mountain, MountainPalette[4],
-                this.#generateMountainPath(
-                    this.#canvasHeight * 0.7, 40, 200,
-                    i => (Math.sin(i / 28) + Math.cos(i / 17) + Math.sin(i / 7)) / 3
-                )
-            ), this.#createLayerPath(
-                LayerType.mountain, MountainPalette[5],
-                this.#generateMountainPath(
-                    this.#canvasHeight * 0.8, 40, 200,
-                    i => (Math.sin(i / 30) + Math.cos(i / 21) + Math.sin(i / 7)) / 3
-                )
-            )
-        );
+        bgLayer4.addPath(new Path(
+            this.#generateMountainPoints(
+                this.#canvasHeight * 0.7, 40, 200,
+                i => (Math.sin(i / 28) + Math.cos(i / 17) + Math.sin(i / 7)) / 3
+            ), MountainPalette[4]
+        ));
+
+        bgLayer4.addPath(new Path(
+            this.#generateMountainPoints(
+                this.#canvasHeight * 0.8, 40, 200,
+                i => (Math.sin(i / 30) + Math.cos(i / 21) + Math.sin(i / 7)) / 3
+            ), MountainPalette[5]
+        ));
 
         // FG Layer 1
-        fgLayer1.paths.push(...this.#generateTreeLayerForMountain(50, TreePalette[0], bgLayer2.paths[0].points));
-        fgLayer1.boundary = BoundaryBox.fromPoints(fgLayer1.paths.map(c => c.points).flat());
-        fgLayer1.animation = new SkewLayerAnimation(
+        fgLayer1.addPaths(this.#generateTreePaths(50, TreePalette[0], bgLayer2.paths[0].points));
+        fgLayer1.addAnimation(new SkewLayerAnimation(
             SkewAnimationAxis.x,
             new ParametricAnimation(-TreeWiggle, TreeWiggle, TreeWiggleSpeed / 3).setEasing(EasingFunctions.easeInOutSine),
             new Vector2(0, 1)
-        )
+        ));
 
         // FG Layer 2
-        fgLayer2.paths.push(...this.#generateTreeLayerForMountain(75, TreePalette[1], bgLayer3.paths[0].points));
-        fgLayer2.boundary = BoundaryBox.fromPoints(fgLayer1.paths.map(c => c.points).flat());
-        fgLayer2.animation = new SkewLayerAnimation(
+        fgLayer2.addPaths(this.#generateTreePaths(75, TreePalette[1], bgLayer3.paths[0].points));
+        fgLayer2.addAnimation(new SkewLayerAnimation(
             SkewAnimationAxis.x,
             new ParametricAnimation(-TreeWiggle, TreeWiggle, TreeWiggleSpeed / 2).setEasing(EasingFunctions.easeInOutSine),
             new Vector2(0, 1)
-        )
+        ));
 
         // FG Layer 3
-        fgLayer3.paths.push(...this.#generateTreeLayerForMountain(150, TreePalette[2], bgLayer4.paths[0].points, 3));
-        fgLayer3.boundary = BoundaryBox.fromPoints(fgLayer1.paths.map(c => c.points).flat());
-        fgLayer3.animation = new SkewLayerAnimation(
+        fgLayer3.addPaths(this.#generateTreePaths(150, TreePalette[2], bgLayer4.paths[0].points, 3));
+        fgLayer3.addAnimation(new SkewLayerAnimation(
             SkewAnimationAxis.x,
             new ParametricAnimation(-TreeWiggle, TreeWiggle, TreeWiggleSpeed).setEasing(EasingFunctions.easeInOutSine),
             new Vector2(0, 1)
-        )
+        ));
     }
 
     #createLayer(dynamic) {
         const [canvas, ctx] = this.#createCanvas();
-        const layer = {canvas, ctx, paths: [], animation: null, boundary: null};
+        const layer = new Layer(canvas, ctx);
 
         if (dynamic) {
-            this.#dynamicLayers.push(layer);
+            this.addDynamicLayer(layer);
         } else {
-            this.#staticLayers.push(layer);
+            this.addStaticLayer(layer);
         }
 
         return layer;
     }
 
-    #generateTreeLayerForMountain(height, palette, mountainPath, step = 1) {
-        const treeLayer = []
+    #generateTreePaths(height, palette, mountainPath, step = 1) {
+        const treePaths = []
         const mountainPeaks = SnowUtils.findPeaks(mountainPath);
         for (let i = 0; i < mountainPeaks.length; i += step) {
             const point = mountainPeaks[i];
-
-            const treePath = this.#createLayerPath(
-                LayerType.tree, palette,
-                this.#generateTreePath(point.x, point.y, height, height / 3, 2 + Math.floor(Math.random() * 3))
-            );
-            treeLayer.push(treePath);
+            treePaths.push(new Path(
+                this.#generateTreePoints(point.x, point.y, height, height / 3, 2 + Math.floor(Math.random() * 3)),
+                palette
+            ));
         }
 
-        return treeLayer;
+        return treePaths;
     }
 
-    #createLayerPath(type, palette, points, alpha = 1) {
-        return {type: type, color: palette, alpha: alpha, points: points}
-    }
-
-    #generateMountainPath(yOffset, height, count, fn, border = 20) {
+    #generateMountainPoints(yOffset, height, count, fn, border = 20) {
         const seed = Math.floor(Math.random() * count);
         const xStep = (this.#canvasWidth + border * 2) / count;
 
@@ -256,7 +189,7 @@ export class BackgroundDrawer {
         ];
     }
 
-    #generateTreePath(xOffset, yOffset, height, base, count) {
+    #generateTreePoints(xOffset, yOffset, height, base, count) {
         const width = height / 3;
         const xStep = width * 3 / 5;
         const result = new Array(5 * count);

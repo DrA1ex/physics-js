@@ -122,6 +122,9 @@ export class Bootstrap {
         return {body, renderer};
     }
 
+    /**
+     * @param {IRenderer} renderer
+     */
     addRenderStep(renderer) {
         this.#renderSteps.push(renderer);
     }
