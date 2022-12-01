@@ -27,7 +27,11 @@ addEventListener("error", (event) => {
     alert(event.error?.stack ?? event.message);
 });
 
-const options = Params.parse({restitution: 0, friction: 0.8, overlap: 0.5, beta: 1, stats: false, tree_cnt: 13, warming: false});
+const options = Params.parse({
+    restitution: 0, friction: 0.8, overlap: 0.5, beta: 1, stats: false, tree_cnt: 13, warming: true,
+    dpr: !CommonUtils.isMobile()
+});
+
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
 const {canvasWidth, canvasHeight} = BootstrapInstance;
 

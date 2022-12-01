@@ -26,7 +26,7 @@ const TreePalette = [
 ];
 
 const TreeWiggle = Math.PI / 180 * 10;
-const TreeWiggleSpeed = Math.PI / 180 * 10;
+const TreeWiggleSpeed = Math.PI / 180 * 2;
 
 export class BackgroundDrawer extends LayeredRenderer {
     #worldBox;
@@ -133,11 +133,11 @@ export class BackgroundDrawer extends LayeredRenderer {
 
         // FG Layer 1
         fgLayer1.addPaths(this.#generateTreePaths(50, TreePalette[0], bgLayer2.paths[0].points));
-        this.#createTreeAnimation(fgLayer1, TreeWiggleSpeed / 3);
+        this.#createTreeAnimation(fgLayer1, TreeWiggleSpeed / 2);
 
         // FG Layer 2
         fgLayer2.addPaths(this.#generateTreePaths(75, TreePalette[1], bgLayer3.paths[0].points));
-        this.#createTreeAnimation(fgLayer2, TreeWiggleSpeed / 2);
+        this.#createTreeAnimation(fgLayer2, TreeWiggleSpeed / 1.5);
 
 
         // FG Layer 3
@@ -159,9 +159,9 @@ export class BackgroundDrawer extends LayeredRenderer {
     }
 
     #createTreeAnimation(layer, speed) {
-        const initial = -TreeWiggle + Math.random() * TreeWiggle * 2;
+        const initial = Math.random() * TreeWiggle;
         for (let path of layer.paths) {
-            const parametric = new ParametricAnimation(-TreeWiggle, TreeWiggle, speed, initial)
+            const parametric = new ParametricAnimation(0, TreeWiggle, speed, initial)
                 .setMode(AnimationMode.repeating)
                 .setDirection(AnimationDirection.both)
                 .setEasing(EasingFunctions.easeInOutSine);

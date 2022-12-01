@@ -104,3 +104,11 @@ export function applyViewportScale(mediaQueries, userSalable = 0) {
     const viewportAttData = `width=device-width, initial-scale=${pageScale}, maximum-scale=${pageScale}, user-scalable=${userSalable}, viewport-fit=cover`
     viewport.setAttribute('content', viewportAttData);
 }
+
+export function isMobile() {
+    if (globalThis.window) {
+        return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    }
+
+    return false;
+}
