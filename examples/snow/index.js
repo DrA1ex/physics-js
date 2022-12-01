@@ -1,13 +1,27 @@
 import {BoundaryBox, PolygonBody, RectBody} from "../../lib/physics/body.js";
-import {GravityForce, ResistanceForce, WindForce} from "../../lib/physics/force.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
+import {GravityForce, ResistanceForce, WindForce} from "../../lib/physics/force.js";
+import {Sprite, SpriteRenderer} from "../../lib/render/sprite.js";
 import {Vector2} from "../../lib/utils/vector.js";
+
 import {Bootstrap} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
+import * as CommonUtils from "../common/utils.js";
+
+import {BackgroundDrawer} from "./background.js";
 import {SnowCloud, SnowDrift} from "./snow.js";
 import {WorldBorderCollider} from "./misc.js";
-import {BackgroundDrawer} from "./background.js";
-import {Sprite, SpriteRenderer} from "../../lib/render/sprite.js";
+
+CommonUtils.applyViewportScale([
+    {media: "(orientation: landscape) and (max-width: 500px)", scale: 0.25},
+    {media: "(orientation: landscape) and (max-width: 900px)", scale: 0.5},
+    {media: "(orientation: landscape) and (max-width: 1200px)", scale: 0.75},
+    {media: "(orientation: landscape) and (max-width: 1400px)", scale: 1},
+    {media: "(orientation: portrait) and (max-height: 500px)", scale: 0.25},
+    {media: "(orientation: portrait) and (max-height: 900px)", scale: 0.5},
+    {media: "(orientation: portrait) and (max-height: 1200px)", scale: 0.75},
+    {media: "(orientation: portrait) and (max-height: 1400px)", scale: 1},
+]);
 
 addEventListener("error", (event) => {
     alert(event.error?.stack ?? event.message);

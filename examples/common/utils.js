@@ -83,3 +83,24 @@ export function initCanvas(canvas, useDpr = true) {
 
     return {dpr, canvasWidth, canvasHeight};
 }
+
+export function applyViewportScale(mediaQueries, userSalable = 0) {
+    let pageScale = 1;
+    for (const {media, scale} of mediaQueries) {
+        if (window.matchMedia(media).matches) {
+            pageScale = scale;
+            break;
+        }
+    }
+
+    let viewport = document.querySelector("meta[name=viewport]");
+    if (!viewport) {
+        viewport = document.createElement("meta");
+        viewport.name = "viewport";
+
+        document.head.appendChild(viewport);
+    }
+
+    const viewportAttData = `width=device-width, initial-scale=${pageScale}, maximum-scale=${pageScale}, user-scalable=${userSalable}, viewport-fit=cover`
+    viewport.setAttribute('content', viewportAttData);
+}
