@@ -1,7 +1,7 @@
 import * as CommonUtils from "../common/utils.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import * as SnowUtils from "./utils.js";
-import {EasingFunctions, ParametricAnimation, SkewAnimationAxis, SkewLayerAnimation} from "../../lib/render/animation.js";
+import {AnimationAxis, AnimationDirection, AnimationMode, EasingFunctions, ParametricAnimation, SkewPathAnimation} from "../../lib/render/animation.js";
 import {Layer, Path} from "../../lib/render/layer.js";
 import {LayeredRenderer} from "../../lib/render/background.js";
 
@@ -26,7 +26,7 @@ const TreePalette = [
 ];
 
 const TreeWiggle = Math.PI / 180 * 10;
-const TreeWiggleSpeed = Math.PI / 180 * 3;
+const TreeWiggleSpeed = Math.PI / 180 * 10;
 
 export class BackgroundDrawer extends LayeredRenderer {
     #worldBox;
@@ -133,27 +133,16 @@ export class BackgroundDrawer extends LayeredRenderer {
 
         // FG Layer 1
         fgLayer1.addPaths(this.#generateTreePaths(50, TreePalette[0], bgLayer2.paths[0].points));
-        fgLayer1.addAnimation(new SkewLayerAnimation(
-            SkewAnimationAxis.x,
-            new ParametricAnimation(-TreeWiggle, TreeWiggle, TreeWiggleSpeed / 3).setEasing(EasingFunctions.easeInOutSine),
-            new Vector2(0, 1)
-        ));
+        this.#createTreeAnimation(fgLayer1, TreeWiggleSpeed / 3);
 
         // FG Layer 2
         fgLayer2.addPaths(this.#generateTreePaths(75, TreePalette[1], bgLayer3.paths[0].points));
-        fgLayer2.addAnimation(new SkewLayerAnimation(
-            SkewAnimationAxis.x,
-            new ParametricAnimation(-TreeWiggle, TreeWiggle, TreeWiggleSpeed / 2).setEasing(EasingFunctions.easeInOutSine),
-            new Vector2(0, 1)
-        ));
+        this.#createTreeAnimation(fgLayer2, TreeWiggleSpeed / 2);
+
 
         // FG Layer 3
         fgLayer3.addPaths(this.#generateTreePaths(150, TreePalette[2], bgLayer4.paths[0].points, 3));
-        fgLayer3.addAnimation(new SkewLayerAnimation(
-            SkewAnimationAxis.x,
-            new ParametricAnimation(-TreeWiggle, TreeWiggle, TreeWiggleSpeed).setEasing(EasingFunctions.easeInOutSine),
-            new Vector2(0, 1)
-        ));
+        this.#createTreeAnimation(fgLayer3, TreeWiggleSpeed);
     }
 
     #createLayer(dynamic) {
@@ -167,6 +156,17 @@ export class BackgroundDrawer extends LayeredRenderer {
         }
 
         return layer;
+    }
+
+    #createTreeAnimation(layer, speed) {
+        const initial = -TreeWiggle + Math.random() * TreeWiggle * 2;
+        for (let path of layer.paths) {
+            const parametric = new ParametricAnimation(-TreeWiggle, TreeWiggle, speed, initial)
+                .setMode(AnimationMode.repeating)
+                .setDirection(AnimationDirection.both)
+                .setEasing(EasingFunctions.easeInOutSine);
+            path.addAnimation(new SkewPathAnimation([AnimationAxis.x], parametric, new Vector2(0, 1)));
+        }
     }
 
     #generateTreePaths(height, palette, mountainPath, step = 1) {
