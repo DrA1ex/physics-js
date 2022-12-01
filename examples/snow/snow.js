@@ -12,8 +12,9 @@ export const Tags = {
 
 export class SnowCloud {
     static SnowColor = "#cce5ec";
-    static SnowSpriteSeries = new SpriteSeries("./sprites/snowflakes.png", 6, 1, 32, 32, 3);
 
+    #initialized = false;
+    #snowSpriteSeries = null;
     #snowInterval = null;
 
     #engine;
@@ -45,7 +46,18 @@ export class SnowCloud {
         this.#border = border;
     }
 
+    async init() {
+        this.#snowSpriteSeries = new SpriteSeries("./sprites/snowflakes.png", 6, 1, 32, 32, 3);
+        await this.#snowSpriteSeries.wait();
+
+        this.#initialized = true;
+    }
+
     letItSnow() {
+        if (!this.#initialized) {
+            throw new Error("Used before initialization. Call init method first");
+        }
+
         if (this.#snowInterval !== null) {
             console.error("Already snowing");
             return;
@@ -74,12 +86,16 @@ export class SnowCloud {
     }
 
     setupInteractions() {
+        if (!this.#initialized) {
+            throw new Error("Used before initialization. Call init method first");
+        }
+
         let spawnPosition = null;
         let intervalId = null;
         let spawnedCount = 0;
 
-        document.oncontextmenu = () => false;
-        document.onmousedown = document.ontouchstart = (e) => {
+        this.#engine.canvas.oncontextmenu = () => false;
+        this.#engine.canvas.onmousedown = document.ontouchstart = (e) => {
             spawnedCount = 0;
             spawnPosition = Utils.getMousePos(e);
             intervalId = setInterval(() => {
@@ -92,14 +108,14 @@ export class SnowCloud {
             e.preventDefault();
         }
 
-        document.onmousemove = document.ontouchmove = (e) => {
+        this.#engine.canvas.onmousemove = document.ontouchmove = (e) => {
             if (spawnPosition === null) return;
 
             spawnPosition = Utils.getMousePos(e);
             e.preventDefault();
         }
 
-        document.onmouseup = document.ontouchend = (e) => {
+        this.#engine.canvas.onmouseup = document.ontouchend = (e) => {
             clearInterval(intervalId);
 
             if (spawnPosition && spawnedCount === 0) {
@@ -135,7 +151,7 @@ export class SnowCloud {
             .setFriction(this.#options.friction)
             .setRestitution(this.#options.restitution);
 
-        const renderer = new SpriteRenderer(body, SnowCloud.SnowSpriteSeries, Math.floor(Math.random() * SnowCloud.SnowSpriteSeries.count));
+        const renderer = new SpriteRenderer(body, this.#snowSpriteSeries, Math.floor(Math.random() * this.#snowSpriteSeries.count));
         return this.#engine.addRigidBody(body, renderer);
     }
 }

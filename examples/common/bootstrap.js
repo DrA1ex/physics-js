@@ -46,6 +46,7 @@ export class Bootstrap {
     };
 
     #debug = false;
+    #useDpr;
     #slowMotion = 1;
     #dpr;
     #canvasWidth;
@@ -53,6 +54,7 @@ export class Bootstrap {
 
     get state() {return this.#state;}
 
+    get canvas() {return this.#canvas;}
     get dpr() {return this.#dpr;}
     get canvasWidth() {return this.#canvasWidth;}
     get canvasHeight() {return this.#canvasHeight;}
@@ -65,7 +67,7 @@ export class Bootstrap {
     /**
      * @param {HTMLCanvasElement} canvas
      * @param {{
-     *          debug?: boolean, slowMotion?: number,
+     *          debug?: boolean, slowMotion?: number, useDpr?: boolean,
      *          showBoundary?: boolean, showVectorLength?: boolean, showVector?: boolean, statistics?: boolean,
      *          solverSteps?: number, solverBias?: number, solverBeta?: number, allowedOverlap?: boolean, solverWarming?: boolean,
      *          solverTreeDivider?: number, solverTreeMaxCount?: number
@@ -77,6 +79,7 @@ export class Bootstrap {
 
         this.#debug = options.debug;
         this.#slowMotion = Math.max(0.01, Math.min(2, options.slowMotion ?? 1));
+        this.#useDpr = options.useDpr;
 
         this.#solver = new ImpulseBasedSolver();
         if (Number.isFinite(options.solverSteps)) this.#solver.steps = options.solverSteps;
@@ -226,7 +229,7 @@ export class Bootstrap {
     }
 
     #init() {
-        const {dpr, canvasWidth, canvasHeight} = CommonUtils.initCanvas(this.#canvas);
+        const {dpr, canvasWidth, canvasHeight} = CommonUtils.initCanvas(this.#canvas, this.#useDpr);
 
         this.#dpr = dpr;
         this.#canvasWidth = canvasWidth;

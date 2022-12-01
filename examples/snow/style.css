@@ -1,0 +1,89 @@
+html, body {
+    height: 100%;
+}
+
+body {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.canvas {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.fill {
+    position: absolute;
+    inset: 0;
+}
+
+.flex-centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-screen {
+    background: #b0cdd9;
+    z-index: 2000;
+
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.hint {
+    z-index: 1001;
+
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-select: none;
+
+    font-size: 4rem;
+    font-family: fantasy;
+    color: #81c2d5;
+    text-shadow: 3px 2px 6px #177c94
+}
+
+pre {
+    z-index: 1002;
+    font-size: 1rem !important;
+}
+
+.fading-out {
+    animation-duration: 1s;
+    animation-delay: 2s;
+    animation-fill-mode: forwards;
+    animation-name: fading-out;
+}
+
+@keyframes fading-out {
+    from {
+        opacity: 100%;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+.rotating {
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: infinite;
+    animation-name: rotating;
+}
+
+@keyframes rotating {
+    from {
+        transform: rotate(0);
+    }
+
+    to {
+        transform: rotate(359deg);
+    }
+}

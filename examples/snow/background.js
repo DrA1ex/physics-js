@@ -30,14 +30,22 @@ const TreeWiggleSpeed = Math.PI / 180 * 3;
 
 export class BackgroundDrawer extends LayeredRenderer {
     #worldBox;
+    #options;
+
     #dpr;
     #canvasWidth;
     #canvasHeight;
 
-    constructor(worldBox) {
+    /**
+     * @param {BoundaryBox} worldBox
+     * @param {{useDpr?: boolean}} options
+     */
+    constructor(worldBox, options) {
         super();
 
         this.#worldBox = worldBox;
+        this.#options = options;
+
         this.#initLayers();
     }
 
@@ -47,7 +55,7 @@ export class BackgroundDrawer extends LayeredRenderer {
 
         document.body.appendChild(canvas);
 
-        const {dpr, canvasWidth, canvasHeight} = CommonUtils.initCanvas(canvas);
+        const {dpr, canvasWidth, canvasHeight} = CommonUtils.initCanvas(canvas, this.#options.useDpr);
         if (this.#dpr === undefined) {
             this.#dpr = dpr;
             this.#canvasWidth = canvasWidth;

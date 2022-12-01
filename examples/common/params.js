@@ -27,6 +27,8 @@ export function parse(def = {}) {
     const result = {
         debug: parseBool(params["debug"]) ?? false,
         statistics: parseBool(params["stats"]) ?? true,
+        useDpr: parseBool(params["dpr"]) ?? true,
+
         showBodies: parseBool(params["debug_body"]) ?? true,
         showVector: parseBool(params["debug_vector"]),
         showPoints: parseBool(params["debug_point"]),

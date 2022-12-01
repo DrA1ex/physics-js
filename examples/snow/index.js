@@ -9,6 +9,9 @@ import {WorldBorderCollider} from "./misc.js";
 import {BackgroundDrawer} from "./background.js";
 import {Sprite, SpriteRenderer} from "../../lib/render/sprite.js";
 
+addEventListener("error", (event) => {
+    alert(event.error?.stack ?? event.message);
+});
 
 const options = Params.parse({restitution: 0, friction: 0.8, overlap: 0.5, beta: 1, stats: false, tree_cnt: 13, warming: false});
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
@@ -27,7 +30,7 @@ BootstrapInstance.addConstraint(borderConstraint);
 
 const worldBox = borderConstraint.box;
 
-const bgDrawer = new BackgroundDrawer(worldBox);
+const bgDrawer = new BackgroundDrawer(worldBox, options);
 BootstrapInstance.addRenderStep(bgDrawer);
 
 const snowSpawnPeriod = 1000 / 120;
@@ -37,6 +40,7 @@ const snowdriftSegmentCount = 200;
 const snowDriftInitialHeight = 30;
 
 const houseSprite = new Sprite("./sprites/house.png");
+
 const houseWidth = 400;
 const houseHeight = 250;
 
@@ -68,6 +72,7 @@ BootstrapInstance.addRenderStep(
 
 const snowCloudOptions = {snowPeriod: snowPeriod, emitSnowPeriod: snowSpawnPeriod};
 const snowCloud = new SnowCloud(BootstrapInstance, worldBox, snowCloudOptions, options);
+await snowCloud.init();
 
 snowCloud.setupInteractions();
 snowCloud.letItSnow();
@@ -77,4 +82,5 @@ const snowDrift = new SnowDrift(BootstrapInstance, worldBox, snowdriftSegmentCou
 BootstrapInstance.enableHotKeys();
 BootstrapInstance.run();
 
+document.getElementById("loader").style.display = "none";
 document.getElementById("hint").style.display = null;

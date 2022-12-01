@@ -66,12 +66,13 @@ export function clampBodyPosition(pos, box, size, border = 0) {
 
 /**
  * @param {HTMLCanvasElement} canvas
+ * @param {boolean} [useDpr=true]
  * @return {{canvasWidth: number, dpr: number, canvasHeight: number}}
  */
-export function initCanvas(canvas) {
+export function initCanvas(canvas, useDpr = true) {
     const rect = canvas.getBoundingClientRect();
 
-    const dpr = window.devicePixelRatio;
+    const dpr = useDpr ? window.devicePixelRatio : 1;
     const canvasWidth = rect.width;
     const canvasHeight = rect.height;
 
