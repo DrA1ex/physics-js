@@ -299,14 +299,13 @@ export class Bootstrap {
             this.#ctx.strokeRect(box.left, box.top, box.width, box.height);
         }
 
-        for (const renderer of this.#renderSteps) {
-            renderer.render(this.#ctx, this.state === State.play ? delta : 0);
-        }
+        const renderers = [
+            ...this.#renderSteps,
+            ...(!this.#debug || this.#debugInstance.showBodies ? this.#renderers.values() : [])
+        ].sort((r1, r2) => r1.z - r2.z);
 
-        if (!this.#debug || this.#debugInstance.showBodies) {
-            for (const renderer of this.#renderers.values()) {
-                renderer.render(this.#ctx);
-            }
+        for (const renderer of renderers) {
+            renderer.render(this.#ctx, this.state === State.play ? delta : 0);
         }
 
         if (this.#debug) {

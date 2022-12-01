@@ -44,6 +44,7 @@ export class SnowDriftStaticBody extends UnionPolyBody {
             .setStatic(true);
 
         this.#renderer = new PolygonBodyRenderer(this);
+        this.#renderer.z = 3;
         this.#renderer.renderDirection = false;
         this.#renderer.fill = true;
         this.#renderer.stroke = false;

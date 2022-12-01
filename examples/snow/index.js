@@ -1,6 +1,6 @@
 import {BoundaryBox, PolygonBody, RectBody} from "../../lib/physics/body.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
-import {GravityForce, ResistanceForce, WindForce} from "../../lib/physics/force.js";
+import {GlobalWind, GravityForce, ResistanceForce} from "../../lib/physics/force.js";
 import {Sprite, SpriteRenderer} from "../../lib/render/sprite.js";
 import {Vector2} from "../../lib/utils/vector.js";
 
@@ -37,7 +37,7 @@ const {canvasWidth, canvasHeight} = BootstrapInstance;
 
 BootstrapInstance.addForce(new GravityForce(options.gravity));
 BootstrapInstance.addForce(new ResistanceForce(options.resistance));
-BootstrapInstance.addForce(new WindForce(new Vector2(-5, -5)));
+BootstrapInstance.addForce(new GlobalWind(new Vector2(-2, -5)));
 
 const top = -40;
 const bottom = canvasHeight - 1;
@@ -61,6 +61,8 @@ const houseSprite = new Sprite("./sprites/house.png");
 
 const houseWidth = 400;
 const houseHeight = 250;
+const houseFlueWidth = 25;
+const houseFlueHeight = houseFlueWidth * 1.5;
 
 const houseSize = new Vector2(houseWidth, houseHeight);
 
@@ -81,12 +83,12 @@ BootstrapInstance.addRigidBody(roof).renderer.stroke = false;
 const houseBase = new PolygonBody(canvasWidth / 2, bottom - houseHeight / 2, houseBasePoly).setActive(false);
 BootstrapInstance.addRigidBody(houseBase).renderer.stroke = false;
 
-BootstrapInstance.addRenderStep(
-    new SpriteRenderer(
-        new RectBody(canvasWidth / 2, bottom - houseHeight / 2, houseWidth, houseHeight),
-        houseSprite,
-    )
+const houseSpriteRenderer = new SpriteRenderer(
+    new RectBody(canvasWidth / 2, bottom - houseHeight / 2, houseWidth, houseHeight),
+    houseSprite,
 );
+houseSpriteRenderer.z = 2;
+BootstrapInstance.addRenderStep(houseSpriteRenderer);
 
 const snowCloudOptions = {snowPeriod: snowPeriod, emitSnowPeriod: snowSpawnPeriod};
 const snowCloud = new SnowCloud(BootstrapInstance, worldBox, snowCloudOptions, options);
