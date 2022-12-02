@@ -29,8 +29,7 @@ addEventListener("error", (event) => {
 });
 
 const options = Params.parse({
-    restitution: 0, friction: 0.8, overlap: 0.5, beta: 1, stats: false, tree_cnt: 13, warming: true,
-    dpr: !CommonUtils.isMobile()
+    restitution: 0, friction: 0.8, overlap: 0.5, beta: 1, bias: 0.1, stats: false, tree_cnt: 13, dpr: !CommonUtils.isMobile()
 });
 
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
@@ -38,7 +37,7 @@ const {canvasWidth, canvasHeight} = BootstrapInstance;
 
 BootstrapInstance.addForce(new GravityForce(options.gravity));
 BootstrapInstance.addForce(new ResistanceForce(options.resistance));
-BootstrapInstance.addForce(new GlobalWind(new Vector2(-2, -5)));
+BootstrapInstance.addForce(new GlobalWind(new Vector2(-1.2, -5)));
 
 const top = -40;
 const bottom = canvasHeight - 1;
@@ -63,8 +62,8 @@ const houseSprite = new Sprite("./sprites/house.png");
 
 const houseWidth = 400;
 const houseHeight = 250;
-const houseFlueWidth = 25;
-const houseFlueHeight = houseFlueWidth * 1.5;
+const houseFlueWidth = 30;
+const houseFlueHeight = houseFlueWidth * 1.7;
 
 const houseSize = new Vector2(houseWidth, houseHeight);
 

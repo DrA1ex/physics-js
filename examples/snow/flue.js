@@ -14,12 +14,12 @@ const SmokeState = {
 }
 
 class SmokeCollider extends CircleCollider {
-    static #NoCollideTags = [Tags.snowflake, Tags.smoke, Tags.snowDrift, Tags.houseFlue, Tags.house];
+    static #NoCollideTags = [Tags.snowflake, Tags.smoke, Tags.houseFlue, Tags.house];
     static #KeyFrames = [{
         opacity: {from: 0, to: 1, duration: 500},
     }, {
-        radius: {from: 1, to: 5, duration: 5000},
-        opacity: {from: 1, to: 0.5, duration: 10000},
+        radius: {from: 1, to: 7, duration: 7000},
+        opacity: {from: 1, to: 0.2, duration: 15000},
     }, {
         opacity: {from: 1, to: 0, duration: 5000},
     }, {
@@ -41,6 +41,10 @@ class SmokeCollider extends CircleCollider {
     }
 
     shouldCollide(body2) {
+        if (this.#state === SmokeState.destroy) {
+            return false;
+        }
+
         return SmokeCollider.#NoCollideTags.indexOf(body2.tag) === -1;
     }
 
@@ -55,7 +59,7 @@ class SmokeCollider extends CircleCollider {
         this.setState(SmokeState.born);
 
         const interval = 1000 / 24;
-        setInterval(() => this.#animate(interval), interval);
+        this.#animationInterval = setInterval(() => this.#animate(interval), interval);
     }
 
     #animate(delta) {
@@ -164,7 +168,7 @@ export class HouseFlue {
 
         engine.addForce(new SpotWindForce(
             new Vector2(x, y),
-            Vector2.fromAngle(-Math.PI / 2), Math.PI / 2, 40
+            Vector2.fromAngle(-Math.PI / 2), Math.PI / 2, 30
         ));
     }
 
@@ -173,7 +177,7 @@ export class HouseFlue {
     }
 
     run() {
-        setInterval(this.#emitSmoke.bind(this), 1000 / 10);
+        setInterval(this.#emitSmoke.bind(this), 1000 / 24);
     }
 
     #emitSmoke() {
@@ -181,18 +185,21 @@ export class HouseFlue {
             return;
         }
 
-        const smokeRadius = 5 + Math.random() * 20;
+        const x = this.#houseFlue.body.position.x;
+        const y = this.#houseFlue.body.position.y - this.#houseFlue.body.height / 2;
+        const smokeRadius = 5 + Math.random() * 15;
         const mass = 0.045 - Math.random() * 0.01;
-        const smokeBody = new CircleBody(
-            this.#houseFlue.body.position.x,
-            this.#houseFlue.body.position.y - this.#houseFlue.body.height / 2,
-            smokeRadius, mass
-        ).setTag(Tags.smoke).setAngle(Math.random() * Math.PI * 2).setRestitution(0);
+        const smokeBody = new CircleBody(x, y, smokeRadius, mass)
+            .setTag(Tags.smoke)
+            .setAngle(Math.random() * Math.PI * 2)
+            .setInertiaFactor(1000)
+            .setRestitution(0)
+            .setFriction(0);
 
         const smokeCollider = new SmokeCollider(this.#engine, smokeBody);
         smokeBody.collider = smokeCollider;
 
-        const renderer = new AnimatedSpriteRenderer(smokeBody, this.#smokeSprite, 3, Math.floor(Math.random() * this.#smokeSprite.count));
+        const renderer = new AnimatedSpriteRenderer(smokeBody, this.#smokeSprite, 12, Math.floor(Math.random() * this.#smokeSprite.count));
         renderer.opacity = 0.05 + Math.random() * 0.25;
 
         this.#engine.addRigidBody(smokeBody, renderer);

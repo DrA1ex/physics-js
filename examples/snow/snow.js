@@ -151,7 +151,7 @@ export class SnowCloud {
         const pos = Vector2.fromAngle(Math.random() * Math.PI * 2).scale(size).add(origin);
         Utils.clampBodyPosition(pos, this.#worldBox, size, this.#border);
 
-        const body = new CircleBody(pos.x, pos.y, size, size / 2)
+        const body = new CircleBody(pos.x, pos.y, size, size / 20)
             .setTag(Tags.snowflake)
             .setFriction(this.#options.friction)
             .setRestitution(this.#options.restitution);
@@ -202,7 +202,7 @@ export class SnowDrift {
         }
 
         this.snowDriftBody = new SnowDriftStaticBody(this.segments, this.#worldBox);
-        this.#engine.addRigidBody(this.snowDriftBody, this.snowDriftBody.renderer);
+        this.#engine.addRenderStep(this.snowDriftBody.renderer);
     }
 
     onCollide(collision, segment, body) {
