@@ -12,6 +12,7 @@ import {BackgroundDrawer} from "./background.js";
 import {SnowCloud, SnowDrift, Tags} from "./snow.js";
 import {WorldBorderCollider} from "./misc.js";
 import {HouseFlue} from "./flue.js";
+import {RoofSnowDriftBody} from "./body.js";
 
 CommonUtils.applyViewportScale([
     {media: "(orientation: landscape) and (max-width: 500px)", scale: 0.25},
@@ -52,8 +53,8 @@ const worldBox = borderConstraint.box;
 const bgDrawer = new BackgroundDrawer(worldBox, options);
 BootstrapInstance.addRenderStep(bgDrawer);
 
-const snowSpawnPeriod = 1000 / 120;
-const snowPeriod = 1000 / 60;
+const snowSpawnPeriod = 1000 / 160;
+const snowPeriod = 1000 / 80;
 
 const snowdriftSegmentCount = 200;
 const snowDriftInitialHeight = 30;
@@ -82,6 +83,17 @@ const roof = new PolygonBody(canvasWidth / 2, bottom - houseHeight / 2, roofPoly
     .setTag(Tags.house)
     .setActive(false);
 BootstrapInstance.addRigidBody(roof).renderer.stroke = false;
+
+const roofSnowDriftPointsCount = 30;
+const roofSnowDriftWidth = 246;
+const roofSnowDriftHeight = 10;
+
+const roofSnowDrift = new RoofSnowDriftBody(
+    roof.position.x - 4, roof.boundary.top + 4,
+    roofSnowDriftWidth, roofSnowDriftHeight, roofSnowDriftPointsCount,
+    (c, sd, body) => {if (body.tag === Tags.snowflake) BootstrapInstance.destroyBody(body)}
+).setSkew(new Vector2(Math.PI / 8)).setAngle(-Math.PI / 180 * 0.5);
+BootstrapInstance.addRigidBody(roofSnowDrift, roofSnowDrift.renderer).renderer.stroke = false;
 
 const houseBase = new PolygonBody(canvasWidth / 2, bottom - houseHeight / 2, houseBasePoly)
     .setTag(Tags.house)

@@ -1,4 +1,4 @@
-import {LineBody} from "../../lib/physics/body.js";
+import {LineBody, PolygonBody} from "../../lib/physics/body.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import {LineRenderer, PolygonBodyRenderer} from "../../lib/render/renderer.js";
 import {SnowCloud, Tags} from "./snow.js";
@@ -23,10 +23,23 @@ export class SnowDriftSegmentBody extends LineBody {
     }
 }
 
-export class SnowDriftStaticBody extends UnionPolyBody {
-    #renderer;
+class SnowDriftRenderer extends PolygonBodyRenderer {
+    constructor(body) {
+        super(body);
 
-    get renderer() {return this.#renderer;}
+        this.z = 3;
+        this.renderDirection = false;
+        this.fill = true;
+        this.stroke = false;
+        this.fillStyle = SnowCloud.SnowColor;
+
+        this.smooth = true;
+        this.smoothCount = 4;
+    }
+}
+
+export class SnowDriftStaticBody extends UnionPolyBody {
+    renderer;
 
     constructor(segments, worldBox) {
         const pFirst = segments[0].points;
@@ -44,14 +57,43 @@ export class SnowDriftStaticBody extends UnionPolyBody {
             .setScale(new Vector2(1, 1.1))
             .setStatic(true);
 
-        this.#renderer = new PolygonBodyRenderer(this);
-        this.#renderer.z = 3;
-        this.#renderer.renderDirection = false;
-        this.#renderer.fill = true;
-        this.#renderer.stroke = false;
-        this.#renderer.fillStyle = SnowCloud.SnowColor;
+        this.renderer = new SnowDriftRenderer(this);
+    }
+}
 
-        this.#renderer.smooth = true;
-        this.#renderer.smoothCount = 4;
+export class RoofSnowDriftBody extends PolygonBody {
+    renderer;
+
+    constructor(x, y, width, height, segmentsCnt, onCollide) {
+        const yCut = Math.PI / 180 * 30;
+        const xStep = width / (segmentsCnt - 1);
+        const yStep = (Math.PI - yCut * 2) / segmentsCnt;
+        const yOffset = height / 2;
+
+        const points = new Array(segmentsCnt);
+        let xCurrent = -width / 2;
+        let yCurrent = yCut;
+        for (let i = 0; i < segmentsCnt; i++) {
+            const y = Math.sin(yCurrent);
+            points[i] = new Vector2(xCurrent, yOffset - y * height);
+
+            xCurrent += xStep;
+            yCurrent += yStep;
+        }
+
+        super(x, y, [
+            new Vector2(-width / 2, yOffset),
+            ...points,
+            new Vector2(width / 2, yOffset),
+        ]);
+
+        this.setTag(Tags.snowDrift);
+        this.setActive(false);
+
+        this.collider = new SnowdriftCollider(this, onCollide);
+
+        this.renderer = new SnowDriftRenderer(this);
+        this.renderer.smooth = false;
+        this.renderer.z = 2;
     }
 }

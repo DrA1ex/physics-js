@@ -146,7 +146,7 @@ export class SnowCloud {
     #emitSnow(origin) {
         if (origin.y >= this.#worldBox.bottom) return;
 
-        const size = 1 + Math.floor(Math.random() * 4);
+        const size = 2 + Math.floor(Math.random() * 4);
 
         const pos = Vector2.fromAngle(Math.random() * Math.PI * 2).scale(size).add(origin);
         Utils.clampBodyPosition(pos, this.#worldBox, size, this.#border);
@@ -206,38 +206,39 @@ export class SnowDrift {
     }
 
     onCollide(collision, segment, body) {
-        const growthSizeFactor = 0.015;
-
+        const growthSizeFactor = 0.02;
         if (collision.result && body.active && body.tag === Tags.snowflake) {
-            const index = this.segments.indexOf(segment);
+            this.#growth(this.segments.indexOf(segment), body.radius * growthSizeFactor);
 
-            const growthSize = body.radius * growthSizeFactor;
-            segment.updatePoints(new Vector2(0, -growthSize), new Vector2(0, -growthSize));
-
-            // Back
-            let currentGrowth = growthSize;
-            for (let i = index - 1; i >= 0 && currentGrowth >= 1e-3; i--) {
-                const nextGrowth = this.#fadeGrowth(growthSize, index - i);
-                this.segments[i].updatePoints(new Vector2(0, -nextGrowth), new Vector2(0, -currentGrowth));
-                currentGrowth = nextGrowth;
-            }
-
-            // Forward
-            currentGrowth = growthSize;
-            for (let i = index + 1; i < this.segmentsCount && currentGrowth >= 1e-3; i++) {
-                const nextGrowth = this.#fadeGrowth(growthSize, i - index);
-                this.segments[i].updatePoints(new Vector2(0, -currentGrowth), new Vector2(0, -nextGrowth));
-                currentGrowth = nextGrowth;
-            }
-
-            body.setTag(null);
+            body.setActive(false);
             this.#engine.destroyBody(body);
         }
     }
 
-    #fadeGrowth(initial, k) {
+    #growth(index, growthSize) {
+        const segment = this.segments[index];
+        segment.updatePoints(new Vector2(0, -growthSize), new Vector2(0, -growthSize));
+
+        // Back
+        let currentGrowth = growthSize;
+        for (let i = index - 1; i >= 0 && currentGrowth >= 1e-3; i--) {
+            const nextGrowth = growthSize * this.#fadeGrowth(index - i);
+            this.segments[i].updatePoints(new Vector2(0, -nextGrowth), new Vector2(0, -currentGrowth));
+            currentGrowth = nextGrowth;
+        }
+
+        // Forward
+        currentGrowth = growthSize;
+        for (let i = index + 1; i < this.segmentsCount && currentGrowth >= 1e-3; i++) {
+            const nextGrowth = growthSize * this.#fadeGrowth(i - index);
+            this.segments[i].updatePoints(new Vector2(0, -currentGrowth), new Vector2(0, -nextGrowth));
+            currentGrowth = nextGrowth;
+        }
+    }
+
+    #fadeGrowth(k) {
         // Ease out cubic
         const x = k / 30;
-        return initial * (1 - x) * (1 - x);
+        return (1 - x) * (1 - x);
     }
 }
