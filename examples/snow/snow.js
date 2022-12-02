@@ -8,6 +8,11 @@ import {SnowDriftSegmentBody, SnowDriftStaticBody} from "./body.js";
 
 export const Tags = {
     snowflake: "snowflake",
+    snowDrift: "snowDrift",
+    smoke: "smoke",
+    worldBorder: "worldBorder",
+    houseFlue: "houseFlue",
+    house: "house",
 }
 
 export class SnowCloud {

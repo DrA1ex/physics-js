@@ -9,8 +9,9 @@ import * as Params from "../common/params.js";
 import * as CommonUtils from "../common/utils.js";
 
 import {BackgroundDrawer} from "./background.js";
-import {SnowCloud, SnowDrift} from "./snow.js";
+import {SnowCloud, SnowDrift, Tags} from "./snow.js";
 import {WorldBorderCollider} from "./misc.js";
+import {HouseFlue} from "./flue.js";
 
 CommonUtils.applyViewportScale([
     {media: "(orientation: landscape) and (max-width: 500px)", scale: 0.25},
@@ -44,6 +45,7 @@ const bottom = canvasHeight - 1;
 
 const borderConstraint = new InsetConstraint(new BoundaryBox(-100, canvasWidth + 100, top, bottom), 0.3);
 borderConstraint.constraintBody.collider = new WorldBorderCollider(borderConstraint.constraintBody, BootstrapInstance);
+borderConstraint.constraintBody.setTag(Tags.worldBorder);
 BootstrapInstance.addConstraint(borderConstraint);
 
 const worldBox = borderConstraint.box;
@@ -77,11 +79,19 @@ const houseBasePoly = [
     new Vector2(0.4264, -0.0380), new Vector2(0.4277, 0.4981)
 ].map(v => v.mul(houseSize));
 
-const roof = new PolygonBody(canvasWidth / 2, bottom - houseHeight / 2, roofPoly).setActive(false);
+const roof = new PolygonBody(canvasWidth / 2, bottom - houseHeight / 2, roofPoly)
+    .setTag(Tags.house)
+    .setActive(false);
 BootstrapInstance.addRigidBody(roof).renderer.stroke = false;
 
-const houseBase = new PolygonBody(canvasWidth / 2, bottom - houseHeight / 2, houseBasePoly).setActive(false);
+const houseBase = new PolygonBody(canvasWidth / 2, bottom - houseHeight / 2, houseBasePoly)
+    .setTag(Tags.house)
+    .setActive(false);
 BootstrapInstance.addRigidBody(houseBase).renderer.stroke = false;
+
+const houseFlue = new HouseFlue(BootstrapInstance, canvasWidth / 2 + houseFlueWidth, bottom - houseHeight, houseFlueWidth, houseFlueHeight);
+await houseFlue.init();
+houseFlue.run();
 
 const houseSpriteRenderer = new SpriteRenderer(
     new RectBody(canvasWidth / 2, bottom - houseHeight / 2, houseWidth, houseHeight),

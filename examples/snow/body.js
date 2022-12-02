@@ -1,7 +1,7 @@
 import {LineBody} from "../../lib/physics/body.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import {LineRenderer, PolygonBodyRenderer} from "../../lib/render/renderer.js";
-import {SnowCloud} from "./snow.js";
+import {SnowCloud, Tags} from "./snow.js";
 import {SnowdriftCollider, UnionPolyBody} from "./misc.js";
 
 export class SnowDriftSegmentBody extends LineBody {
@@ -17,6 +17,7 @@ export class SnowDriftSegmentBody extends LineBody {
         this.#renderer = new LineRenderer(this);
         this.#renderer.stroke = false;
 
+        this.setTag(Tags.snowDrift);
         this.setActive(false);
         this.setFriction(0.3);
     }
