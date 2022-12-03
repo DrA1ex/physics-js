@@ -5,6 +5,7 @@ import {CircleCollider} from "../../lib/physics/collider.js";
 import {Tags} from "./snow.js";
 import {State} from "../common/bootstrap.js";
 import {AnimatedSpriteRenderer, SpriteSeries} from "../../lib/render/sprite.js";
+import {AnimationProperty, KeyframeType, Particle, ParticleState, StateKeyframe} from "../../lib/render/particle.js";
 
 const SmokeState = {
     born: 0,
@@ -13,135 +14,76 @@ const SmokeState = {
     destroy: 3
 }
 
+class SmokeParticle extends Particle {
+    static SmokeSprite = new SpriteSeries("./sprites/smoke_animation.png", 8, 8, 128, 128);
+
+    constructor(x, y) {
+        const smokeRadius = 5 + Math.random() * 15;
+        const mass = 0.045 - Math.random() * 0.01;
+        const smokeBody = new CircleBody(x, y, smokeRadius, mass)
+            .setTag(Tags.smoke)
+            .setAngle(Math.random() * Math.PI * 2)
+            .setInertiaFactor(1000)
+            .setRestitution(0)
+            .setFriction(0);
+
+        const renderer = new AnimatedSpriteRenderer(
+            smokeBody, SmokeParticle.SmokeSprite, 12,
+            Math.floor(Math.random() * SmokeParticle.SmokeSprite.count)
+        );
+        renderer.opacity = 0.05 + Math.random() * 0.25;
+
+        super(smokeBody, renderer);
+
+        smokeBody.collider = new SmokeCollider(this);
+
+        this.addState(SmokeState.born, new ParticleState()
+            .addKeyframe(new StateKeyframe(AnimationProperty.opacity, 0, 1, 500, KeyframeType.relative)));
+
+        this.addState(SmokeState.active, new ParticleState()
+            .addKeyframe(new StateKeyframe(AnimationProperty.radius, 1, 7, 7000, KeyframeType.relative))
+            .addKeyframe(new StateKeyframe(AnimationProperty.opacity, 1, 0.2, 15000, KeyframeType.relative)));
+
+        this.addState(SmokeState.fade, new ParticleState()
+            .addKeyframe(new StateKeyframe(AnimationProperty.radius, 1, 7, 7000, KeyframeType.relative))
+            .addKeyframe(new StateKeyframe(AnimationProperty.opacity, 1, 0.2, 15000, KeyframeType.relative)));
+
+        this.addState(SmokeState.destroy, new ParticleState()
+            .addKeyframe(new StateKeyframe(AnimationProperty.opacity, 1, 0, 1000, KeyframeType.relative)));
+
+        this.addSequentialTransition([SmokeState.born, SmokeState.active, SmokeState.fade, SmokeState.destroy, Particle.DestroyState]);
+        this.setState(SmokeState.born);
+    }
+
+    onStateChanged(state) {
+        if (state) {
+            this.body.collider.noCollide = true;
+        }
+    }
+}
+
 class SmokeCollider extends CircleCollider {
     static #NoCollideTags = [Tags.snowflake, Tags.smoke, Tags.houseFlue, Tags.house];
-    static #KeyFrames = [{
-        opacity: {from: 0, to: 1, duration: 500},
-    }, {
-        radius: {from: 1, to: 7, duration: 7000},
-        opacity: {from: 1, to: 0.2, duration: 15000},
-    }, {
-        opacity: {from: 1, to: 0, duration: 5000},
-    }, {
-        opacity: {from: 1, to: 0, duration: 1000},
-    }]
 
-    #engine;
-    #renderer;
-    #state = -1;
-    #stateData = {};
+    #particle;
+    noCollide = false;
 
-    #animationInterval = null;
-    #destroyed = false;
+    constructor(particle) {
+        super(particle.body);
 
-    constructor(engine, body) {
-        super(body);
-
-        this.#engine = engine;
+        this.#particle = particle;
     }
 
     shouldCollide(body2) {
-        if (this.#state === SmokeState.destroy) {
-            return false;
-        }
+        if (this.noCollide) return false;
 
         return SmokeCollider.#NoCollideTags.indexOf(body2.tag) === -1;
     }
 
     onCollide(collision, body2) {
-        if (body2.tag === Tags.worldBorder) {
-            this.setState(SmokeState.destroy);
+        if (body2.tag === Tags.worldBorder && !this.#particle.destroyed) {
+            this.#particle.setState(SmokeState.destroy);
         }
-    }
-
-    startAnimation() {
-        this.#renderer = this.#engine.getRenderer(this.body);
-        this.setState(SmokeState.born);
-
-        const interval = 1000 / 24;
-        this.#animationInterval = setInterval(() => this.#animate(interval), interval);
-    }
-
-    #animate(delta) {
-        let complete = true;
-        for (const [key, data] of Object.entries(this.#stateData)) {
-            const value = data.current;
-            this.#setParameterValue(key, value);
-
-            let nextValue = data.current + data.step * delta
-            if (data.from < data.to) {
-                nextValue = Math.min(nextValue, data.to);
-            } else {
-                nextValue = Math.max(nextValue, data.to);
-            }
-
-            data.current = nextValue;
-            complete &&= data.current === data.to;
-        }
-
-        if (complete) {
-            this.setState(this.#state + 1);
-        }
-    }
-
-    setState(state) {
-        if (this.#state >= state) {
-            return;
-        }
-
-        const params = SmokeCollider.#KeyFrames[state];
-        if (!params) {
-            this.#destroy();
-            return;
-        }
-
-        this.#state = state;
-        this.#stateData = {};
-        for (const [key, config] of Object.entries(params)) {
-            const current = this.#getParameterValue(key);
-            const from = config.from * current;
-            const to = config.to * current;
-
-            this.#setParameterValue(key, from);
-
-            this.#stateData[key] = {
-                current: from,
-                from, to,
-                step: (to - from) / config.duration,
-                timeLeft: config.duration
-            };
-        }
-    }
-
-    #getParameterValue(parameter) {
-        switch (parameter) {
-            case "opacity":
-                return this.#renderer.opacity;
-            case "radius":
-                return this.body.radius;
-        }
-
-        return null;
-    }
-
-    #setParameterValue(parameter, value) {
-        switch (parameter) {
-            case "opacity":
-                this.#renderer.opacity = value;
-                break;
-            case "radius":
-                this.body.radius = value;
-                break;
-        }
-    }
-
-    #destroy() {
-        if (this.#destroyed) return;
-        if (this.#animationInterval) clearInterval(this.#animationInterval);
-
-        this.#engine.destroyBody(this.body);
-        this.#engine = null;
-        this.#destroyed = true;
     }
 }
 
@@ -187,22 +129,7 @@ export class HouseFlue {
 
         const x = this.#houseFlue.body.position.x;
         const y = this.#houseFlue.body.position.y - this.#houseFlue.body.height / 2;
-        const smokeRadius = 5 + Math.random() * 15;
-        const mass = 0.045 - Math.random() * 0.01;
-        const smokeBody = new CircleBody(x, y, smokeRadius, mass)
-            .setTag(Tags.smoke)
-            .setAngle(Math.random() * Math.PI * 2)
-            .setInertiaFactor(1000)
-            .setRestitution(0)
-            .setFriction(0);
 
-        const smokeCollider = new SmokeCollider(this.#engine, smokeBody);
-        smokeBody.collider = smokeCollider;
-
-        const renderer = new AnimatedSpriteRenderer(smokeBody, this.#smokeSprite, 12, Math.floor(Math.random() * this.#smokeSprite.count));
-        renderer.opacity = 0.05 + Math.random() * 0.25;
-
-        this.#engine.addRigidBody(smokeBody, renderer);
-        smokeCollider.startAnimation();
+        this.#engine.addParticle(new SmokeParticle(x, y));
     }
 }

@@ -4,6 +4,7 @@ import * as Utils from "../../lib/utils/common.js";
 import {Body} from "../../lib/physics/body.js";
 import {RendererMapping} from "../../lib/render/renderer.js";
 import * as CommonUtils from "./utils.js";
+import {Particle} from "../../lib/render/particle.js";
 
 /*** @enum {number} */
 export const State = {
@@ -31,6 +32,7 @@ export class Bootstrap {
     #drawingVectors = new Map();
     #renderers = new Map();
     #renderSteps = [];
+    #particles = [];
 
     #statsElement;
     #stats = {
@@ -130,6 +132,24 @@ export class Bootstrap {
      */
     addRenderStep(renderer) {
         this.#renderSteps.push(renderer);
+    }
+
+    /**
+     * @param {Particle} particle
+     */
+    addParticle(particle) {
+        this.#particles.push(particle);
+        this.addRigidBody(particle.body, particle.renderer)
+    }
+
+    destroyParticle(particle) {
+        const index = this.#particles.indexOf(particle);
+        if (index !== -1) {
+            this.#particles.splice(index, 1);
+            this.destroyBody(particle.body);
+        } else {
+            console.warn(`Unable to find particle ${particle}`);
+        }
     }
 
     /**
@@ -289,6 +309,15 @@ export class Bootstrap {
 
     #physicsStep(elapsed) {
         this.#solver.solve(elapsed * this.#slowMotion);
+        const delta = this.#solver.stepInfo.delta;
+
+        for (const particle of this.#particles) {
+            particle.step(delta);
+        }
+
+        for (const particle of this.#particles.filter(p => p.destroyed)) {
+            this.destroyParticle(particle);
+        }
     }
 
     #render(delta) {
