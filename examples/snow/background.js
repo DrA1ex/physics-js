@@ -5,10 +5,6 @@ import {AnimationAxis, AnimationDirection, AnimationMode, EasingFunctions, Param
 import {Layer, Path} from "../../lib/render/layer.js";
 import {LayeredRenderer} from "../../lib/render/background.js";
 
-const BackgroundPalette = [
-    "#b0cdd9",
-    "#e4f2f8"
-]
 
 const MountainPalette = [
     {fill: "#cbdfe7", stroke: "#bed7e1"},
@@ -32,19 +28,24 @@ export class BackgroundDrawer extends LayeredRenderer {
     #worldBox;
     #options;
 
+    #scale;
     #dpr;
     #canvasWidth;
     #canvasHeight;
 
+    #mountainSegments;
+
     /**
      * @param {BoundaryBox} worldBox
-     * @param {{useDpr?: boolean}} options
+     * @param {{useDpr?: boolean, scale?: number}} options
      */
     constructor(worldBox, options) {
         super();
 
         this.#worldBox = worldBox;
         this.#options = options;
+        this.#scale = options.scale ?? 1;
+        this.#mountainSegments = 200 * this.#scale;
 
         this.#initLayers();
     }
@@ -79,11 +80,10 @@ export class BackgroundDrawer extends LayeredRenderer {
         const bgLayer4 = this.#createLayer(false);
 
         // BG Layer 1
-        bgLayer1.canvas.style.background = `linear-gradient(10deg, ${BackgroundPalette.join(", ")})`;
         bgLayer1.addPath(new Path(
             SnowUtils.generateMountainPoints(
                 this.#worldBox,
-                this.#canvasHeight * 0.1, 100, 200,
+                this.#canvasHeight * 0.2, 100, this.#mountainSegments,
                 i => (Math.sin(i / 25) + Math.cos(i / 15) + Math.sin(i / 5)) / 3
             ), MountainPalette[0]
         ));
@@ -92,7 +92,7 @@ export class BackgroundDrawer extends LayeredRenderer {
         bgLayer2.addPath(new Path(
             SnowUtils.generateMountainPoints(
                 this.#worldBox,
-                this.#canvasHeight * 0.3, 100, 200,
+                this.#canvasHeight * 0.35, 100, this.#mountainSegments,
                 i => (Math.sin(i / 13) + Math.sin(i / 11) + Math.cos(i / 7) + Math.sin(i / 5)) / 4
             ), MountainPalette[1]
         ));
@@ -101,7 +101,7 @@ export class BackgroundDrawer extends LayeredRenderer {
         bgLayer3.addPath(new Path(
             SnowUtils.generateMountainPoints(
                 this.#worldBox,
-                this.#canvasHeight * 0.5, 70, 200,
+                this.#canvasHeight * 0.5, 70, this.#mountainSegments,
                 i => (Math.sin(i / 30) + Math.cos(i / 11) + Math.sin(i / 9)) / 3
             ), MountainPalette[2],
         ));
@@ -109,7 +109,7 @@ export class BackgroundDrawer extends LayeredRenderer {
         bgLayer3.addPath(new Path(
             SnowUtils.generateMountainPoints(
                 this.#worldBox,
-                this.#canvasHeight * 0.6, 70, 200,
+                this.#canvasHeight * 0.6, 70, this.#mountainSegments,
                 i => (Math.sin(i / 25) + Math.cos(i / 20) + Math.sin(i / 10)) / 3
             ), MountainPalette[3]
         ));
@@ -118,7 +118,7 @@ export class BackgroundDrawer extends LayeredRenderer {
         bgLayer4.addPath(new Path(
             SnowUtils.generateMountainPoints(
                 this.#worldBox,
-                this.#canvasHeight * 0.7, 40, 200,
+                this.#canvasHeight * 0.7, 40, this.#mountainSegments,
                 i => (Math.sin(i / 28) + Math.cos(i / 17) + Math.sin(i / 7)) / 3
             ), MountainPalette[4]
         ));
@@ -126,7 +126,7 @@ export class BackgroundDrawer extends LayeredRenderer {
         bgLayer4.addPath(new Path(
             SnowUtils.generateMountainPoints(
                 this.#worldBox,
-                this.#canvasHeight * 0.8, 40, 200,
+                this.#canvasHeight * 0.8, 40, this.#mountainSegments,
                 i => (Math.sin(i / 30) + Math.cos(i / 21) + Math.sin(i / 7)) / 3
             ), MountainPalette[5]
         ));
