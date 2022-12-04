@@ -11,15 +11,15 @@ html, body {
     height: 100%;
 }
 
-html {
-    background: #b0cdd9;
-}
-
 .bg-gradient {
-    background: linear-gradient(10deg, #b0cdd9 1.5%, #e4f2f8 100%);
+    background: linear-gradient(181deg, #b7cfe3 0%, #d9efff 20%);
 }
 
 body {
+    --mountain-color: #81afd2;
+    --tree-color: #6e92b7;
+    --snow-color: #d7ecff;
+    background: var(--mountain-color);
     box-sizing: border-box;
     padding: 0;
     margin: 0;
@@ -30,7 +30,7 @@ body {
 .foreground {
     z-index: 1001;
     mix-blend-mode: color-burn;
-    opacity: 20%;
+    opacity: 30%;
     pointer-events: none;
     user-select: none;
     -webkit-user-select: none;
@@ -55,7 +55,7 @@ body {
 }
 
 .loading-screen {
-    background: #b0cdd9;
+    background: var(--mountain-color);
     z-index: 2000;
     pointer-events: none;
     user-select: none;
@@ -69,8 +69,8 @@ body {
     -webkit-user-select: none;
     font-size: 4rem;
     font-family: fantasy;
-    color: #9dd9ea;
-    text-shadow: 3px 2px 6px #064352;
+    color: var(--snow-color);
+    text-shadow: 3px 2px 6px var(--tree-color);
 }
 
 pre {

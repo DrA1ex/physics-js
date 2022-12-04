@@ -16,8 +16,6 @@ export const Tags = {
 }
 
 export class SnowCloud {
-    static SnowColor = "#cce5ec";
-
     #initialized = false;
     #snowSpriteSeries = null;
     #snowInterval = null;

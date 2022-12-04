@@ -1,7 +1,7 @@
 import {LineBody, PolygonBody} from "../../lib/physics/body.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import {LineRenderer, PolygonBodyRenderer} from "../../lib/render/renderer.js";
-import {SnowCloud, Tags} from "./snow.js";
+import {Tags} from "./snow.js";
 import {SnowdriftCollider, UnionPolyBody} from "./misc.js";
 
 export class SnowDriftSegmentBody extends LineBody {
@@ -31,7 +31,7 @@ class SnowDriftRenderer extends PolygonBodyRenderer {
         this.renderDirection = false;
         this.fill = true;
         this.stroke = false;
-        this.fillStyle = SnowCloud.SnowColor;
+        this.fillStyle = window.getComputedStyle(document.body).getPropertyValue("--snow-color").trim();
 
         this.smooth = true;
         this.smoothCount = 4;

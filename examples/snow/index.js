@@ -51,6 +51,10 @@ BootstrapInstance.addConstraint(borderConstraint);
 const worldBox = borderConstraint.box;
 
 const bgDrawer = new BackgroundDrawer(worldBox, options);
+bgDrawer.updatePalette(
+    window.getComputedStyle(document.body).getPropertyValue("--mountain-color").trim(),
+    window.getComputedStyle(document.body).getPropertyValue("--tree-color").trim()
+);
 BootstrapInstance.addRenderStep(bgDrawer);
 
 const snowSpawnPeriod = 1000 / 160;

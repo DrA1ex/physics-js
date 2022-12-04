@@ -5,7 +5,6 @@
  * @return {Vector2[]}
  */
 import {Vector2} from "../../lib/utils/vector.js";
-import {BoundaryBox} from "../../lib/physics/body.js";
 
 export function findPeaks(data, invert = false, tolerance = 10) {
     const peaks = [];
@@ -23,7 +22,7 @@ export function findPeaks(data, invert = false, tolerance = 10) {
             ascending = true
         } else if (!ascending) {
             lastValue = item
-        } else if (peaks.length === 0 || lastValue.x - lastPeak.x > 10) {
+        } else if (peaks.length === 0 || lastValue.x - lastPeak.x > tolerance) {
             lastPeak = lastValue.copy().mul(factor);
             peaks.push(lastPeak);
             ascending = false;
@@ -46,11 +45,10 @@ export function generateMountainPoints(worldBox, yOffset, height, count, fn, bor
         x += xStep;
     }
 
-    const b = BoundaryBox.fromPoints(points);
     return [
-        new Vector2(b.left, worldBox.height),
+        new Vector2(worldBox.left, worldBox.height),
         ...points,
-        new Vector2(b.right, worldBox.height),
+        new Vector2(worldBox.right, worldBox.height),
     ];
 }
 

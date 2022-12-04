@@ -105,8 +105,8 @@ export class HouseFlue {
         this.#houseFlue.renderer.z = 1;
         this.#houseFlue.renderer.renderDirection = false;
         this.#houseFlue.renderer.fill = true;
-        this.#houseFlue.renderer.fillStyle = "#38626d";
-        this.#houseFlue.renderer.strokeStyle = "#568794";
+        this.#houseFlue.renderer.fillStyle = "#1f3c60";
+        this.#houseFlue.renderer.strokeStyle = "#4c5d75";
 
         engine.addForce(new SpotWindForce(
             new Vector2(x, y),

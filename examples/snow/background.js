@@ -4,22 +4,8 @@ import * as SnowUtils from "./utils.js";
 import {AnimationAxis, AnimationDirection, AnimationMode, EasingFunctions, ParametricAnimation, SkewPathAnimation} from "../../lib/render/animation.js";
 import {Layer, Path} from "../../lib/render/layer.js";
 import {LayeredRenderer} from "../../lib/render/background.js";
+import * as ColorUtils from "../common/color.js";
 
-
-const MountainPalette = [
-    {fill: "#cbdfe7", stroke: "#bed7e1"},
-    {fill: "#b7d0da", stroke: "#a9c7d3"},
-    {fill: "#a3c5d3", stroke: "#8fbecd"},
-    {fill: "#98bfce", stroke: "#85b9c9"},
-    {fill: "#8db6c5", stroke: "#84b2c2"},
-    {fill: "#85afbf", stroke: "#8db6c5"},
-]
-
-const TreePalette = [
-    {fill: "#c2d3dc", stroke: "transparent"},
-    {fill: "#618f9c", stroke: "transparent"},
-    {fill: "#618f9c", stroke: "transparent"}
-];
 
 const TreeWiggle = Math.PI / 180 * 10;
 const TreeWiggleSpeed = Math.PI / 180 * 2;
@@ -50,6 +36,28 @@ export class BackgroundDrawer extends LayeredRenderer {
         this.#initLayers();
     }
 
+    updatePalette(mountainColor, treeColor, mountainStep = -0.08, treeStep = -0.25) {
+        let factor = 0;
+        for (const layer of this.staticLayers) {
+            for (const path of layer.paths) {
+                path.setPalette({fill: ColorUtils.shadeColor(mountainColor, factor), stroke: "transparent"});
+
+                factor += mountainStep;
+            }
+        }
+
+        factor = 0;
+        for (const layer of this.dynamicLayers) {
+            for (const path of layer.paths) {
+                path.setPalette({fill: ColorUtils.shadeColor(treeColor, factor), stroke: "transparent"});
+            }
+
+            factor += treeStep;
+        }
+
+        this.invalidateContent();
+    }
+
     #createCanvas() {
         const canvas = document.createElement("canvas");
         canvas.classList.add("canvas");
@@ -73,7 +81,7 @@ export class BackgroundDrawer extends LayeredRenderer {
         // Create layers
         const bgLayer1 = this.#createLayer(false)
         const fgLayer1 = this.#createLayer(true);
-        const bgLayer2 = this.#createLayer(false);
+        const bgLayer2 = this.#createLayer(false)
         const fgLayer2 = this.#createLayer(true);
         const bgLayer3 = this.#createLayer(false);
         const fgLayer3 = this.#createLayer(true);
@@ -83,9 +91,9 @@ export class BackgroundDrawer extends LayeredRenderer {
         bgLayer1.addPath(new Path(
             SnowUtils.generateMountainPoints(
                 this.#worldBox,
-                this.#canvasHeight * 0.2, 100, this.#mountainSegments,
+                this.#canvasHeight * 0.25, 100, this.#mountainSegments,
                 i => (Math.sin(i / 25) + Math.cos(i / 15) + Math.sin(i / 5)) / 3
-            ), MountainPalette[0]
+            )
         ));
 
         // BG Layer 2
@@ -94,7 +102,7 @@ export class BackgroundDrawer extends LayeredRenderer {
                 this.#worldBox,
                 this.#canvasHeight * 0.35, 100, this.#mountainSegments,
                 i => (Math.sin(i / 13) + Math.sin(i / 11) + Math.cos(i / 7) + Math.sin(i / 5)) / 4
-            ), MountainPalette[1]
+            )
         ));
 
         // BG Layer 3
@@ -103,15 +111,16 @@ export class BackgroundDrawer extends LayeredRenderer {
                 this.#worldBox,
                 this.#canvasHeight * 0.5, 70, this.#mountainSegments,
                 i => (Math.sin(i / 30) + Math.cos(i / 11) + Math.sin(i / 9)) / 3
-            ), MountainPalette[2],
+            )
         ));
 
+        // BG Layer 3
         bgLayer3.addPath(new Path(
             SnowUtils.generateMountainPoints(
                 this.#worldBox,
                 this.#canvasHeight * 0.6, 70, this.#mountainSegments,
                 i => (Math.sin(i / 25) + Math.cos(i / 20) + Math.sin(i / 10)) / 3
-            ), MountainPalette[3]
+            )
         ));
 
         // BG Layer 4
@@ -120,7 +129,7 @@ export class BackgroundDrawer extends LayeredRenderer {
                 this.#worldBox,
                 this.#canvasHeight * 0.7, 40, this.#mountainSegments,
                 i => (Math.sin(i / 28) + Math.cos(i / 17) + Math.sin(i / 7)) / 3
-            ), MountainPalette[4]
+            )
         ));
 
         bgLayer4.addPath(new Path(
@@ -128,20 +137,20 @@ export class BackgroundDrawer extends LayeredRenderer {
                 this.#worldBox,
                 this.#canvasHeight * 0.8, 40, this.#mountainSegments,
                 i => (Math.sin(i / 30) + Math.cos(i / 21) + Math.sin(i / 7)) / 3
-            ), MountainPalette[5]
+            )
         ));
 
         // FG Layer 1
-        fgLayer1.addPaths(this.#generateTreePaths(50, TreePalette[0], bgLayer2.paths[0].points));
+        fgLayer1.addPaths(this.#generateTreePaths(50, SnowUtils.findPeaks(bgLayer2.paths[0].points)));
         this.#createTreeAnimation(fgLayer1, TreeWiggleSpeed / 2);
 
         // FG Layer 2
-        fgLayer2.addPaths(this.#generateTreePaths(75, TreePalette[1], bgLayer3.paths[0].points));
+        fgLayer2.addPaths(this.#generateTreePaths(75, SnowUtils.findPeaks(bgLayer3.paths[0].points)));
         this.#createTreeAnimation(fgLayer2, TreeWiggleSpeed / 1.5);
 
 
         // FG Layer 3
-        fgLayer3.addPaths(this.#generateTreePaths(150, TreePalette[2], bgLayer4.paths[0].points, 3));
+        fgLayer3.addPaths(this.#generateTreePaths(150, SnowUtils.findPeaks(bgLayer4.paths[0].points), 3));
         this.#createTreeAnimation(fgLayer3, TreeWiggleSpeed);
     }
 
@@ -169,14 +178,12 @@ export class BackgroundDrawer extends LayeredRenderer {
         }
     }
 
-    #generateTreePaths(height, palette, mountainPath, step = 1) {
+    #generateTreePaths(height, points, step = 1) {
         const treePaths = []
-        const mountainPeaks = SnowUtils.findPeaks(mountainPath);
-        for (let i = 0; i < mountainPeaks.length; i += step) {
-            const point = mountainPeaks[i];
+        for (let i = 0; i < points.length; i += step) {
+            const point = points[i];
             treePaths.push(new Path(
                 SnowUtils.generateTreePoints(point.x, point.y, height, height / 3, 2 + Math.floor(Math.random() * 3)),
-                palette
             ));
         }
 
