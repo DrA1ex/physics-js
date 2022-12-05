@@ -1,26 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<svg viewBox="1.008 282.97 343.66 216.362" width="400px" height="250px" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="1.008 282.97 343.66 216.362" width="400px" height="250px" xmlns="http://www.w3.org/2000/svg"
+     style="--roof-fill: #d7ecff; --roof-stroke: #b6d7f4; --house-fill: #274163; --house-stroke: #213650; --shadow-color: #142942; --light-color: #f5e38f; --highlight-color: #87a1c2;">
     <style>
         .roof {
-        fill: #d7ecff;
-        stroke: #b6d7f4;
+        fill: var(--roof-fill);
+        stroke: var(--roof-stroke);
         }
 
         .base {
-        fill: #274163;
-        stroke: #213650;
+        fill: var(--house-fill);
+        stroke: var(--house-stroke);
         }
 
         .shadows {
-        fill: #142942;
+        fill: var(--shadow-color);
         }
 
         .light {
-        fill: #f5e38f;
+        fill: var(--light-color);
         }
 
         .appearance {
-        stroke: #87a1c2;
+        stroke: var(--highlight-color);
         filter: drop-shadow(-1px 1px 0 #142942) blur(0.6px);
         }
 

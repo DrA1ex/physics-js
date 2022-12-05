@@ -31,7 +31,6 @@ class SnowDriftRenderer extends PolygonBodyRenderer {
         this.renderDirection = false;
         this.fill = true;
         this.stroke = false;
-        this.fillStyle = window.getComputedStyle(document.body).getPropertyValue("--snow-color").trim();
 
         this.smooth = true;
         this.smoothCount = 4;

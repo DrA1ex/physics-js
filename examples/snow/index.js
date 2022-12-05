@@ -13,6 +13,9 @@ import {SnowCloud, SnowDrift, Tags} from "./snow.js";
 import {WorldBorderCollider} from "./misc.js";
 import {HouseFlue} from "./flue.js";
 import {RoofSnowDriftBody} from "./body.js";
+import {SvgWrapper} from "../../lib/render/svg.js";
+import * as ColorUtils from "../common/color.js";
+import * as Utils from "./utils.js";
 
 CommonUtils.applyViewportScale([
     {media: "(orientation: landscape) and (max-width: 500px)", scale: 0.25},
@@ -51,10 +54,6 @@ BootstrapInstance.addConstraint(borderConstraint);
 const worldBox = borderConstraint.box;
 
 const bgDrawer = new BackgroundDrawer(worldBox, options);
-bgDrawer.updatePalette(
-    window.getComputedStyle(document.body).getPropertyValue("--mountain-color").trim(),
-    window.getComputedStyle(document.body).getPropertyValue("--tree-color").trim()
-);
 BootstrapInstance.addRenderStep(bgDrawer);
 
 const snowSpawnPeriod = 1000 / 160;
@@ -63,7 +62,8 @@ const snowPeriod = 1000 / 80;
 const snowdriftSegmentCount = 200;
 const snowDriftInitialHeight = 30;
 
-const houseSprite = new Sprite("./sprites/house.svg");
+const houseSvg = await SvgWrapper.fromRemote("./sprites/house.svg");
+const houseSprite = new Sprite(houseSvg.getSource());
 await houseSprite.wait();
 houseSprite.setupPreRendering(400, 250);
 
@@ -125,6 +125,41 @@ snowCloud.setupInteractions();
 snowCloud.letItSnow();
 
 const snowDrift = new SnowDrift(BootstrapInstance, worldBox, snowdriftSegmentCount, snowDriftInitialHeight);
+
+(function applyTheme() {
+    const smokeColor = Utils.getCssVariable("--smoke-color");
+    const snowColor = Utils.getCssVariable("--snow-color");
+
+    houseFlue.smokeSprite.setupFilter(smokeColor);
+    snowCloud.snowSprite.setupFilter(snowColor, "color");
+
+    snowDrift.snowDriftBody.renderer.fillStyle = snowColor;
+    roofSnowDrift.renderer.fillStyle = snowColor;
+
+    bgDrawer.updatePalette(Utils.getCssVariable("--mountain-color"), Utils.getCssVariable("--tree-color"));
+
+    const houseFill = Utils.getCssVariable("--house-fill");
+    const houseStroke = ColorUtils.shadeColor(houseFill, -0.2);
+
+    const houseShadow = ColorUtils.shadeColor(houseFill, -0.4);
+    const houseHighlights = ColorUtils.shadeColor(houseFill, 1.5);
+    const houseLight = Utils.getCssVariable("--light-color");
+
+    const roofFill = snowColor;
+    const roofStroke = ColorUtils.shadeColor(roofFill, -0.2);
+
+    houseFlue.houseFlue.renderer.fillStyle = houseFill;
+    houseFlue.houseFlue.renderer.strokeStyle = houseStroke;
+    houseSvg.setProperty("--house-fill", houseFill);
+    houseSvg.setProperty("--house-stroke", houseStroke);
+    houseSvg.setProperty("--shadow-color", houseShadow);
+    houseSvg.setProperty("--roof-fill", roofFill);
+    houseSvg.setProperty("--roof-stroke", roofStroke);
+    houseSvg.setProperty("--light-color", houseLight);
+    houseSvg.setProperty("--highlight-color", houseHighlights);
+
+    houseSprite.updateSource(houseSvg.getSource());
+})();
 
 BootstrapInstance.enableHotKeys();
 BootstrapInstance.run();

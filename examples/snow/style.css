@@ -12,13 +12,10 @@ html, body {
 }
 
 .bg-gradient {
-    background: linear-gradient(181deg, #b7cfe3 0%, #d9efff 20%);
+    background: var(--bacground);
 }
 
 body {
-    --mountain-color: #81afd2;
-    --tree-color: #6e92b7;
-    --snow-color: #d7ecff;
     background: var(--mountain-color);
     box-sizing: border-box;
     padding: 0;

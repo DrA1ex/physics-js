@@ -29,6 +29,9 @@ export class SnowCloud {
     #preSnowDuration;
     #border;
 
+    get snowSprite() {return this.#snowSpriteSeries;}
+
+
     /**
      * @param {Bootstrap} engine
      * @param {BoundaryBox} worldBox

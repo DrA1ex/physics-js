@@ -93,6 +93,10 @@ export class HouseFlue {
     #houseFlue;
     #smokeSprite;
 
+    get smokeSprite() {return this.#smokeSprite;}
+    get houseFlue() {return this.#houseFlue;}
+
+
     constructor(engine, x, y, width, height) {
         this.#engine = engine;
         this.#smokeSprite = new SpriteSeries("./sprites/smoke_animation.png", 8, 8, 128, 128);
@@ -106,8 +110,6 @@ export class HouseFlue {
         this.#houseFlue.renderer.z = 1;
         this.#houseFlue.renderer.renderDirection = false;
         this.#houseFlue.renderer.fill = true;
-        this.#houseFlue.renderer.fillStyle = "#1f3c60";
-        this.#houseFlue.renderer.strokeStyle = "#4c5d75";
 
         engine.addForce(new SpotWindForce(
             new Vector2(x, y),

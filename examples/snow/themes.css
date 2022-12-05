@@ -1,0 +1,14 @@
+.day-theme {
+    --bg-color-1: #b7cfe3;
+    --bg-color-2: #d9efff;
+
+    --bacground: linear-gradient(181deg, var(--bg-color-1) 0%, var(--bg-color-2) 20%);
+    --mountain-color: #81afd2;
+    --tree-color: #6e92b7;
+    --snow-color: #d7ecff;
+    --smoke-color: #93a6b9;
+
+    /* House sprite*/
+    --house-fill: #274163;
+    --light-color: #f5e38f;
+}

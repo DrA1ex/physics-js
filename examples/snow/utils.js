@@ -73,3 +73,11 @@ export function generateTreePoints(xOffset, yOffset, height, base, count) {
 
     return result;
 }
+
+export function getCssVariable(name) {
+    return window.getComputedStyle(document.body).getPropertyValue(name).trim();
+}
+
+export function setCssVariable(name, value) {
+    document.body.style.setProperty(name, value);
+}
