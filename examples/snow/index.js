@@ -63,7 +63,9 @@ const snowPeriod = 1000 / 80;
 const snowdriftSegmentCount = 200;
 const snowDriftInitialHeight = 30;
 
-const houseSprite = new Sprite("./sprites/house.png");
+const houseSprite = new Sprite("./sprites/house.svg");
+await houseSprite.wait();
+houseSprite.setupPreRendering(400, 250);
 
 const houseWidth = 400;
 const houseHeight = 250;

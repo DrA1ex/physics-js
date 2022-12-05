@@ -15,9 +15,13 @@ const SmokeState = {
 }
 
 class SmokeParticle extends Particle {
-    static SmokeSprite = new SpriteSeries("./sprites/smoke_animation.png", 8, 8, 128, 128);
 
-    constructor(x, y) {
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {SpriteSeries} smokeSprite
+     */
+    constructor(x, y, smokeSprite) {
         const smokeRadius = 5 + Math.random() * 15;
         const mass = 0.045 - Math.random() * 0.01;
         const smokeBody = new CircleBody(x, y, smokeRadius, mass)
@@ -27,10 +31,7 @@ class SmokeParticle extends Particle {
             .setRestitution(0)
             .setFriction(0);
 
-        const renderer = new AnimatedSpriteRenderer(
-            smokeBody, SmokeParticle.SmokeSprite, 12,
-            Math.floor(Math.random() * SmokeParticle.SmokeSprite.count)
-        );
+        const renderer = new AnimatedSpriteRenderer(smokeBody, smokeSprite, 12, Math.floor(Math.random() * smokeSprite.count));
         renderer.opacity = 0.05 + Math.random() * 0.25;
 
         super(smokeBody, renderer);
@@ -115,7 +116,8 @@ export class HouseFlue {
     }
 
     async init() {
-        return this.#smokeSprite.wait()
+        await this.#smokeSprite.wait();
+        this.#smokeSprite.setupPreRendering(1024, 1024);
     }
 
     run() {
@@ -130,6 +132,6 @@ export class HouseFlue {
         const x = this.#houseFlue.body.position.x;
         const y = this.#houseFlue.body.position.y - this.#houseFlue.body.height / 2;
 
-        this.#engine.addParticle(new SmokeParticle(x, y));
+        this.#engine.addParticle(new SmokeParticle(x, y, this.#smokeSprite));
     }
 }

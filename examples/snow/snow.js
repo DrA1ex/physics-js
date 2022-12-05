@@ -50,9 +50,10 @@ export class SnowCloud {
     }
 
     async init() {
-        this.#snowSpriteSeries = new SpriteSeries("./sprites/snowflakes.png", 6, 1, 32, 32, 3);
+        this.#snowSpriteSeries = new SpriteSeries("./sprites/snowflakes.svg", 9, 1, 32, 32, 3);
         await this.#snowSpriteSeries.wait();
 
+        this.#snowSpriteSeries.setupPreRendering(312, 32);
         this.#initialized = true;
     }
 
