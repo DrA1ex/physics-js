@@ -16,6 +16,8 @@ html, body {
 }
 
 body {
+    --bacground: linear-gradient(181deg, var(--bg-color-1) 0%, var(--bg-color-2) 20%);
+
     background: var(--mountain-color);
     box-sizing: border-box;
     padding: 0;

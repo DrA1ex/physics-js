@@ -22,7 +22,7 @@
 
         .appearance {
         stroke: var(--highlight-color);
-        filter: drop-shadow(-1px 1px 0 #142942) blur(0.6px);
+        filter: drop-shadow(-1px 1px 0 var(--shadow-color)) blur(0.6px);
         }
 
         .window {
@@ -31,11 +31,12 @@
 
         .shadows-blured {
         filter: blur(10px);
-        fill-opacity: 0.86;
+        fill-opacity: 0.6;
         }
 
         .light-highlight {
         filter: blur(20px);
+        opacity: 0.8;
         stroke: none;
         }
     </style>
@@ -50,7 +51,6 @@
         <path d="M 128.88 437.463 C 114.964 437.463 101.663 435.404 89.447 431.655 L 89.752 364.706 L 234.026 372.291 C 222.885 409.641 180.038 437.463 128.88 437.463 Z"/>
     </g>
     <g class="appearance" transform="matrix(1, 0, 0, 1.121586, -79.058578, 28.328045)">
-        <title>Appearance</title>
         <line x1="327.208" y1="269.338" x2="353.054" y2="268.69"/>
         <line x1="345.185" y1="280.645" x2="360.488" y2="279.963"/>
         <line x1="302.218" y1="296.162" x2="353.342" y2="295.089"/>

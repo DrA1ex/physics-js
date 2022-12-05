@@ -2,7 +2,6 @@
     --bg-color-1: #b7cfe3;
     --bg-color-2: #d9efff;
 
-    --bacground: linear-gradient(181deg, var(--bg-color-1) 0%, var(--bg-color-2) 20%);
     --mountain-color: #81afd2;
     --tree-color: #6e92b7;
     --snow-color: #d7ecff;
@@ -11,4 +10,45 @@
     /* House sprite*/
     --house-fill: #274163;
     --light-color: #f5e38f;
+}
+
+.sunset-theme {
+    --bg-color-1: #c0a995;
+    --bg-color-2: #dacbbb;
+
+    --mountain-color: #b1987f;
+    --tree-color: #756046;
+    --snow-color: #ebd2b4;
+    --smoke-color: #604d37;
+
+    /* House sprite*/
+    --house-fill: #553b24;
+    --light-color: #f1ede1;
+}
+
+.sunset-theme .loader-icon {
+    filter: sepia(1) hue-rotate(324deg);
+}
+
+.night-theme {
+    --bg-color-1: #575068;
+    --bg-color-2: #7c637a;
+
+    --mountain-color: #534960;
+    --tree-color: #0a090c;
+    --snow-color: #272031;
+    --smoke-color: #1c1622;
+
+    /* House sprite*/
+    --house-fill: #0e0c12;
+    --light-color: #fffeee;
+}
+
+.night-theme .loader-icon {
+    filter: sepia(1) hue-rotate(213deg) contrast(0.8);
+}
+
+.night-theme .foreground {
+    mix-blend-mode: overlay;
+    opacity: 50%;
 }

@@ -126,7 +126,7 @@ snowCloud.letItSnow();
 
 const snowDrift = new SnowDrift(BootstrapInstance, worldBox, snowdriftSegmentCount, snowDriftInitialHeight);
 
-(function applyTheme() {
+await (async function applyTheme() {
     const smokeColor = Utils.getCssVariable("--smoke-color");
     const snowColor = Utils.getCssVariable("--snow-color");
 
@@ -159,6 +159,7 @@ const snowDrift = new SnowDrift(BootstrapInstance, worldBox, snowdriftSegmentCou
     houseSvg.setProperty("--highlight-color", houseHighlights);
 
     houseSprite.updateSource(houseSvg.getSource());
+    await houseSprite.wait();
 })();
 
 BootstrapInstance.enableHotKeys();

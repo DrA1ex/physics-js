@@ -334,7 +334,7 @@ export class Bootstrap {
         ].sort((r1, r2) => r1.z - r2.z);
 
         for (const renderer of renderers) {
-            renderer.render(this.#ctx, this.state === State.play ? delta : 0);
+            renderer.render(this.#ctx, this.state === State.play ? delta : 1e-12);
         }
 
         if (this.#debug) {
