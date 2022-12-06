@@ -62,7 +62,7 @@ body {
     font-size: 4rem;
     font-family: fantasy;
     color: var(--snow-color);
-    text-shadow: 3px 2px 6px var(--tree-color);
+    text-shadow: 3px 2px 6px var(--tree-color-bottom);
 }
 
 pre {

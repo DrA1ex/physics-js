@@ -16,8 +16,28 @@
         fill: var(--shadow-color);
         }
 
+        .shadow-start {
+        stop-color: var(--shadow-color);
+        stop-opacity: 0.5;
+        }
+
+        .shadow-stop {
+        stop-color: var(--shadow-color);
+        stop-opacity: 0;
+        }
+
         .light {
         fill: var(--light-color);
+        }
+
+        .light-start {
+        stop-color: var(--light-color);
+        stop-opacity: 0.5;
+        }
+
+        .light-stop {
+        stop-color: var(--light-color);
+        stop-opacity: 0;
         }
 
         .appearance {
@@ -30,16 +50,31 @@
         }
 
         .shadows-blured {
+        fill: url("#shadow-gradient");
+        mix-blend-mode: hard_light;
         filter: blur(10px);
-        fill-opacity: 0.6;
         }
 
         .light-highlight {
-        filter: blur(20px);
-        opacity: 0.8;
+        fill: url("#light-gradient");
+        mix-blend-mode: hard-light;
         stroke: none;
+        filter: blur(10px);
         }
     </style>
+
+    <defs>
+        <radialGradient id="shadow-gradient">
+            <stop offset="50%" class="shadow-start"/>
+            <stop offset="100%" class="shadow-stop"/>
+        </radialGradient>
+
+        <radialGradient id="light-gradient">
+            <stop offset="0%" class="light-start"/>
+            <stop offset="100%" class="light-stop"/>
+        </radialGradient>
+    </defs>
+
 
     <path class="base"
           d="M 194.543 499.047 L 319.618 497.197 L 319.618 382.315 L 338.738 381.748 L 275.798 287.416 L 268.066 287.377 L 194.543 371.647 L 20.103 368.972 L 20.103 498.255 L 194.543 499.047 Z">
@@ -84,8 +119,8 @@
         <line x1="313.638" y1="419.379" x2="352.581" y2="418.695"/>
         <line x1="176.809" y1="420.306" x2="213.693" y2="420.52"/>
         <line x1="195.659" y1="402.556" x2="195.659" y2="436.476"/>
-        <ellipse class="light-highlight light" cx="193.386" cy="417.965" rx="42.363" ry="23.934"/>
-        <ellipse class="light-highlight light" cx="340.173" cy="351.067" rx="37.748" ry="27.966"
+        <ellipse class="light-highlight light" cx="193.386" cy="417.965" rx="70" ry="50"/>
+        <ellipse class="light-highlight light" cx="340.173" cy="351.067" rx="65" ry="45"
                  transform="matrix(0.999391, -0.0349, 0.0349, 0.999391, -21.389328, 80.334574)"/>
     </g>
     <path class="roof"
