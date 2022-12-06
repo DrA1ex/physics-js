@@ -1,6 +1,7 @@
-.day-theme {
+.default-theme, .day-theme {
     --bg-color-1: #b7cfe3;
-    --bg-color-2: #d9efff;
+    --bg-color-2: #b7cfe3;
+    --bg-color-3: #d9efff;
 
     --snow-color: #d7ecff;
     --smoke-color: #93a6b9;
@@ -16,9 +17,14 @@
     --light-color: #f5e38f;
 }
 
+.default-theme .bg-gradient, .day-theme .bg-gradient {
+    background: radial-gradient(circle at 80% 10%, var(--bg-color-1) 1.5%, var(--bg-color-2) 1.5%, var(--bg-color-3) 100%);
+}
+
 .sunset-theme {
-    --bg-color-1: #ffddae;
-    --bg-color-2: #948173;
+    --bg-color-1: #ffffe3;
+    --bg-color-2: #ffddae;
+    --bg-color-3: #948173;
 
     --snow-color: #efe2d2;
     --smoke-color: #8a6e54;
@@ -34,22 +40,18 @@
     --light-color: #fefdf8;
 }
 
+.sunset-theme .bg-gradient {
+    background: radial-gradient(circle at 80% 10%, var(--bg-color-1) 1.5%, var(--bg-color-2) 1.5%, var(--bg-color-3) 100%);
+}
+
 .sunset-theme .loader-icon {
     filter: sepia(1) hue-rotate(324deg);
 }
 
-.sunset-theme.bg-gradient, .sunset-theme .bg-gradient {
-    background: radial-gradient(circle at 80% 10%, #ffffe3 1.5%, var(--bg-color-1) 1.5%, var(--bg-color-2) 100%);
-}
-
-.sunset-theme .foreground {
-    mix-blend-mode: color-burn;
-    opacity: 20%;
-}
-
 .night-theme {
     --bg-color-1: #534554;
-    --bg-color-2: #6d516a;
+    --bg-color-2: #534554;
+    --bg-color-3: #6d516a;
 
     --snow-color: #272031;
     --smoke-color: #1c1622;
@@ -65,11 +67,10 @@
     --light-color: #fffeee;
 }
 
-.night-theme .loader-icon {
-    filter: sepia(1) hue-rotate(213deg) contrast(0.8);
+.night-theme .bg-gradient {
+    background: radial-gradient(circle at 80% 10%, var(--bg-color-1) 1.5%, var(--bg-color-2) 1.5%, var(--bg-color-3) 100%);
 }
 
-.night-theme .foreground {
-    mix-blend-mode: overlay;
-    opacity: 50%;
+.night-theme .loader-icon {
+    filter: sepia(1) hue-rotate(213deg) contrast(0.8);
 }

@@ -137,9 +137,71 @@ snowCloud.letItSnow();
 
 const snowDrift = new SnowDrift(BootstrapInstance, worldBox, snowdriftSegmentCount, snowDriftInitialHeight);
 
-async function applyTheme() {
-    const smokeColor = Utils.getCssVariable("--smoke-color");
-    const snowColor = Utils.getCssVariable("--snow-color");
+let lastProps = {};
+let initialized = false;
+await monitorChanges();
+
+BootstrapInstance.enableHotKeys();
+BootstrapInstance.run();
+
+document.getElementById("loader").style.display = "none";
+document.getElementById("hint").style.display = null;
+
+async function monitorChanges() {
+    const props = [
+        "--bg-color-1",
+        "--bg-color-2",
+        "--bg-color-3",
+        "--snow-color",
+        "--smoke-color",
+        "--mountain-color-top",
+        "--mountain-color-bottom",
+        "--tree-color-top",
+        "--tree-color-bottom",
+        "--house-fill",
+        "--light-color"
+    ];
+
+    let hasChanges = false;
+    const nextProps = {}
+    for (const prop of props) {
+        nextProps[prop] = Utils.getCssVariable(prop);
+        if (nextProps[prop] !== lastProps[prop]) {
+            hasChanges = true;
+        }
+    }
+
+    if (!initialized) {
+        await applyTheme(nextProps);
+        initialized = true;
+    } else if (hasChanges) {
+        for (let i = 0; i <= 1; i += 0.01) {
+            const current = {};
+            for (const key of Object.keys(nextProps)) {
+                current[key] = ColorUtils.colorBetween(lastProps[key], nextProps[key], i);
+            }
+
+            await applyTheme(current);
+            await new Promise(r => setTimeout(r, 1000 / 10));
+            console.log(`Step: ${i}`)
+        }
+    }
+
+    lastProps = nextProps;
+
+    if (snowOptions.watch) {
+        setTimeout(monitorChanges, 1000);
+    }
+}
+
+async function applyTheme(props) {
+    const bg = document.getElementById("background");
+    bg.style.setProperty("--bg-color-1", props["--bg-color-1"]);
+    bg.style.setProperty("--bg-color-2", props["--bg-color-2"]);
+    bg.style.setProperty("--bg-color-3", props["--bg-color-3"]);
+
+    const smokeColor = props["--smoke-color"];
+    const snowColor = props["--snow-color"];
 
     houseFlue.smokeSprite.setupFilter(smokeColor);
     snowCloud.snowSprite.setupFilter(snowColor, "color");
@@ -148,16 +210,16 @@ async function applyTheme() {
     roofSnowDrift.renderer.fillStyle = snowColor;
 
     bgDrawer.updatePalette(
-        Utils.getCssVariable("--mountain-color-top"), Utils.getCssVariable("--mountain-color-bottom"),
-        Utils.getCssVariable("--tree-color-top"), Utils.getCssVariable("--tree-color-bottom"),
+        props["--mountain-color-top"], props["--mountain-color-bottom"],
+        props["--tree-color-top"], props["--tree-color-bottom"],
     );
 
-    const houseFill = Utils.getCssVariable("--house-fill");
+    const houseFill = props["--house-fill"];
     const houseStroke = ColorUtils.shadeColor(houseFill, -0.2);
 
     const houseShadow = ColorUtils.shadeColor(houseFill, -0.4);
     const houseHighlights = ColorUtils.shadeColor(houseFill, 1.5);
-    const houseLight = Utils.getCssVariable("--light-color");
+    const houseLight = props["--light-color"];
 
     const roofFill = snowColor;
     const roofStroke = ColorUtils.shadeColor(roofFill, -0.2);
@@ -176,44 +238,10 @@ async function applyTheme() {
     await houseSprite.wait();
 }
 
-await applyTheme();
-
-BootstrapInstance.enableHotKeys();
-BootstrapInstance.run();
-
-document.getElementById("loader").style.display = "none";
-document.getElementById("hint").style.display = null;
-
-const lastProps = {};
-
-async function monitorChanges() {
-    const props = [
-        "--snow-color",
-        "--smoke-color",
-        "--mountain-color-top",
-        "--mountain-color-bottom",
-        "--tree-color-top",
-        "--tree-color-bottom",
-        "--house-fill",
-        "--light-color"
-    ];
-
-    let hasChanges = false;
-    for (const prop of props) {
-        const current = Utils.getCssVariable(prop);
-        if (current !== lastProps[prop]) {
-            lastProps[prop] = current;
-            hasChanges = true;
-        }
-    }
-
-    if (hasChanges) {
-        await applyTheme();
-    }
-
-    setTimeout(monitorChanges, 1000);
-}
-
-if (snowOptions.watch) {
-    await monitorChanges();
-}
+let i = 0;
+const themes = ["blue-theme", "sunset-theme", "night-theme"];
+const origClass = document.body.className;
+setInterval(() => {
+    document.body.className = `${origClass} ${themes[i % themes.length]}`;
+    i += 1;
+}, 10000);

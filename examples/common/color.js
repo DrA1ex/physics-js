@@ -1,3 +1,5 @@
+import * as Utils from "./utils.js";
+
 function parseHexColor(color) {
     const r = parseInt(color.substring(1, 3), 16) / 255;
     const g = parseInt(color.substring(3, 5), 16) / 255;
@@ -90,12 +92,14 @@ export function hslToRgb(h, s, l) {
  * @return {string}
  */
 export function colorBetween(color1, color2, factor) {
-    const hsl1 = rgbToHsl(color1);
-    const hsl2 = rgbToHsl(color2);
+    const rgb1 = parseHexColor(color1);
+    const rgb2 = parseHexColor(color2);
+    const out = new Array(3);
 
-    return hslToRgb(
-        hsl1.h + (hsl2.h - hsl1.h) * factor,
-        hsl1.s + (hsl2.s - hsl1.s) * factor,
-        hsl1.l + (hsl2.l - hsl1.l) * factor,
-    );
+    let i = 0;
+    for (const [c1, c2] of Utils.zip(rgb1, rgb2)) {
+        out[i++] = c1 - (c1 - c2) * factor;
+    }
+
+    return rgbToHex(...out);
 }
