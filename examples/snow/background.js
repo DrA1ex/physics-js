@@ -36,23 +36,31 @@ export class BackgroundDrawer extends LayeredRenderer {
         this.#initLayers();
     }
 
-    updatePalette(mountainColor, treeColor, mountainStep = -0.08, treeStep = -0.25) {
-        let factor = 0;
+    updatePalette(mountainColorTop, mountainColorBottom, treeColorTop, treeColorBottom) {
+        const mountainShadesCnt = this.staticLayers.reduce((p, c) => p + c.paths.length, 0) - 1;
+        let i = 0;
         for (const layer of this.staticLayers) {
             for (const path of layer.paths) {
-                path.setPalette({fill: ColorUtils.shadeColor(mountainColor, factor), stroke: "transparent"});
+                path.setPalette({
+                    fill: ColorUtils.colorBetween(mountainColorTop, mountainColorBottom, i / mountainShadesCnt),
+                    stroke: "transparent"
+                });
 
-                factor += mountainStep;
+                ++i;
             }
         }
 
-        factor = 0;
+        const treeShadesCnt = this.dynamicLayers.length - 1;
+        i = 0;
         for (const layer of this.dynamicLayers) {
             for (const path of layer.paths) {
-                path.setPalette({fill: ColorUtils.shadeColor(treeColor, factor), stroke: "transparent"});
+                path.setPalette({
+                    fill: ColorUtils.colorBetween(treeColorTop, treeColorBottom, i / treeShadesCnt),
+                    stroke: "transparent"
+                });
             }
 
-            factor += treeStep;
+            ++i;
         }
 
         this.invalidateContent();

@@ -2,10 +2,14 @@
     --bg-color-1: #b7cfe3;
     --bg-color-2: #d9efff;
 
-    --mountain-color: #81afd2;
-    --tree-color: #6e92b7;
     --snow-color: #d7ecff;
     --smoke-color: #93a6b9;
+
+    /* Background */
+    --mountain-color-top: #81afd1;
+    --mountain-color-bottom: #4d697e;
+    --tree-color-top: #6e92b7;
+    --tree-color-bottom: #2d4257;
 
     /* House sprite*/
     --house-fill: #274163;
@@ -13,31 +17,48 @@
 }
 
 .sunset-theme {
-    --bg-color-1: #c0a995;
-    --bg-color-2: #dacbbb;
+    --bg-color-1: #ffddae;
+    --bg-color-2: #948173;
 
-    --mountain-color: #b1987f;
-    --tree-color: #756046;
-    --snow-color: #ebd2b4;
-    --smoke-color: #604d37;
+    --snow-color: #efe2d2;
+    --smoke-color: #8a6e54;
+
+    /* Background */
+    --mountain-color-top: #bf9e7c;
+    --mountain-color-bottom: #e0c7a9;
+    --tree-color-top: #ae885b;
+    --tree-color-bottom: #624c34;
 
     /* House sprite*/
-    --house-fill: #553b24;
-    --light-color: #f1ede1;
+    --house-fill: #533920;
+    --light-color: #fefdf8;
 }
 
 .sunset-theme .loader-icon {
     filter: sepia(1) hue-rotate(324deg);
 }
 
-.night-theme {
-    --bg-color-1: #575068;
-    --bg-color-2: #7c637a;
+.sunset-theme.bg-gradient, .sunset-theme .bg-gradient {
+    background: radial-gradient(circle at 80% 10%, #ffffe3 1.5%, var(--bg-color-1) 1.5%, var(--bg-color-2) 100%);
+}
 
-    --mountain-color: #534960;
-    --tree-color: #0a090c;
+.sunset-theme .foreground {
+    mix-blend-mode: color-burn;
+    opacity: 20%;
+}
+
+.night-theme {
+    --bg-color-1: #534554;
+    --bg-color-2: #6d516a;
+
     --snow-color: #272031;
     --smoke-color: #1c1622;
+
+    /* Background */
+    --mountain-color-top: #4d455a;
+    --mountain-color-bottom: #2d2a33;
+    --tree-color-top: #05040a;
+    --tree-color-bottom: #05040a;
 
     /* House sprite*/
     --house-fill: #0e0c12;

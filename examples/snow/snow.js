@@ -77,14 +77,8 @@ export class SnowCloud {
             const y = this.#worldBox.top + this.#border + Math.random() * this.#worldBox.height;
             const point = new Vector2(x, y);
 
-            while (true) {
-                const intersectingBody = staticBodies.find(b => CollisionUtils.isPointInsideBoundary(point, b.boundary));
-                if (!intersectingBody) break;
-
-                const {boundary} = intersectingBody;
-                point.x = Math.random() < 0.5 ? boundary.left - Math.random() * this.#border * 4 : boundary.right + Math.random() * this.#border * 4;
-                point.y = boundary.top - Math.random() * this.#border * 4;
-            }
+            const intersectingBody = staticBodies.find(b => CollisionUtils.isPointInsideBoundary(point, b.boundary));
+            if (intersectingBody) continue;
 
             this.#emitSnow(point);
         }

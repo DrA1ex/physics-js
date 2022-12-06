@@ -36,6 +36,26 @@ const options = Params.parse({
     restitution: 0, friction: 0.8, overlap: 0.5, beta: 1, bias: 0.1, stats: false, tree_cnt: 13, dpr: !CommonUtils.isMobile()
 });
 
+const snowOptions = Params.parseSettings({
+    watch: {parser: Params.Parser.bool, param: "watch", default: false},
+    top: {parser: Params.Parser.float, param: "offset_top", default: -40},
+    bottom: {parser: Params.Parser.float, param: "offset_bottom", default: -1},
+
+    snowSpawnPeriod: {parser: Params.Parser.float, param: "snow_spawn_fq", default: 1000 / 160},
+    snowPeriod: {parser: Params.Parser.float, param: "snow_emit_fq", default: 1000 / 80},
+
+    snowdriftSegmentCount: {parser: Params.Parser.float, param: "sd_seg_cnt", default: 200},
+    snowDriftInitialHeight: {parser: Params.Parser.float, param: "sd_height", default: 30},
+
+    houseWidth: {parser: Params.Parser.float, param: "house_w", default: 400},
+    houseHeight: {parser: Params.Parser.float, param: "house_h", default: 250},
+    houseFlueWidth: {parser: Params.Parser.float, param: "flue_w", default: 30},
+
+    roofSnowDriftPointsCount: {parser: Params.Parser.float, param: "roof_seg_cnt", default: 30},
+    roofSnowDriftWidth: {parser: Params.Parser.float, param: "roof_sd_w", default: 246},
+    roofSnowDriftHeight: {parser: Params.Parser.float, param: "roof_sd_h", default: 10},
+});
+
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
 const {canvasWidth, canvasHeight} = BootstrapInstance;
 
@@ -43,8 +63,8 @@ BootstrapInstance.addForce(new GravityForce(options.gravity));
 BootstrapInstance.addForce(new ResistanceForce(options.resistance));
 BootstrapInstance.addForce(new GlobalWind(new Vector2(-1.2, -5)));
 
-const top = -40;
-const bottom = canvasHeight - 1;
+const top = snowOptions.top;
+const bottom = canvasHeight - snowOptions.bottom;
 
 const borderConstraint = new InsetConstraint(new BoundaryBox(-100, canvasWidth + 100, top, bottom), 0.3);
 borderConstraint.constraintBody.collider = new WorldBorderCollider(borderConstraint.constraintBody, BootstrapInstance);
@@ -56,24 +76,17 @@ const worldBox = borderConstraint.box;
 const bgDrawer = new BackgroundDrawer(worldBox, options);
 BootstrapInstance.addRenderStep(bgDrawer);
 
-const snowSpawnPeriod = 1000 / 160;
-const snowPeriod = 1000 / 80;
-
-const snowdriftSegmentCount = 200;
-const snowDriftInitialHeight = 30;
+const {snowSpawnPeriod, snowPeriod} = snowOptions;
+const {snowdriftSegmentCount, snowDriftInitialHeight} = snowOptions;
+const {houseWidth, houseHeight, houseFlueWidth} = snowOptions;
+const houseFlueHeight = houseFlueWidth * 1.7;
 
 const houseSvg = await SvgWrapper.fromRemote("./sprites/house.svg");
 const houseSprite = new Sprite(houseSvg.getSource());
 await houseSprite.wait();
-houseSprite.setupPreRendering(400, 250);
-
-const houseWidth = 400;
-const houseHeight = 250;
-const houseFlueWidth = 30;
-const houseFlueHeight = houseFlueWidth * 1.7;
+houseSprite.setupPreRendering(houseWidth, houseHeight);
 
 const houseSize = new Vector2(houseWidth, houseHeight);
-
 const roofPoly = [
     new Vector2(-0.4453, -0.0396), new Vector2(-0.5000, -0.0393),
     new Vector2(-0.3146, -0.4856), new Vector2(0.3031, -0.5000),
@@ -90,9 +103,7 @@ const roof = new PolygonBody(canvasWidth / 2, bottom - houseHeight / 2, roofPoly
     .setActive(false);
 BootstrapInstance.addRigidBody(roof).renderer.stroke = false;
 
-const roofSnowDriftPointsCount = 30;
-const roofSnowDriftWidth = 246;
-const roofSnowDriftHeight = 10;
+const {roofSnowDriftPointsCount, roofSnowDriftWidth, roofSnowDriftHeight} = snowOptions;
 
 const roofSnowDrift = new RoofSnowDriftBody(
     roof.position.x - 4, roof.boundary.top + 4,
@@ -126,7 +137,7 @@ snowCloud.letItSnow();
 
 const snowDrift = new SnowDrift(BootstrapInstance, worldBox, snowdriftSegmentCount, snowDriftInitialHeight);
 
-await (async function applyTheme() {
+async function applyTheme() {
     const smokeColor = Utils.getCssVariable("--smoke-color");
     const snowColor = Utils.getCssVariable("--snow-color");
 
@@ -136,7 +147,10 @@ await (async function applyTheme() {
     snowDrift.snowDriftBody.renderer.fillStyle = snowColor;
     roofSnowDrift.renderer.fillStyle = snowColor;
 
-    bgDrawer.updatePalette(Utils.getCssVariable("--mountain-color"), Utils.getCssVariable("--tree-color"));
+    bgDrawer.updatePalette(
+        Utils.getCssVariable("--mountain-color-top"), Utils.getCssVariable("--mountain-color-bottom"),
+        Utils.getCssVariable("--tree-color-top"), Utils.getCssVariable("--tree-color-bottom"),
+    );
 
     const houseFill = Utils.getCssVariable("--house-fill");
     const houseStroke = ColorUtils.shadeColor(houseFill, -0.2);
@@ -160,10 +174,46 @@ await (async function applyTheme() {
 
     houseSprite.updateSource(houseSvg.getSource());
     await houseSprite.wait();
-})();
+}
+
+await applyTheme();
 
 BootstrapInstance.enableHotKeys();
 BootstrapInstance.run();
 
 document.getElementById("loader").style.display = "none";
 document.getElementById("hint").style.display = null;
+
+const lastProps = {};
+
+async function monitorChanges() {
+    const props = [
+        "--snow-color",
+        "--smoke-color",
+        "--mountain-color-top",
+        "--mountain-color-bottom",
+        "--tree-color-top",
+        "--tree-color-bottom",
+        "--house-fill",
+        "--light-color"
+    ];
+
+    let hasChanges = false;
+    for (const prop of props) {
+        const current = Utils.getCssVariable(prop);
+        if (current !== lastProps[prop]) {
+            lastProps[prop] = current;
+            hasChanges = true;
+        }
+    }
+
+    if (hasChanges) {
+        await applyTheme();
+    }
+
+    setTimeout(monitorChanges, 1000);
+}
+
+if (snowOptions.watch) {
+    await monitorChanges();
+}

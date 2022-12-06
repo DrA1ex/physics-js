@@ -12,11 +12,11 @@ html, body {
 }
 
 .bg-gradient {
-    background: var(--bacground);
+    background: var(--background);
 }
 
 body {
-    --bacground: linear-gradient(181deg, var(--bg-color-1) 0%, var(--bg-color-2) 20%);
+    --background: linear-gradient(181deg, var(--bg-color-1) 0%, var(--bg-color-2) 20%);
 
     background: var(--mountain-color);
     box-sizing: border-box;
@@ -54,7 +54,7 @@ body {
 }
 
 .loading-screen {
-    background: var(--mountain-color);
+    background: var(--mountain-color-top);
     z-index: 2000;
     pointer-events: none;
     user-select: none;

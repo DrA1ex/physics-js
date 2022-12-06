@@ -14,6 +14,12 @@ function parseNumber(param, parser) {
     return null;
 }
 
+export const Parser = {
+    bool: parseBool,
+    int: (v) => parseNumber(v, Number.parseInt),
+    float: (v) => parseNumber(v, Number.parseFloat),
+}
+
 export function parse(def = {}) {
     const urlSearchParams = new URLSearchParams(window.location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
@@ -66,4 +72,20 @@ export function parse(def = {}) {
 
         return res;
     }, {});
+}
+
+export function parseSettings(config) {
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(urlSearchParams.entries());
+
+    const result = {}
+    for (const [key, {parser, param, default: def}] of Object.entries(config)) {
+        const value = parser(params[param] ?? def);
+
+        if (value !== null) {
+            result[key] = value;
+        }
+    }
+
+    return result;
 }

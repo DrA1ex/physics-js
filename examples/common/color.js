@@ -6,11 +6,42 @@ function parseHexColor(color) {
     return [r, g, b];
 }
 
+function rgbToHex(...colors) {
+    return "#" + colors.map(
+        v => Math.round(Math.max(0, Math.min(1, v) * 255))
+            .toString(16)
+            .padStart(2, '0')
+    ).join("");
+}
+
+function clampHueAngle(deg) {
+    if (deg > 360) {
+        const cnt = Math.floor(deg / 360);
+        return deg - cnt * 360;
+    }
+
+    if (deg < 0) {
+        const cnt = Math.ceil(-deg / 360);
+        return deg + cnt * 360;
+    }
+
+    return deg;
+}
+
+/**
+ * @param {string} color
+ * @param {number} factor
+ * @return {string}
+ */
 export function shadeColor(color, factor) {
     let [r, g, b] = parseHexColor(color);
     return rgbToHex(r * (1 + factor), g * (1 + factor), b * (1 + factor));
 }
 
+/**
+ * @param {string} color
+ * @return {{h: number, s: number, l: number}}
+ */
 export function rgbToHsl(color) {
     const [r, g, b] = parseHexColor(color)
 
@@ -21,12 +52,20 @@ export function rgbToHsl(color) {
     const lightness = minMaxSum / 2;
     const saturation = lightness > 0 && lightness < 1 ? (max - min) / (1 - Math.abs(minMaxSum - 1)) : 0;
     let hue = Math.round(Math.atan2(Math.sqrt(3) * (g - b), 2 * r - g - b) * 180 / Math.PI);
-    if (hue < 0) hue += 360;
+    hue = clampHueAngle(hue);
 
     return {h: hue, l: lightness, s: saturation};
 }
 
+/**
+ * @param {number} h
+ * @param {number} s
+ * @param {number} l
+ * @return {string}
+ */
 export function hslToRgb(h, s, l) {
+    h = clampHueAngle(h);
+
     const C = (1 - Math.abs(2 * l - 1)) * s;
     const hPrime = h / 60;
     const X = C * (1 - Math.abs(hPrime % 2 - 1));
@@ -44,10 +83,19 @@ export function hslToRgb(h, s, l) {
     return rgbToHex(...result);
 }
 
-export function rgbToHex(...colors) {
-    return "#" + colors.map(
-        v => Math.round(Math.max(0, Math.min(1, v) * 255))
-            .toString(16)
-            .padStart(2, '0')
-    ).join("");
+/**
+ * @param {string} color1
+ * @param {string} color2
+ * @param {number} factor
+ * @return {string}
+ */
+export function colorBetween(color1, color2, factor) {
+    const hsl1 = rgbToHsl(color1);
+    const hsl2 = rgbToHsl(color2);
+
+    return hslToRgb(
+        hsl1.h + (hsl2.h - hsl1.h) * factor,
+        hsl1.s + (hsl2.s - hsl1.s) * factor,
+        hsl1.l + (hsl2.l - hsl1.l) * factor,
+    );
 }
