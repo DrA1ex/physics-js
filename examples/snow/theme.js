@@ -3,7 +3,7 @@ import * as Utils from "./utils.js";
 import * as ColorUtils from "../common/color.js";
 
 export class ThemeManager {
-    static Themes = ["blue-theme", "sunset-theme", "night-theme"];
+    static Themes = ["dawn-theme", "day-theme", "sunset-theme", "dusk-theme", "night-theme"];
 
     #lastProps = {};
     #initialized = false;

@@ -21,13 +21,40 @@
     background: radial-gradient(circle at 80% 10%, var(--bg-color-1) 1.5%, var(--bg-color-2) 1.5%, var(--bg-color-3) 100%);
 }
 
+.dawn-theme {
+    --bg-color-1: #ddd6ce;
+    --bg-color-2: #ddd6ce;
+    --bg-color-3: #e3d2c7;
+
+    --snow-color: #d5d5c9;
+    --smoke-color: #737e76;
+
+    /* Background */
+    --mountain-color-top: #bbcbc5;
+    --mountain-color-bottom: #61645d;
+    --tree-color-top: #5b6c67;
+    --tree-color-bottom: #25332e;
+
+    /* House sprite*/
+    --house-fill: #3d3d31;
+    --light-color: #d9d5bf;
+}
+
+.dawn-theme .bg-gradient {
+    background: radial-gradient(circle at 80% 10%, var(--bg-color-1) 1.5%, var(--bg-color-2) 1.5%, var(--bg-color-3) 100%);
+}
+
+.dawn-theme .loader-icon {
+    filter: sepia(1) hue-rotate(160deg);
+}
+
 .sunset-theme {
     --bg-color-1: #ffffe3;
     --bg-color-2: #ffddae;
     --bg-color-3: #948173;
 
     --snow-color: #efe2d2;
-    --smoke-color: #8a6e54;
+    --smoke-color: #a6927f;
 
     /* Background */
     --mountain-color-top: #bf9e7c;
@@ -48,13 +75,13 @@
     filter: sepia(1) hue-rotate(324deg);
 }
 
-.night-theme {
+.dusk-theme {
     --bg-color-1: #534554;
     --bg-color-2: #534554;
     --bg-color-3: #6d516a;
 
-    --snow-color: #272031;
-    --smoke-color: #1c1622;
+    --snow-color: #463f50;
+    --smoke-color: #2d2634;
 
     /* Background */
     --mountain-color-top: #4d455a;
@@ -63,8 +90,35 @@
     --tree-color-bottom: #05040a;
 
     /* House sprite*/
-    --house-fill: #0e0c12;
+    --house-fill: #19171e;
     --light-color: #fffeee;
+}
+
+.dusk-theme .bg-gradient {
+    background: radial-gradient(circle at 80% 10%, var(--bg-color-1) 1.5%, var(--bg-color-2) 1.5%, var(--bg-color-3) 100%);
+}
+
+.dusk-theme .loader-icon {
+    filter: sepia(1) hue-rotate(213deg) contrast(0.8);
+}
+
+.night-theme {
+    --bg-color-1: #253646;
+    --bg-color-2: #253646;
+    --bg-color-3: #1e2830;
+
+    --snow-color: #2c363f;
+    --smoke-color: #121b23;
+
+    /* Background */
+    --mountain-color-top: #2a3b4b;
+    --mountain-color-bottom: #131c23;
+    --tree-color-top: #080f14;
+    --tree-color-bottom: #080f14;
+
+    /* House sprite*/
+    --house-fill: #101218;
+    --light-color: #dbe3e7;
 }
 
 .night-theme .bg-gradient {
@@ -72,5 +126,5 @@
 }
 
 .night-theme .loader-icon {
-    filter: sepia(1) hue-rotate(213deg) contrast(0.8);
+    filter: sepia(1) hue-rotate(165deg) contrast(0.6);
 }
