@@ -12,15 +12,17 @@ const scale = CommonUtils.applyViewportScale([
     {media: "(orientation: portrait) and (max-height: 1400px)", scale: 1},
 ]);
 
+const isMobile = CommonUtils.isMobile();
+
 const snowOptions = Params.parseSettings({
     watch: {parser: Params.Parser.bool, param: "watch", default: false},
     top: {parser: Params.Parser.float, param: "offset_top", default: -40},
     bottom: {parser: Params.Parser.float, param: "offset_bottom", default: -1},
 
-    snowSpawnPeriod: {parser: Params.Parser.float, param: "snow_spawn", default: 1000 / 160},
-    snowPeriod: {parser: Params.Parser.float, param: "snow_emit", default: 1000 / 80},
+    snowSpawnPeriod: {parser: Params.Parser.float, param: "snow_spawn", default: isMobile ? 1000 / 80 : 1000 / 160},
+    snowPeriod: {parser: Params.Parser.float, param: "snow_emit", default: isMobile ? 1000 / 40 : 1000 / 80},
 
-    snowdriftSegmentCount: {parser: Params.Parser.float, param: "sd_seg_cnt", default: 200},
+    snowdriftSegmentCount: {parser: Params.Parser.float, param: "sd_seg_cnt", default: isMobile ? 100 : 200},
     snowDriftInitialHeight: {parser: Params.Parser.float, param: "sd_height", default: 30},
 
     houseWidth: {parser: Params.Parser.float, param: "house_w", default: 400},
@@ -32,7 +34,9 @@ const snowOptions = Params.parseSettings({
     roofSnowDriftHeight: {parser: Params.Parser.float, param: "roof_sd_h", default: 10},
 
     treeWiggle: {parser: Params.Parser.float, param: "tree_wiggle", default: Math.PI / 180 * 10},
-    treeWiggleSpeed: {parser: Params.Parser.float, param: "tree_wiggle_speed", default: Math.PI / 180 * 2}
+    treeWiggleSpeed: {parser: Params.Parser.float, param: "tree_wiggle_speed", default: Math.PI / 180 * 2},
+
+    smokeInterval: {parser: Params.Parser.float, param: "smoke_interval", default: isMobile ? 1000 / 12 : 1000 / 24},
 });
 
 export default {
@@ -71,6 +75,11 @@ export default {
         Height: snowOptions.snowDriftInitialHeight,
     },
 
+    Smoke: {
+        Interval: snowOptions.smokeInterval,
+        Framerate: 12,
+    },
+
     Background: {
         Tree: {
             Wiggle: snowOptions.treeWiggle,
@@ -97,8 +106,8 @@ export default {
         ],
 
         Animation: {
-            Step: 0.01,
-            Interval: 1000 / 24,
+            Step: isMobile ? 0.1 : 0.01,
+            Interval: isMobile ? 1000 / 6 : 1000 / 24,
         }
     }
 };

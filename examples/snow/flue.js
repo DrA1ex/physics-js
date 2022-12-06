@@ -5,6 +5,7 @@ import {State} from "../common/bootstrap.js";
 import {AnimatedSpriteRenderer, SpriteSeries} from "../../lib/render/sprite.js";
 import {AnimationProperty, KeyframeType, Particle, ParticleState, StateKeyframe} from "../../lib/render/particle.js";
 import {SmokeCollider, SmokeState, Tags} from "./misc.js";
+import Settings from "./settings.js";
 
 class SmokeParticle extends Particle {
 
@@ -23,7 +24,7 @@ class SmokeParticle extends Particle {
             .setRestitution(0)
             .setFriction(0);
 
-        const renderer = new AnimatedSpriteRenderer(smokeBody, smokeSprite, 12, Math.floor(Math.random() * smokeSprite.count));
+        const renderer = new AnimatedSpriteRenderer(smokeBody, smokeSprite, Settings.Smoke.Framerate, Math.floor(Math.random() * smokeSprite.count));
         renderer.opacity = 0.05 + Math.random() * 0.25;
 
         super(smokeBody, renderer);
@@ -90,7 +91,7 @@ export class HouseFlue {
     }
 
     run() {
-        setInterval(this.#emitSmoke.bind(this), 1000 / 24);
+        setInterval(this.#emitSmoke.bind(this), Settings.Smoke.Interval);
     }
 
     #emitSmoke() {
