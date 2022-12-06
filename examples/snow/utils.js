@@ -83,5 +83,5 @@ export function setCssVariable(name, value) {
 }
 
 export async function delay(interval) {
-    new Promise(resolve => setTimeout(resolve, interval));
+    return new Promise(resolve => setTimeout(resolve, interval));
 }

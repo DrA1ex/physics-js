@@ -97,8 +97,8 @@ export default {
         ],
 
         Animation: {
-            Step: 0.02,
-            Interval: 1000 / 12,
+            Step: 0.01,
+            Interval: 1000 / 24,
         }
     }
 };
