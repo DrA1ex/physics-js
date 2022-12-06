@@ -1,8 +1,23 @@
-import {Collider, LineCollider} from "../../lib/physics/collider.js";
+import {CircleCollider, Collider, LineCollider} from "../../lib/physics/collider.js";
 import {PolygonBody} from "../../lib/physics/body.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import * as GeomUtils from "../../lib/utils/geom.js";
-import {Tags} from "./snow.js";
+
+export const SmokeState = {
+    born: 0,
+    active: 1,
+    fade: 2,
+    destroy: 3
+}
+
+export const Tags = {
+    snowflake: "snowflake",
+    snowDrift: "snowDrift",
+    smoke: "smoke",
+    worldBorder: "worldBorder",
+    houseFlue: "houseFlue",
+    house: "house",
+}
 
 export class SnowdriftCollider extends LineCollider {
     #onCollideHandler;
@@ -69,5 +84,30 @@ export class UnionPolyBody extends PolygonBody {
         }
 
         return this.#globalPoints;
+    }
+}
+
+export class SmokeCollider extends CircleCollider {
+    static #NoCollideTags = [Tags.snowflake, Tags.smoke, Tags.houseFlue, Tags.house];
+
+    #particle;
+    noCollide = false;
+
+    constructor(particle) {
+        super(particle.body);
+
+        this.#particle = particle;
+    }
+
+    shouldCollide(body2) {
+        if (this.noCollide) return false;
+
+        return SmokeCollider.#NoCollideTags.indexOf(body2.tag) === -1;
+    }
+
+    onCollide(collision, body2) {
+        if (body2.tag === Tags.worldBorder && !this.#particle.destroyed) {
+            this.#particle.setState(SmokeState.destroy);
+        }
     }
 }

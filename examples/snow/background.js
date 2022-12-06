@@ -5,10 +5,7 @@ import {AnimationAxis, AnimationDirection, AnimationMode, EasingFunctions, Param
 import {Layer, Path} from "../../lib/render/layer.js";
 import {LayeredRenderer} from "../../lib/render/background.js";
 import * as ColorUtils from "../common/color.js";
-
-
-const TreeWiggle = Math.PI / 180 * 10;
-const TreeWiggleSpeed = Math.PI / 180 * 2;
+import Settings from "./settings.js";
 
 export class BackgroundDrawer extends LayeredRenderer {
     #worldBox;
@@ -148,18 +145,19 @@ export class BackgroundDrawer extends LayeredRenderer {
             )
         ));
 
+        const wiggleSpeed = Settings.Background.Tree.WiggleSpeed;
         // FG Layer 1
         fgLayer1.addPaths(this.#generateTreePaths(50, SnowUtils.findPeaks(bgLayer2.paths[0].points)));
-        this.#createTreeAnimation(fgLayer1, TreeWiggleSpeed / 2);
+        this.#createTreeAnimation(fgLayer1, wiggleSpeed / 2);
 
         // FG Layer 2
         fgLayer2.addPaths(this.#generateTreePaths(75, SnowUtils.findPeaks(bgLayer3.paths[0].points)));
-        this.#createTreeAnimation(fgLayer2, TreeWiggleSpeed / 1.5);
+        this.#createTreeAnimation(fgLayer2, wiggleSpeed / 1.5);
 
 
         // FG Layer 3
         fgLayer3.addPaths(this.#generateTreePaths(150, SnowUtils.findPeaks(bgLayer4.paths[0].points), 3));
-        this.#createTreeAnimation(fgLayer3, TreeWiggleSpeed);
+        this.#createTreeAnimation(fgLayer3, wiggleSpeed);
     }
 
     #createLayer(dynamic) {
@@ -176,9 +174,10 @@ export class BackgroundDrawer extends LayeredRenderer {
     }
 
     #createTreeAnimation(layer, speed) {
-        const initial = Math.random() * TreeWiggle;
+        const wiggle = Settings.Background.Tree.Wiggle
+        const initial = Math.random() * wiggle;
         for (let path of layer.paths) {
-            const parametric = new ParametricAnimation(0, TreeWiggle, speed, initial)
+            const parametric = new ParametricAnimation(0, wiggle, speed, initial)
                 .setMode(AnimationMode.repeating)
                 .setDirection(AnimationDirection.both)
                 .setEasing(EasingFunctions.easeInOutSine);

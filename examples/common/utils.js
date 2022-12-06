@@ -103,6 +103,8 @@ export function applyViewportScale(mediaQueries, userSalable = 0) {
 
     const viewportAttData = `width=device-width, initial-scale=${pageScale}, maximum-scale=${pageScale}, user-scalable=${userSalable}, viewport-fit=cover`
     viewport.setAttribute('content', viewportAttData);
+
+    return pageScale;
 }
 
 export function isMobile() {
@@ -111,6 +113,12 @@ export function isMobile() {
     }
 
     return false;
+}
+
+export function installGlobalErrorHook() {
+    addEventListener("error", (event) => {
+        alert(event.error?.stack ?? event.message);
+    });
 }
 
 

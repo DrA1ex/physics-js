@@ -5,18 +5,13 @@ import {State} from "../common/bootstrap.js";
 import * as CollisionUtils from "../../lib/utils/geom.js";
 import {SpriteRenderer, SpriteSeries} from "../../lib/render/sprite.js";
 import {SnowDriftSegmentBody, SnowDriftStaticBody} from "./body.js";
-
-export const Tags = {
-    snowflake: "snowflake",
-    snowDrift: "snowDrift",
-    smoke: "smoke",
-    worldBorder: "worldBorder",
-    houseFlue: "houseFlue",
-    house: "house",
-}
+import {Tags} from "./misc.js";
+import Settings from "./settings.js";
 
 export class SnowCloud {
     #initialized = false;
+
+    /** @type {SpriteSeries} */
     #snowSpriteSeries = null;
     #snowInterval = null;
 
@@ -24,32 +19,18 @@ export class SnowCloud {
     #worldBox;
     #options;
 
-    #snowPeriod;
-    #emitSnowPeriod;
-    #preSnowDuration;
-    #border;
-
     get snowSprite() {return this.#snowSpriteSeries;}
 
 
     /**
      * @param {Bootstrap} engine
      * @param {BoundaryBox} worldBox
-     * @param {number} snowPeriod
-     * @param {number} emitSnowPeriod
-     * @param {number} [preSnowDuration=5]
-     * @param {number} [border = 10]
      * @param {Object} globalOptions
      */
-    constructor(engine, worldBox, {snowPeriod, emitSnowPeriod, preSnowDuration = 5, border = 10}, globalOptions) {
+    constructor(engine, worldBox, globalOptions) {
         this.#engine = engine;
         this.#worldBox = worldBox;
         this.#options = globalOptions;
-
-        this.#snowPeriod = snowPeriod;
-        this.#emitSnowPeriod = emitSnowPeriod;
-        this.#preSnowDuration = preSnowDuration;
-        this.#border = border;
     }
 
     async init() {
@@ -71,10 +52,12 @@ export class SnowCloud {
         }
 
         const staticBodies = this.#engine.rigidBodies.filter(b => !b.active);
-        const preSnowIterations = (1000 / this.#snowPeriod) * this.#preSnowDuration;
+        const preSnowIterations = (1000 / Settings.Snow.EmitPeriod) * Settings.Snow.InitDuration;
+        const border = Settings.Snow.Border;
+
         for (let i = 0; i < preSnowIterations; i++) {
-            const x = this.#border + Math.random() * (this.#worldBox.width - this.#border);
-            const y = this.#worldBox.top + this.#border + Math.random() * this.#worldBox.height;
+            const x = border + Math.random() * (this.#worldBox.width - border);
+            const y = this.#worldBox.top + border + Math.random() * this.#worldBox.height;
             const point = new Vector2(x, y);
 
             const intersectingBody = staticBodies.find(b => CollisionUtils.isPointInsideBoundary(point, b.boundary));
@@ -83,7 +66,7 @@ export class SnowCloud {
             this.#emitSnow(point);
         }
 
-        this.#snowInterval = setInterval(this.#periodicSnow.bind(this), this.#snowPeriod);
+        this.#snowInterval = setInterval(this.#periodicSnow.bind(this), Settings.Snow.EmitPeriod);
     }
 
     setupInteractions() {
@@ -104,7 +87,7 @@ export class SnowCloud {
 
                 this.#emitSnow(spawnPosition);
                 ++spawnedCount;
-            }, this.#emitSnowPeriod);
+            }, Settings.Snow.SpawnInterval);
 
             e.preventDefault();
         }
@@ -133,8 +116,9 @@ export class SnowCloud {
     #periodicSnow() {
         if (this.#engine.state !== State.play) return;
 
-        const x = this.#border + this.#worldBox.left + Math.random() * (this.#worldBox.width - this.#border * 2);
-        const y = this.#worldBox.top + Math.random() * this.#border / 2;
+        const border = Settings.Snow.Border;
+        const x = border + this.#worldBox.left + Math.random() * (this.#worldBox.width - border * 2);
+        const y = this.#worldBox.top + Math.random() * border / 2;
 
         this.#emitSnow(new Vector2(x, y));
     }
@@ -145,7 +129,7 @@ export class SnowCloud {
         const size = 2 + Math.floor(Math.random() * 4);
 
         const pos = Vector2.fromAngle(Math.random() * Math.PI * 2).scale(size).add(origin);
-        Utils.clampBodyPosition(pos, this.#worldBox, size, this.#border);
+        Utils.clampBodyPosition(pos, this.#worldBox, size, Settings.Snow.Border);
 
         const body = new CircleBody(pos.x, pos.y, size, size / 20)
             .setTag(Tags.snowflake)
@@ -162,32 +146,30 @@ export class SnowDrift {
     #worldBox;
 
     segments;
-    segmentsCount
-    initialHeight;
 
     snowDriftBody;
 
-    constructor(engine, worldBox, snowdriftSegmentCount, initialHeight) {
+    constructor(engine, worldBox) {
         this.#engine = engine;
         this.#worldBox = worldBox;
 
-        this.segmentsCount = snowdriftSegmentCount;
-        this.initialHeight = initialHeight;
-
-        this.segments = new Array(this.segmentsCount);
+        this.segments = new Array(Settings.SnowDrift.Segments);
         this.#init();
     }
 
     #init() {
-        const bottom = this.#worldBox.bottom - this.initialHeight / 2;
-        const xStep = this.#worldBox.width / this.segmentsCount;
-        const lastPos = new Vector2(this.#worldBox.left, this.initialHeight / 2);
+        const segmentsCount = Settings.SnowDrift.Segments;
+        const initialHeight = Settings.SnowDrift.Height;
 
-        for (let i = 0; i < this.segmentsCount; i++) {
+        const bottom = this.#worldBox.bottom - initialHeight / 2;
+        const xStep = this.#worldBox.width / segmentsCount;
+        const lastPos = new Vector2(this.#worldBox.left, initialHeight / 2);
+
+        for (let i = 0; i < segmentsCount; i++) {
             const x = lastPos.x + xStep;
 
-            const yOffset = (0.5 - Math.random()) * this.initialHeight / 2;
-            const y = Math.max(0, Math.min(this.initialHeight, lastPos.y + yOffset));
+            const yOffset = (0.5 - Math.random()) * initialHeight / 2;
+            const y = Math.max(0, Math.min(initialHeight, lastPos.y + yOffset));
 
             const segment = new SnowDriftSegmentBody(this, lastPos.x, bottom - lastPos.y, x, bottom - y);
             this.segments[i] = segment;
@@ -225,7 +207,7 @@ export class SnowDrift {
 
         // Forward
         currentGrowth = growthSize;
-        for (let i = index + 1; i < this.segmentsCount && currentGrowth >= 1e-3; i++) {
+        for (let i = index + 1; i < Settings.SnowDrift.Segments && currentGrowth >= 1e-3; i++) {
             const nextGrowth = growthSize * this.#fadeGrowth(i - index);
             this.segments[i].updatePoints(new Vector2(0, -currentGrowth), new Vector2(0, -nextGrowth));
             currentGrowth = nextGrowth;

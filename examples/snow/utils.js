@@ -81,3 +81,7 @@ export function getCssVariable(name) {
 export function setCssVariable(name, value) {
     document.body.style.setProperty(name, value);
 }
+
+export async function delay(interval) {
+    new Promise(resolve => setTimeout(resolve, interval));
+}

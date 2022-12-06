@@ -1,18 +1,10 @@
 import {CircleBody, RectBody} from "../../lib/physics/body.js";
 import {SpotWindForce} from "../../lib/physics/force.js";
 import {Vector2} from "../../lib/utils/vector.js";
-import {CircleCollider} from "../../lib/physics/collider.js";
-import {Tags} from "./snow.js";
 import {State} from "../common/bootstrap.js";
 import {AnimatedSpriteRenderer, SpriteSeries} from "../../lib/render/sprite.js";
 import {AnimationProperty, KeyframeType, Particle, ParticleState, StateKeyframe} from "../../lib/render/particle.js";
-
-const SmokeState = {
-    born: 0,
-    active: 1,
-    fade: 2,
-    destroy: 3
-}
+import {SmokeCollider, SmokeState, Tags} from "./misc.js";
 
 class SmokeParticle extends Particle {
 
@@ -59,31 +51,6 @@ class SmokeParticle extends Particle {
     onStateChanged(state) {
         if (state) {
             this.body.collider.noCollide = true;
-        }
-    }
-}
-
-class SmokeCollider extends CircleCollider {
-    static #NoCollideTags = [Tags.snowflake, Tags.smoke, Tags.houseFlue, Tags.house];
-
-    #particle;
-    noCollide = false;
-
-    constructor(particle) {
-        super(particle.body);
-
-        this.#particle = particle;
-    }
-
-    shouldCollide(body2) {
-        if (this.noCollide) return false;
-
-        return SmokeCollider.#NoCollideTags.indexOf(body2.tag) === -1;
-    }
-
-    onCollide(collision, body2) {
-        if (body2.tag === Tags.worldBorder && !this.#particle.destroyed) {
-            this.#particle.setState(SmokeState.destroy);
         }
     }
 }
