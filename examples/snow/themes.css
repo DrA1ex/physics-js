@@ -1,5 +1,8 @@
-.default-theme, .day-theme {
-    --bg-color-1: #b7cfe3;
+.default-theme {
+    --sun-position-x: 50%;
+    --sun-position-y: -20%;
+
+    --bg-color-1: #e5edf5;
     --bg-color-2: #b7cfe3;
     --bg-color-3: #d9efff;
 
@@ -17,58 +20,78 @@
     --light-color: #f5e38f;
 }
 
-.default-theme .bg-gradient, .day-theme .bg-gradient {
-    background: radial-gradient(circle at 80% 10%, var(--bg-color-1) 1.5%, var(--bg-color-2) 1.5%, var(--bg-color-3) 100%);
-}
-
 .dawn-theme {
-    --bg-color-1: #ddd6ce;
-    --bg-color-2: #ddd6ce;
-    --bg-color-3: #e3d2c7;
+    --sun-position-x: 0%;
+    --sun-position-y: 50%;
 
-    --snow-color: #d5d5c9;
+    --bg-color-1: #ffe7d5;
+    --bg-color-2: #fffbf8;
+    --bg-color-3: #f8ebd9;
+
+    --snow-color: #bcbcb0;
     --smoke-color: #737e76;
 
     /* Background */
-    --mountain-color-top: #bbcbc5;
-    --mountain-color-bottom: #61645d;
-    --tree-color-top: #5b6c67;
+    --mountain-color-top: #a5b4ae;
+    --mountain-color-bottom: #464843;
+    --tree-color-top: #7f8f8a;
     --tree-color-bottom: #25332e;
 
     /* House sprite*/
-    --house-fill: #3d3d31;
+    --house-fill: #25322e;
     --light-color: #d9d5bf;
-}
-
-.dawn-theme .bg-gradient {
-    background: radial-gradient(circle at 80% 10%, var(--bg-color-1) 1.5%, var(--bg-color-2) 1.5%, var(--bg-color-3) 100%);
 }
 
 .dawn-theme .loader-icon {
     filter: sepia(1) hue-rotate(160deg);
 }
 
-.sunset-theme {
-    --bg-color-1: #ffffe3;
-    --bg-color-2: #ffddae;
-    --bg-color-3: #948173;
+.twilight-theme {
+    --sun-position-x: 30%;
+    --sun-position-y: 20%;
 
-    --snow-color: #efe2d2;
-    --smoke-color: #a6927f;
+    --bg-color-1: #fff9f1;
+    --bg-color-2: #f5f1ea;
+    --bg-color-3: #f9e7d1;
+
+    --snow-color: #c8eaf1;
+    --smoke-color: #37799b;
 
     /* Background */
-    --mountain-color-top: #bf9e7c;
-    --mountain-color-bottom: #e0c7a9;
-    --tree-color-top: #ae885b;
-    --tree-color-bottom: #624c34;
+    --mountain-color-top: #7cd4ed;
+    --mountain-color-bottom: #1a6e9c;
+    --tree-color-top: #6abada;
+    --tree-color-bottom: #023048;
 
     /* House sprite*/
-    --house-fill: #533920;
-    --light-color: #fefdf8;
+    --house-fill: #0a4c7b;
+    --light-color: #fcf3e7;
 }
 
-.sunset-theme .bg-gradient {
-    background: radial-gradient(circle at 80% 10%, var(--bg-color-1) 1.5%, var(--bg-color-2) 1.5%, var(--bg-color-3) 100%);
+.twilight-theme .loader-icon {
+    filter: sepia(1) hue-rotate(100deg);
+}
+
+.sunset-theme {
+    --sun-position-x: 70%;
+    --sun-position-y: 20%;
+
+    --bg-color-1: #ffffe3;
+    --bg-color-2: #ffe6c0;
+    --bg-color-3: #fdc975;
+
+    --snow-color: #eac7bf;
+    --smoke-color: #e29b7e;
+
+    /* Background */
+    --mountain-color-top: #feb060;
+    --mountain-color-bottom: #aa473f;
+    --tree-color-top: #e79451;
+    --tree-color-bottom: #a84f3a;
+
+    /* House sprite*/
+    --house-fill: #491a10;
+    --light-color: #fdedcb;
 }
 
 .sunset-theme .loader-icon {
@@ -76,26 +99,25 @@
 }
 
 .dusk-theme {
-    --bg-color-1: #534554;
-    --bg-color-2: #534554;
-    --bg-color-3: #6d516a;
+    --sun-position-x: 100%;
+    --sun-position-y: 50%;
 
-    --snow-color: #463f50;
-    --smoke-color: #2d2634;
+    --bg-color-1: #fecbc8;
+    --bg-color-2: #bc8fab;
+    --bg-color-3: #404972;
+
+    --snow-color: #7581b8;
+    --smoke-color: #313b61;
 
     /* Background */
-    --mountain-color-top: #4d455a;
-    --mountain-color-bottom: #2d2a33;
-    --tree-color-top: #05040a;
-    --tree-color-bottom: #05040a;
+    --mountain-color-top: #84759c;
+    --mountain-color-bottom: #2e3967;
+    --tree-color-top: #5c547c;
+    --tree-color-bottom: #1f1842;
 
     /* House sprite*/
-    --house-fill: #19171e;
+    --house-fill: #222a50;
     --light-color: #fffeee;
-}
-
-.dusk-theme .bg-gradient {
-    background: radial-gradient(circle at 80% 10%, var(--bg-color-1) 1.5%, var(--bg-color-2) 1.5%, var(--bg-color-3) 100%);
 }
 
 .dusk-theme .loader-icon {
@@ -103,7 +125,10 @@
 }
 
 .night-theme {
-    --bg-color-1: #253646;
+    --sun-position-x: 50%;
+    --sun-position-y: 80%;
+
+    --bg-color-1: #dbe3e7;
     --bg-color-2: #253646;
     --bg-color-3: #1e2830;
 
@@ -119,10 +144,6 @@
     /* House sprite*/
     --house-fill: #101218;
     --light-color: #dbe3e7;
-}
-
-.night-theme .bg-gradient {
-    background: radial-gradient(circle at 80% 10%, var(--bg-color-1) 1.5%, var(--bg-color-2) 1.5%, var(--bg-color-3) 100%);
 }
 
 .night-theme .loader-icon {

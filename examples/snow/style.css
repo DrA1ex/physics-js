@@ -19,13 +19,8 @@ body {
     -webkit-user-select: none;
 }
 
-.foreground {
-    z-index: 1001;
-    mix-blend-mode: color-burn;
-    opacity: 30%;
-    pointer-events: none;
-    user-select: none;
-    -webkit-user-select: none;
+.bg-gradient {
+    background: radial-gradient(circle at var(--sun-position-x) var(--sun-position-y), var(--bg-color-1) 3%, var(--bg-color-2) 3%, var(--bg-color-3) 80%);
 }
 
 .canvas {

@@ -4,7 +4,7 @@ import * as SnowUtils from "./utils.js";
 import {AnimationAxis, AnimationDirection, AnimationMode, EasingFunctions, ParametricAnimation, SkewPathAnimation} from "../../lib/render/animation.js";
 import {Layer, Path} from "../../lib/render/layer.js";
 import {LayeredRenderer} from "../../lib/render/background.js";
-import * as ColorUtils from "../common/color.js";
+import * as ColorUtils from "../../lib/utils/color.js";
 import Settings from "./settings.js";
 
 export class BackgroundDrawer extends LayeredRenderer {

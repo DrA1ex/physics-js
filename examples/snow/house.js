@@ -6,7 +6,7 @@ import {Tags} from "./misc.js";
 import {RoofSnowDriftBody} from "./body.js";
 import {HouseFlue} from "./flue.js";
 import Settings from "./settings.js";
-import * as ColorUtils from "../common/color.js";
+import * as ColorUtils from "../../lib/utils/color.js";
 
 const HouseSize = new Vector2(Settings.House.Width, Settings.House.Height);
 const RoofPoly = [

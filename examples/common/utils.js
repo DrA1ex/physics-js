@@ -127,14 +127,3 @@ export function* reversed(array) {
         yield array[i];
     }
 }
-
-export function* zip(array1, array2) {
-    const size = Math.max(array1.length, array2.length);
-
-    for (let i = 0; i < size; i++) {
-        const item1 = i < array1.length ? array1[i] : null
-        const item2 = i < array2.length ? array2[i] : null
-
-        yield [item1, item2];
-    }
-}

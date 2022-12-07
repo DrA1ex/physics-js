@@ -1,9 +1,9 @@
 import Settings from "./settings.js";
 import * as Utils from "./utils.js";
-import * as ColorUtils from "../common/color.js";
+import {EasingFunctions} from "../../lib/render/animation.js";
 
 export class ThemeManager {
-    static Themes = ["dawn-theme", "day-theme", "sunset-theme", "dusk-theme", "night-theme"];
+    static Themes = ["dawn-theme", "twilight-theme", "day-theme", "sunset-theme", "dusk-theme", "night-theme"];
 
     #lastProps = {};
     #initialized = false;
@@ -32,14 +32,18 @@ export class ThemeManager {
         await this.updateStyling();
     }
 
-    async updateStyling() {
+    async updateStyling(animated = true) {
         const [nextProps, hasChanges] = this.#collectStyleProps(this.#lastProps);
 
         if (!this.#initialized) {
             await this.#applyTheme(nextProps)
             this.#initialized = true;
         } else if (hasChanges) {
-            await this.#animateThemeChanges(this.#lastProps, nextProps);
+            if (animated) {
+                await this.#animateThemeChanges(this.#lastProps, nextProps);
+            } else {
+                await this.#applyTheme(nextProps);
+            }
         }
 
         this.#lastProps = nextProps;
@@ -50,7 +54,7 @@ export class ThemeManager {
     }
 
     async #watchImpl() {
-        await this.updateStyling();
+        await this.updateStyling(false);
         setTimeout(this.#watchImpl.bind(this), Settings.Style.WatchInterval);
     }
 
@@ -61,7 +65,7 @@ export class ThemeManager {
     #collectStyleProps(lastProps) {
         const nextProps = {}
         let hasChanges = false;
-        for (const prop of Settings.Style.Properties) {
+        for (const prop of Object.keys(Settings.Style.Properties)) {
             nextProps[prop] = Utils.getCssVariable(prop);
             if (nextProps[prop] !== lastProps[prop]) {
                 hasChanges = true;
@@ -76,10 +80,13 @@ export class ThemeManager {
      * @return {Promise}
      */
     async #applyTheme(props) {
-        const bg = document.getElementById("background");
+        const bg = document.getElementById("container");
         bg.style.setProperty("--bg-color-1", props["--bg-color-1"]);
         bg.style.setProperty("--bg-color-2", props["--bg-color-2"]);
         bg.style.setProperty("--bg-color-3", props["--bg-color-3"]);
+
+        bg.style.setProperty("--sun-position-x", props["--sun-position-x"]);
+        bg.style.setProperty("--sun-position-y", props["--sun-position-y"]);
 
         const snowColor = props["--snow-color"];
         this.#snowCloud.snowSprite.setupFilter(snowColor, "color");
@@ -95,17 +102,26 @@ export class ThemeManager {
 
     /**
      * @param {Object} lastProps
-     * @param {Object} props
+     * @param {Object} nextProps
      * @return {Promise}
      */
-    async #animateThemeChanges(lastProps, props) {
-        for (let i = 0; i <= 1; i += Settings.Style.Animation.Step) {
-            const current = {};
-            for (const key of Object.keys(props)) {
-                current[key] = ColorUtils.colorBetween(lastProps[key], props[key], i);
+    async #animateThemeChanges(lastProps, nextProps) {
+        const animations = {};
+        for (const [key, animationType] of Object.entries(Settings.Style.Properties)) {
+            animations[key] = new animationType(lastProps[key], nextProps[key], Settings.Style.Animation.Step)
+                .setEasing(EasingFunctions.easeInOutCubic);
+        }
+
+        let hasNextValue = true;
+        const currentProps = {};
+        while (hasNextValue) {
+            hasNextValue = false;
+            for (const [key, animation] of Object.entries(animations)) {
+                currentProps[key] = animation.next(Settings.Style.Animation.Interval / 1000);
+                hasNextValue ||= animation.hasNextValue();
             }
 
-            await this.#applyTheme(current);
+            await this.#applyTheme(currentProps);
             await Utils.delay(Settings.Style.Animation.Interval);
         }
     }

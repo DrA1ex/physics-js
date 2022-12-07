@@ -1,5 +1,6 @@
 import * as Params from "../common/params.js";
 import * as CommonUtils from "../common/utils.js";
+import {ColorAnimation, PercentAnimation} from "../../lib/render/animation.js";
 
 const scale = CommonUtils.applyViewportScale([
     {media: "(orientation: landscape) and (max-width: 500px)", scale: 0.25},
@@ -91,22 +92,25 @@ export default {
         Watch: snowOptions.watch,
         WatchInterval: 500,
 
-        Properties: [
-            "--bg-color-1",
-            "--bg-color-2",
-            "--bg-color-3",
-            "--snow-color",
-            "--smoke-color",
-            "--mountain-color-top",
-            "--mountain-color-bottom",
-            "--tree-color-top",
-            "--tree-color-bottom",
-            "--house-fill",
-            "--light-color"
-        ],
+        /** @type {{[key: string]: IParametricAnimation.constructor}} */
+        Properties: {
+            "--sun-position-x": PercentAnimation,
+            "--sun-position-y": PercentAnimation,
+            "--bg-color-1": ColorAnimation,
+            "--bg-color-2": ColorAnimation,
+            "--bg-color-3": ColorAnimation,
+            "--snow-color": ColorAnimation,
+            "--smoke-color": ColorAnimation,
+            "--mountain-color-top": ColorAnimation,
+            "--mountain-color-bottom": ColorAnimation,
+            "--tree-color-top": ColorAnimation,
+            "--tree-color-bottom": ColorAnimation,
+            "--house-fill": ColorAnimation,
+            "--light-color": ColorAnimation,
+        },
 
         Animation: {
-            Step: isMobile ? 0.1 : 0.01,
+            Step: isMobile ? 1 : 0.25,
             Interval: isMobile ? 1000 / 6 : 1000 / 24,
         }
     }
