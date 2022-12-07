@@ -3,8 +3,6 @@ import * as Utils from "./utils.js";
 import {EasingFunctions} from "../../lib/render/animation.js";
 
 export class ThemeManager {
-    static Themes = ["dawn-theme", "twilight-theme", "day-theme", "sunset-theme", "dusk-theme", "night-theme"];
-
     #lastProps = {};
     #initialized = false;
 
@@ -26,7 +24,7 @@ export class ThemeManager {
      * @return {Promise}
      */
     async setTheme(name) {
-        document.body.classList.remove(...ThemeManager.Themes);
+        document.body.classList.remove(...Settings.Style.Themes);
         document.body.classList.add(name);
 
         await this.updateStyling();

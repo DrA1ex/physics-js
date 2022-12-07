@@ -92,6 +92,8 @@ export default {
         Watch: snowOptions.watch,
         WatchInterval: 500,
 
+        Themes: ["dawn-theme", "twilight-theme", "day-theme", "sunset-theme", "dusk-theme", "night-theme"],
+
         /** @type {{[key: string]: IParametricAnimation.constructor}} */
         Properties: {
             "--sun-position-x": PercentAnimation,
