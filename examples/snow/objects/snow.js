@@ -1,12 +1,17 @@
-import {Vector2} from "../../../lib/utils/vector.js";
 import {CircleBody} from "../../../lib/physics/body.js";
-import * as Utils from "../../common/utils.js";
-import {State} from "../../common/bootstrap.js";
-import * as CollisionUtils from "../../../lib/utils/geom.js";
 import {SpriteRenderer, SpriteSeries} from "../../../lib/render/sprite.js";
+import * as CollisionUtils from "../../../lib/utils/geom.js";
+import {Vector2} from "../../../lib/utils/vector.js";
+
+import {State} from "../../common/bootstrap.js";
+import * as Utils from "../../common/utils.js";
+
+import Settings from "../settings.js";
 import {SnowDriftSegmentBody, SnowDriftStaticBody} from "./body.js";
 import {Tags} from "./misc.js";
-import Settings from "../settings.js";
+import * as SnowUtils from "../utils/common.js";
+import * as CommonUtils from "../../../lib/utils/common.js";
+
 
 export class SnowCloud {
     #initialized = false;
@@ -145,6 +150,7 @@ export class SnowDrift {
     #engine;
     #worldBox;
 
+    /** @type{SnowDriftSegmentBody[]} */
     segments;
 
     snowDriftBody;
@@ -181,10 +187,17 @@ export class SnowDrift {
 
         this.snowDriftBody = new SnowDriftStaticBody(this.segments, this.#worldBox);
         this.#engine.addRenderStep(this.snowDriftBody.renderer);
+
+        const _snowDriftReducer = async () => {
+            await this.#reduceSnowDrift();
+            setTimeout(_snowDriftReducer, Settings.Snow.Reducing.CheckInterval);
+        }
+
+        setTimeout(_snowDriftReducer, Settings.Snow.Reducing.CheckInterval);
     }
 
     onCollide(collision, segment, body) {
-        const growthSizeFactor = 0.02;
+        const growthSizeFactor = Settings.Snow.GrowthFactor;
         if (collision.result && body.active && body.tag === Tags.snowflake) {
             this.#growth(this.segments.indexOf(segment), body.radius * growthSizeFactor);
 
@@ -218,5 +231,73 @@ export class SnowDrift {
         // Ease out cubic
         const x = k / 30;
         return (1 - x) * (1 - x);
+    }
+
+    async #reduceSnowDrift() {
+        let min = Number.POSITIVE_INFINITY, max = Number.NEGATIVE_INFINITY;
+        for (const segment of this.segments) {
+            const height = this.#worldBox.bottom - segment.boundary.top;
+            if (height < min) min = height;
+            if (height > max) max = height;
+        }
+
+        if (max > Settings.SnowDrift.MaxHeight) {
+            const yOffset = this.#worldBox.bottom - Settings.SnowDrift.Height / 2;
+            const size = Math.max(1, max - min);
+
+            const deltas = new Array(this.segments.length);
+            const prevHeights = [0, 0];
+            const xStep = this.segments[0].points[1].x - this.segments[0].points[0].x;
+            for (let i = 0; i < this.segments.length; i++) {
+                const segment = this.segments[i];
+
+                const height = this.#worldBox.bottom - segment.points[1].y - min;
+                const desiredHeight = (height / size) * Settings.SnowDrift.Height;
+                let relativeHeight = CommonUtils.clamp(
+                    -Settings.SnowDrift.Height / 3, Settings.SnowDrift.Height / 3,
+                    this.#getHeightDifference(xStep, prevHeights[0], prevHeights[1], height)
+                );
+
+                deltas[i] = Math.max(0, yOffset - segment.points[1].y - desiredHeight - relativeHeight);
+                prevHeights[0] = prevHeights[1];
+                prevHeights[1] = height;
+            }
+
+            const stepCount = Settings.Snow.Reducing.StepCount;
+            const step = 1 / stepCount;
+            for (let k = 0; k < stepCount; k++) {
+                let prevDelta = deltas[0];
+                for (let i = 0; i < deltas.length; i++) {
+                    const delta = deltas[i];
+                    this.segments[i].updatePoints(
+                        new Vector2(0, prevDelta * step),
+                        new Vector2(0, delta * step)
+                    );
+
+                    prevDelta = delta;
+                }
+
+                await SnowUtils.delay(Settings.Snow.Reducing.AnimationInterval);
+            }
+        }
+    }
+
+    #getHeightDifference(xStep, y1, y2, y3) {
+        if (y2 === y3) {
+            return 0;
+        }
+
+        const p1 = new Vector2(0, y1);
+        const p2 = new Vector2(xStep, y2);
+        const p3 = new Vector2(xStep * 2, y3);
+
+        const vector1to2 = p2.delta(p1);
+        const vector1to3 = p3.delta(p1);
+
+        const length1to2 = vector1to2.length();
+        const angle1 = vector1to3.angle(vector1to2);
+
+        const delta = length1to2 * Math.sin(angle1);
+        return y2 < y3 ? delta : -delta;
     }
 }

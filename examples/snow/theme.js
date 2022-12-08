@@ -1,5 +1,3 @@
-import {EasingFunctions} from "../../lib/render/animation.js";
-
 import Settings, {Themes} from "./settings.js";
 import * as GeoUtils from "./utils/geo.js";
 import * as Utils from "./utils/common.js";
@@ -147,7 +145,7 @@ export class ThemeManager {
         const animations = {};
         for (const [key, animationType] of Object.entries(Settings.Style.Properties)) {
             animations[key] = new animationType(lastProps[key], nextProps[key], Settings.Style.Animation.Step)
-                .setEasing(EasingFunctions.easeInOutCubic);
+                .setEasing(Settings.Style.Animation.Easing);
         }
 
         let hasNextValue = true;

@@ -1,6 +1,6 @@
 import * as Params from "../common/params.js";
 import * as CommonUtils from "../common/utils.js";
-import {ColorAnimation, PercentAnimation} from "../../lib/render/animation.js";
+import {ColorAnimation, EasingFunctions, PercentAnimation} from "../../lib/render/animation.js";
 
 /** @enum {number} */
 export const SunAzimuth = {
@@ -49,6 +49,10 @@ const snowOptions = Params.parseSettings({
     theme: {parser: Params.Parser.enum(Themes), param: "theme", default: Themes.day},
     sunChangeInterval: {parser: Params.Parser.float, param: "sun_interval", default: 60},
 
+    themeChangeAnimationStep: {parser: Params.Parser.float, param: "theme_step", default: isMobile ? 1 : 0.25},
+    themeChangeAnimationInterval: {parser: Params.Parser.float, param: "theme_interval", default: isMobile ? 1000 / 6 : 1000 / 24},
+    themeChangeEasing: {parser: Params.Parser.enum(EasingFunctions), param: "theme_easing", default: EasingFunctions.easeInOutCubic},
+
     detectCoordinates: {parser: Params.Parser.bool, param: "gps", default: true},
     lat: {parser: Params.Parser.float, param: "lat", default: null},
     lon: {parser: Params.Parser.float, param: "lon", default: null},
@@ -58,6 +62,13 @@ const snowOptions = Params.parseSettings({
 
     snowdriftSegmentCount: {parser: Params.Parser.float, param: "sd_seg_cnt", default: isMobile ? 100 : 200},
     snowDriftInitialHeight: {parser: Params.Parser.float, param: "sd_height", default: 30},
+    snowDriftMaxHeight: {parser: Params.Parser.float, param: "sd_max_height", default: 250},
+
+    snowGrowth: {parser: Params.Parser.float, param: "sd_growth", default: 0.02},
+
+    snowReducingCheckInterval: {parser: Params.Parser.float, param: "reducing_interval", default: 5000},
+    snowReducingSteps: {parser: Params.Parser.float, param: "reducing_steps", default: 200},
+    snowReducingAnimationInterval: {parser: Params.Parser.float, param: "reducing_animation", default: isMobile ? 1000 / 24 : 1000 / 60},
 
     houseWidth: {parser: Params.Parser.float, param: "house_w", default: 400},
     houseHeight: {parser: Params.Parser.float, param: "house_h", default: 250},
@@ -86,6 +97,14 @@ export default {
         SpawnInterval: snowOptions.snowSpawnPeriod,
         InitDuration: 5,
         Border: 10,
+
+        GrowthFactor: snowOptions.snowGrowth,
+
+        Reducing: {
+            CheckInterval: snowOptions.snowReducingCheckInterval,
+            StepCount: snowOptions.snowReducingSteps,
+            AnimationInterval: snowOptions.snowReducingAnimationInterval,
+        }
     },
 
     House: {
@@ -107,6 +126,7 @@ export default {
     SnowDrift: {
         Segments: snowOptions.snowdriftSegmentCount,
         Height: snowOptions.snowDriftInitialHeight,
+        MaxHeight: snowOptions.snowDriftMaxHeight,
     },
 
     Smoke: {
@@ -145,8 +165,9 @@ export default {
         },
 
         Animation: {
-            Step: isMobile ? 1 : 0.25,
-            Interval: isMobile ? 1000 / 6 : 1000 / 24,
+            Step: snowOptions.themeChangeAnimationStep,
+            Interval: snowOptions.themeChangeAnimationInterval,
+            Easing: snowOptions.themeChangeEasing,
         }
     },
 
