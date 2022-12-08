@@ -7,14 +7,19 @@ import {Bootstrap} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
 import * as CommonUtils from "../common/utils.js";
 
+import Settings, {SunMode} from "./settings.js";
 import {BackgroundDrawer} from "./background.js";
-import {SnowCloud, SnowDrift} from "./snow.js";
-import {Tags, WorldBorderCollider} from "./misc.js";
-import Settings from "./settings.js";
-import {House} from "./house.js";
+import {SnowCloud, SnowDrift} from "./objects/snow.js";
+import {Tags, WorldBorderCollider} from "./objects/misc.js";
+import {House} from "./objects/house.js";
 import {ThemeManager} from "./theme.js";
+import * as GeoUtils from "./utils/geo.js";
 
 CommonUtils.installGlobalErrorHook();
+document.body.classList.add(Settings.Sun.Theme);
+
+const loaderState = document.getElementById("loader-state");
+loaderState.innerText = "Initialize engine...";
 
 const options = Params.parse({
     restitution: 0, friction: 0.8, overlap: 0.5, beta: 1, bias: 0.1, stats: false, tree_cnt: 13, dpr: !CommonUtils.isMobile()
@@ -36,8 +41,12 @@ borderConstraint.constraintBody.collider = new WorldBorderCollider(borderConstra
 borderConstraint.constraintBody.setTag(Tags.worldBorder);
 BootstrapInstance.addConstraint(borderConstraint);
 
+loaderState.innerText = "Initialize background...";
+
 const bgDrawer = new BackgroundDrawer(WorldBox, options);
 BootstrapInstance.addRenderStep(bgDrawer);
+
+loaderState.innerText = "Initialize objects...";
 
 const house = new House(BootstrapInstance, WorldBox);
 await house.init();
@@ -51,10 +60,31 @@ snowCloud.letItSnow();
 const snowDrift = new SnowDrift(BootstrapInstance, WorldBox);
 
 const themeManager = new ThemeManager(bgDrawer, house, snowCloud, snowDrift);
-await themeManager.updateStyling();
 
-if (Settings.Style.Watch) {
-    themeManager.watch();
+loaderState.innerText = "Initialize sun positioning...";
+
+
+let coords = null;
+if (Settings.Sun.Mode === SunMode.sync) {
+    if (Settings.Sun.Coordinates.Detect) {
+        const gps = await GeoUtils.getGeoPosition();
+        if (gps) coords = {lat: gps.coords.latitude, lon: gps.coords.longitude};
+    }
+    if (!coords && Settings.Sun.Coordinates.Lat && Settings.Sun.Coordinates.Lon) {
+        coords = {lat: Settings.Sun.Coordinates.Lat, lon: Settings.Sun.Coordinates.Lon};
+    }
+}
+
+loaderState.innerText = "Apply style...";
+
+if (Settings.Sun.Mode === SunMode.sync && coords) {
+    await themeManager.setupAstroSync(coords.lat, coords.lon);
+} else if (Settings.Sun.Mode === SunMode.fixed) {
+    await themeManager.updateStyling();
+    if (Settings.Style.Watch) themeManager.watch();
+} else {
+    await themeManager.setTheme(Settings.Sun.Theme);
+    themeManager.setupPeriodicChange(Settings.Sun.Theme, Settings.Sun.Interval * 1000);
 }
 
 BootstrapInstance.enableHotKeys();

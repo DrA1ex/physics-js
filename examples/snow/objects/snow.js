@@ -1,12 +1,12 @@
-import {Vector2} from "../../lib/utils/vector.js";
-import {CircleBody} from "../../lib/physics/body.js";
-import * as Utils from "../common/utils.js";
-import {State} from "../common/bootstrap.js";
-import * as CollisionUtils from "../../lib/utils/geom.js";
-import {SpriteRenderer, SpriteSeries} from "../../lib/render/sprite.js";
+import {Vector2} from "../../../lib/utils/vector.js";
+import {CircleBody} from "../../../lib/physics/body.js";
+import * as Utils from "../../common/utils.js";
+import {State} from "../../common/bootstrap.js";
+import * as CollisionUtils from "../../../lib/utils/geom.js";
+import {SpriteRenderer, SpriteSeries} from "../../../lib/render/sprite.js";
 import {SnowDriftSegmentBody, SnowDriftStaticBody} from "./body.js";
 import {Tags} from "./misc.js";
-import Settings from "./settings.js";
+import Settings from "../settings.js";
 
 export class SnowCloud {
     #initialized = false;

@@ -1,6 +1,8 @@
-import Settings from "./settings.js";
-import * as Utils from "./utils.js";
 import {EasingFunctions} from "../../lib/render/animation.js";
+
+import Settings, {Themes} from "./settings.js";
+import * as GeoUtils from "./utils/geo.js";
+import * as Utils from "./utils/common.js";
 
 export class ThemeManager {
     #lastProps = {};
@@ -28,6 +30,44 @@ export class ThemeManager {
         document.body.classList.add(name);
 
         await this.updateStyling();
+    }
+
+    async setupAstroSync(lat, lon) {
+        const _update = async () => {
+            const now = new Date();
+            const currentHour = now.getHours() + now.getMinutes() / 60;
+
+            const periods = Settings.Sun.Periods;
+            const periodsCnt = periods.length;
+
+            let theme = periods[periodsCnt - 1].theme;
+            for (let i = 0; i < periodsCnt; i++) {
+                const period = periods[i];
+                const hour = GeoUtils.sunPosition(now, lat, lon, period.config.azimuth)[period.config.kind];
+
+                if (currentHour < hour) {
+                    theme = periods[(periodsCnt + i - 1) % periodsCnt].theme;
+                    break;
+                }
+            }
+
+            await this.setTheme(Themes[theme]);
+            setTimeout(_update, 60 * 1000);
+        }
+
+        await _update();
+    }
+
+    setupPeriodicChange(initialTheme, period) {
+        let index = Settings.Style.Themes.indexOf(initialTheme);
+
+        const _update = async () => {
+            const themes = Settings.Style.Themes;
+            await this.setTheme(themes[++index % themes.length]);
+            setTimeout(_update, period);
+        };
+
+        setTimeout(_update, period);
     }
 
     async updateStyling(animated = true) {

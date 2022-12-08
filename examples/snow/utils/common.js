@@ -4,7 +4,7 @@
  * @param {number} [tolerance=10]
  * @return {Vector2[]}
  */
-import {Vector2} from "../../lib/utils/vector.js";
+import {Vector2} from "../../../lib/utils/vector.js";
 
 export function findPeaks(data, invert = false, tolerance = 10) {
     const peaks = [];

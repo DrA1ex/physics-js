@@ -1,6 +1,6 @@
 import * as CommonUtils from "../common/utils.js";
 import {Vector2} from "../../lib/utils/vector.js";
-import * as SnowUtils from "./utils.js";
+import * as SnowUtils from "./utils/common.js";
 import {AnimationAxis, AnimationDirection, AnimationMode, EasingFunctions, ParametricAnimation, SkewPathAnimation} from "../../lib/render/animation.js";
 import {Layer, Path} from "../../lib/render/layer.js";
 import {LayeredRenderer} from "../../lib/render/background.js";

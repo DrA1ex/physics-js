@@ -1,6 +1,6 @@
-import {LineBody, PolygonBody} from "../../lib/physics/body.js";
-import {Vector2} from "../../lib/utils/vector.js";
-import {LineRenderer, PolygonBodyRenderer} from "../../lib/render/renderer.js";
+import {LineBody, PolygonBody} from "../../../lib/physics/body.js";
+import {Vector2} from "../../../lib/utils/vector.js";
+import {LineRenderer, PolygonBodyRenderer} from "../../../lib/render/renderer.js";
 import {SnowdriftCollider, Tags, UnionPolyBody} from "./misc.js";
 
 export class SnowDriftSegmentBody extends LineBody {

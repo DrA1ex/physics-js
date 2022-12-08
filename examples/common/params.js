@@ -1,11 +1,20 @@
+/**
+ * @param {*} param
+ * @return {boolean|null}
+ */
 function parseBool(param) {
     if (typeof param === "boolean") return param;
 
     if (param === "1") return true;
     else if (param === "0") return false;
-    return null
+    return null;
 }
 
+/**
+ * @param {*} param
+ * @param {function(*): number} parser
+ * @return {number|null}
+ */
 function parseNumber(param, parser) {
     if (typeof param === "number") return param;
 
@@ -14,10 +23,30 @@ function parseNumber(param, parser) {
     return null;
 }
 
+/**
+ * @param {Object} type
+ * @return {(function(*): (*|null))}
+ */
+function parseEnum(type) {
+    return (v) => {
+        const value = type[v];
+        if (value === undefined) {
+            return Object.values(type).indexOf(v) !== -1 ? v : null;
+        }
+
+        return value;
+    }
+}
+
 export const Parser = {
+    /** @param {*} v */
     bool: parseBool,
+    /** @param {*} v */
     int: (v) => parseNumber(v, Number.parseInt),
+    /** @param {*} v */
     float: (v) => parseNumber(v, Number.parseFloat),
+    /** @param {Object} type */
+    enum: type => parseEnum(type),
 }
 
 export function parse(def = {}) {
@@ -80,7 +109,7 @@ export function parseSettings(config) {
 
     const result = {}
     for (const [key, {parser, param, default: def}] of Object.entries(config)) {
-        const value = parser(params[param] ?? def);
+        const value = parser(params[param]) ?? def;
 
         if (value !== null) {
             result[key] = value;

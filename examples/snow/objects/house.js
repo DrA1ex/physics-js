@@ -1,12 +1,12 @@
-import {SvgWrapper} from "../../lib/render/svg.js";
-import {Sprite, SpriteRenderer} from "../../lib/render/sprite.js";
-import {Vector2} from "../../lib/utils/vector.js";
-import {PolygonBody, RectBody} from "../../lib/physics/body.js";
+import {SvgWrapper} from "../../../lib/render/svg.js";
+import {Sprite, SpriteRenderer} from "../../../lib/render/sprite.js";
+import {Vector2} from "../../../lib/utils/vector.js";
+import {PolygonBody, RectBody} from "../../../lib/physics/body.js";
 import {Tags} from "./misc.js";
 import {RoofSnowDriftBody} from "./body.js";
 import {HouseFlue} from "./flue.js";
-import Settings from "./settings.js";
-import * as ColorUtils from "../../lib/utils/color.js";
+import Settings from "../settings.js";
+import * as ColorUtils from "../../../lib/utils/color.js";
 
 const HouseSize = new Vector2(Settings.House.Width, Settings.House.Height);
 const RoofPoly = [

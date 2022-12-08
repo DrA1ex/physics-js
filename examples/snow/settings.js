@@ -2,6 +2,31 @@ import * as Params from "../common/params.js";
 import * as CommonUtils from "../common/utils.js";
 import {ColorAnimation, PercentAnimation} from "../../lib/render/animation.js";
 
+/** @enum {number} */
+export const SunAzimuth = {
+    Official: 90,
+    Civil: 96,
+    Nautical: 102,
+    Astro: 108,
+}
+
+/** @enum {string} */
+export const Themes = {
+    dawn: "dawn-theme",
+    twilight: "twilight-theme",
+    day: "day-theme",
+    sunset: "sunset-theme",
+    dusk: "dusk-theme",
+    night: "night-theme"
+}
+
+/** @enum {string} */
+export const SunMode = {
+    sync: "sync",
+    periodic: "periodic",
+    fixed: "fixed"
+}
+
 const scale = CommonUtils.applyViewportScale([
     {media: "(orientation: landscape) and (max-width: 500px)", scale: 0.25},
     {media: "(orientation: landscape) and (max-width: 900px)", scale: 0.5},
@@ -19,6 +44,14 @@ const snowOptions = Params.parseSettings({
     watch: {parser: Params.Parser.bool, param: "watch", default: false},
     top: {parser: Params.Parser.float, param: "offset_top", default: -40},
     bottom: {parser: Params.Parser.float, param: "offset_bottom", default: -1},
+
+    sunMode: {parser: Params.Parser.enum(SunMode), param: "sun", default: SunMode.sync},
+    theme: {parser: Params.Parser.enum(Themes), param: "theme", default: Themes.day},
+    sunChangeInterval: {parser: Params.Parser.float, param: "sun_interval", default: 60},
+
+    detectCoordinates: {parser: Params.Parser.bool, param: "gps", default: true},
+    lat: {parser: Params.Parser.float, param: "lat", default: null},
+    lon: {parser: Params.Parser.float, param: "lon", default: null},
 
     snowSpawnPeriod: {parser: Params.Parser.float, param: "snow_spawn", default: isMobile ? 1000 / 80 : 1000 / 160},
     snowPeriod: {parser: Params.Parser.float, param: "snow_emit", default: isMobile ? 1000 / 40 : 1000 / 80},
@@ -92,9 +125,9 @@ export default {
         Watch: snowOptions.watch,
         WatchInterval: 500,
 
-        Themes: ["dawn-theme", "twilight-theme", "day-theme", "sunset-theme", "dusk-theme", "night-theme"],
+        Themes: Object.values(Themes),
 
-        /** @type {{[key: string]: IParametricAnimation.constructor}} */
+        /** @type {{[key: string]: typeof IParametricAnimation}} */
         Properties: {
             "--sun-position-x": PercentAnimation,
             "--sun-position-y": PercentAnimation,
@@ -115,5 +148,26 @@ export default {
             Step: isMobile ? 1 : 0.25,
             Interval: isMobile ? 1000 / 6 : 1000 / 24,
         }
+    },
+
+    Sun: {
+        Mode: snowOptions.sunMode,
+        Theme: snowOptions.theme,
+        Interval: snowOptions.sunChangeInterval,
+
+        Coordinates: {
+            Detect: snowOptions.detectCoordinates,
+            Lat: snowOptions.lat,
+            Lon: snowOptions.lon,
+        },
+
+        Periods: [
+            {theme: "dawn", config: {kind: "rising", azimuth: SunAzimuth.Astro}},
+            {theme: "twilight", config: {kind: "rising", azimuth: SunAzimuth.Civil}},
+            {theme: "day", config: {kind: "rising", azimuth: SunAzimuth.Official}},
+            {theme: "sunset", config: {kind: "sunset", azimuth: SunAzimuth.Official}},
+            {theme: "dusk", config: {kind: "sunset", azimuth: SunAzimuth.Civil}},
+            {theme: "night", config: {kind: "sunset", azimuth: SunAzimuth.Astro}},
+        ]
     }
-};
+}

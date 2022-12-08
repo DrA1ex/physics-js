@@ -1,11 +1,11 @@
-import {CircleBody, RectBody} from "../../lib/physics/body.js";
-import {SpotWindForce} from "../../lib/physics/force.js";
-import {Vector2} from "../../lib/utils/vector.js";
-import {State} from "../common/bootstrap.js";
-import {AnimatedSpriteRenderer, SpriteSeries} from "../../lib/render/sprite.js";
-import {AnimationProperty, KeyframeType, Particle, ParticleState, StateKeyframe} from "../../lib/render/particle.js";
+import {CircleBody, RectBody} from "../../../lib/physics/body.js";
+import {SpotWindForce} from "../../../lib/physics/force.js";
+import {Vector2} from "../../../lib/utils/vector.js";
+import {State} from "../../common/bootstrap.js";
+import {AnimatedSpriteRenderer, SpriteSeries} from "../../../lib/render/sprite.js";
+import {AnimationProperty, KeyframeType, Particle, ParticleState, StateKeyframe} from "../../../lib/render/particle.js";
 import {SmokeCollider, SmokeState, Tags} from "./misc.js";
-import Settings from "./settings.js";
+import Settings from "../settings.js";
 
 class SmokeParticle extends Particle {
 

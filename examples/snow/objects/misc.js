@@ -1,7 +1,7 @@
-import {CircleCollider, Collider, LineCollider} from "../../lib/physics/collider.js";
-import {PolygonBody} from "../../lib/physics/body.js";
-import {Vector2} from "../../lib/utils/vector.js";
-import * as GeomUtils from "../../lib/utils/geom.js";
+import {CircleCollider, Collider, LineCollider} from "../../../lib/physics/collider.js";
+import {PolygonBody} from "../../../lib/physics/body.js";
+import {Vector2} from "../../../lib/utils/vector.js";
+import * as GeomUtils from "../../../lib/utils/geom.js";
 
 export const SmokeState = {
     born: 0,
