@@ -39,11 +39,12 @@ const scale = CommonUtils.applyViewportScale([
 ]);
 
 const isMobile = CommonUtils.isMobile();
+const isPortrait = window.matchMedia("(orientation: portrait)").matches;
 
 const snowOptions = Params.parseSettings({
     watch: {parser: Params.Parser.bool, param: "watch", default: false},
-    top: {parser: Params.Parser.float, param: "offset_top", default: -40},
-    bottom: {parser: Params.Parser.float, param: "offset_bottom", default: -1},
+    offsetTop: {parser: Params.Parser.float, param: "offset_top", default: -40},
+    offsetBottom: {parser: Params.Parser.float, param: "offset_bottom", default: isPortrait ? -60 : -20},
 
     sunMode: {parser: Params.Parser.enum(SunMode), param: "sun", default: SunMode.sync},
     theme: {parser: Params.Parser.enum(Themes), param: "theme", default: Themes.day},
@@ -86,8 +87,8 @@ const snowOptions = Params.parseSettings({
 
 export default {
     World: {
-        OffsetTop: snowOptions.top,
-        OffsetBottom: snowOptions.bottom,
+        OffsetTop: snowOptions.offsetTop,
+        OffsetBottom: snowOptions.offsetBottom,
         Border: 100,
         Scale: scale,
     },

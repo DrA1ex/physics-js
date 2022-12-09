@@ -33,7 +33,7 @@ BootstrapInstance.addForce(new GlobalWind(new Vector2(-1.2, -5)));
 
 const WorldBox = new BoundaryBox(
     -Settings.World.Border, BootstrapInstance.canvasWidth + Settings.World.Border,
-    Settings.World.OffsetTop, BootstrapInstance.canvasHeight + Settings.World.OffsetBottom
+    Settings.World.OffsetTop, BootstrapInstance.canvasHeight
 );
 
 const borderConstraint = new InsetConstraint(WorldBox, 0.3);

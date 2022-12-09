@@ -44,10 +44,11 @@ export class House {
         this.houseSprite = new Sprite(this.houseSvg.getSource());
         await this.houseSprite.wait();
         this.houseSprite.setupPreRendering(Settings.House.Width, Settings.House.Height);
+        const bottom = this.#worldBox.bottom + Settings.World.OffsetBottom;
 
         const houseSpriteRenderer = new SpriteRenderer(
             new RectBody(
-                this.#worldBox.center.x, this.#worldBox.bottom - Settings.House.Height / 2,
+                this.#worldBox.center.x, bottom - Settings.House.Height / 2,
                 Settings.House.Width, Settings.House.Height,
             ),
             this.houseSprite,
@@ -56,11 +57,11 @@ export class House {
         houseSpriteRenderer.z = 2;
         this.#engine.addRenderStep(houseSpriteRenderer);
 
-        this.roof = new PolygonBody(this.#worldBox.center.x, this.#worldBox.bottom - Settings.House.Height / 2, RoofPoly)
+        this.roof = new PolygonBody(this.#worldBox.center.x, bottom - Settings.House.Height / 2, RoofPoly)
             .setTag(Tags.house)
             .setActive(false);
 
-        this.base = new PolygonBody(this.#worldBox.center.x, this.#worldBox.bottom - Settings.House.Height / 2, HouseBasePoly)
+        this.base = new PolygonBody(this.#worldBox.center.x, bottom - Settings.House.Height / 2, HouseBasePoly)
             .setTag(Tags.house)
             .setActive(false);
 
@@ -77,7 +78,7 @@ export class House {
         this.flue = new HouseFlue(
             this.#engine,
             this.#worldBox.center.x + Settings.House.Flue.Width,
-            this.#worldBox.bottom - Settings.House.Height,
+            bottom - Settings.House.Height,
             Settings.House.Flue.Width, Settings.House.Flue.Height,
         );
 

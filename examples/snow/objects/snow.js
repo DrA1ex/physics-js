@@ -62,7 +62,7 @@ export class SnowCloud {
 
         for (let i = 0; i < preSnowIterations; i++) {
             const x = border + Math.random() * (this.#worldBox.width - border);
-            const y = this.#worldBox.top + border + Math.random() * this.#worldBox.height;
+            const y = this.#worldBox.top + border + Math.random() * (this.#worldBox.height + Settings.World.OffsetBottom);
             const point = new Vector2(x, y);
 
             const intersectingBody = staticBodies.find(b => CollisionUtils.isPointInsideBoundary(point, b.boundary));
@@ -167,7 +167,7 @@ export class SnowDrift {
         const segmentsCount = Settings.SnowDrift.Segments;
         const initialHeight = Settings.SnowDrift.Height;
 
-        const bottom = this.#worldBox.bottom - initialHeight / 2;
+        const bottom = this.#worldBox.bottom + Settings.World.OffsetBottom - initialHeight / 2;
         const xStep = this.#worldBox.width / segmentsCount;
         const lastPos = new Vector2(this.#worldBox.left, initialHeight / 2);
 
@@ -242,7 +242,7 @@ export class SnowDrift {
         }
 
         if (max > Settings.SnowDrift.MaxHeight) {
-            const yOffset = this.#worldBox.bottom - Settings.SnowDrift.Height / 2;
+            const yOffset = this.#worldBox.bottom + Settings.World.OffsetBottom - Settings.SnowDrift.Height / 2;
             const size = Math.max(1, max - min);
 
             const deltas = new Array(this.segments.length);
