@@ -1,17 +1,20 @@
 import Settings, {Themes} from "./settings.js";
 import * as GeoUtils from "./utils/geo.js";
 import * as Utils from "./utils/common.js";
+import * as CommonUtils from "../../lib/utils/common.js";
 
 export class ThemeManager {
     #lastProps = {};
     #initialized = false;
 
+    #worldBox;
     #bgDrawer;
     #house;
     #snowCloud;
     #snowDrift;
 
-    constructor(bgDrawer, house, snowCloud, snowDrift) {
+    constructor(worldBox, bgDrawer, house, snowCloud, snowDrift) {
+        this.#worldBox = worldBox;
         this.#bgDrawer = bgDrawer;
         this.#house = house;
         this.#snowCloud = snowCloud;
@@ -121,8 +124,16 @@ export class ThemeManager {
         bg.style.setProperty("--bg-color-2", props["--bg-color-2"]);
         bg.style.setProperty("--bg-color-3", props["--bg-color-3"]);
 
-        bg.style.setProperty("--sun-position-x", props["--sun-position-x"]);
-        bg.style.setProperty("--sun-position-y", props["--sun-position-y"]);
+        const [angle] = CommonUtils.parseAngle(props["--sun-angle"]);
+
+        const orbitOffsetX = this.#worldBox.center.x + Settings.Sun.Orbit.OffsetX * this.#worldBox.width;
+        const orbitOffsetY = this.#worldBox.center.y + Settings.Sun.Orbit.OffsetY * this.#worldBox.height;
+        const orbitWidth = Settings.Sun.Orbit.Width * this.#worldBox.width;
+        const orbitHeight = Settings.Sun.Orbit.Height * this.#worldBox.height;
+
+        bg.style.setProperty("--sun-angle", props["--sun-angle"]);
+        bg.style.setProperty("--sun-position-x", `${orbitOffsetX + Math.cos(angle) * orbitWidth}px`);
+        bg.style.setProperty("--sun-position-y", `${orbitOffsetY + Math.sin(angle) * orbitHeight}px`);
 
         const snowColor = props["--snow-color"];
         this.#snowCloud.snowSprite.setupFilter(snowColor, "color");

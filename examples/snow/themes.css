@@ -1,6 +1,5 @@
 .default-theme {
-    --sun-position-x: 50%;
-    --sun-position-y: -20%;
+    --sun-angle: 270deg;
 
     --bg-color-1: #e5edf5;
     --bg-color-2: #b7cfe3;
@@ -21,8 +20,7 @@
 }
 
 .dawn-theme {
-    --sun-position-x: 0%;
-    --sun-position-y: 50%;
+    --sun-angle: 180deg;
 
     --bg-color-1: #ffe7d5;
     --bg-color-2: #fffbf8;
@@ -43,10 +41,9 @@
 }
 
 .twilight-theme {
-    --sun-position-x: 30%;
-    --sun-position-y: 20%;
+    --sun-angle: 210deg;
 
-    --bg-color-1: #fff9f1;
+    --bg-color-1: #f8e6d6;
     --bg-color-2: #f5f1ea;
     --bg-color-3: #f9e7d1;
 
@@ -65,8 +62,7 @@
 }
 
 .sunset-theme {
-    --sun-position-x: 70%;
-    --sun-position-y: 20%;
+    --sun-angle: 330deg;
 
     --bg-color-1: #ffffe3;
     --bg-color-2: #ffe6c0;
@@ -87,8 +83,7 @@
 }
 
 .dusk-theme {
-    --sun-position-x: 100%;
-    --sun-position-y: 50%;
+    --sun-angle: 0deg;
 
     --bg-color-1: #fecbc8;
     --bg-color-2: #bc8fab;
@@ -109,8 +104,7 @@
 }
 
 .night-theme {
-    --sun-position-x: 50%;
-    --sun-position-y: 80%;
+    --sun-angle: 90deg;
 
     --bg-color-1: #dbe3e7;
     --bg-color-2: #253646;

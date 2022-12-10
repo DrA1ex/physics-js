@@ -1,3 +1,5 @@
+import * as CommonUtils from "../../../lib/utils/common.js";
+
 export async function getGeoPosition() {
     return new Promise((resolve) => {
         navigator.geolocation.getCurrentPosition(resolve, () => resolve(null));
@@ -72,24 +74,10 @@ function calculateSunTime(rising, N, lngHour, lat, zenith) {
     return T - lngHour;
 }
 
-function clampPeriodic(value, period) {
-    if (value > period) {
-        const cnt = Math.floor(value / period);
-        return value - cnt * period;
-    }
-
-    if (value < 0) {
-        const cnt = Math.ceil(-value / period);
-        return value + cnt * period;
-    }
-
-    return value;
-}
-
 function clampAngle(deg) {
-    return clampPeriodic(deg, 360);
+    return CommonUtils.clampPeriodic(deg, 360);
 }
 
 function clampHour(value) {
-    return clampPeriodic(value, 24);
+    return CommonUtils.clampPeriodic(value, 24);
 }

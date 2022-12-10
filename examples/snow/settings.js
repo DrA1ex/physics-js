@@ -1,6 +1,6 @@
 import * as Params from "../common/params.js";
 import * as CommonUtils from "../common/utils.js";
-import {ColorAnimation, EasingFunctions, PercentAnimation} from "../../lib/render/animation.js";
+import {AngleAnimation, ColorAnimation, EasingFunctions} from "../../lib/render/animation.js";
 
 /** @enum {number} */
 export const SunAzimuth = {
@@ -150,8 +150,7 @@ export default {
 
         /** @type {{[key: string]: typeof IParametricAnimation}} */
         Properties: {
-            "--sun-position-x": PercentAnimation,
-            "--sun-position-y": PercentAnimation,
+            "--sun-angle": AngleAnimation,
             "--bg-color-1": ColorAnimation,
             "--bg-color-2": ColorAnimation,
             "--bg-color-3": ColorAnimation,
@@ -176,6 +175,13 @@ export default {
         Mode: snowOptions.sunMode,
         Theme: snowOptions.theme,
         Interval: snowOptions.sunChangeInterval,
+
+        Orbit: {
+            OffsetX: 0,
+            OffsetY: -0.1,
+            Width: 0.4,
+            Height: 0.4
+        },
 
         Coordinates: {
             Detect: snowOptions.detectCoordinates,
