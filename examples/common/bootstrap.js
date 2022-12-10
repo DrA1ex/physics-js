@@ -32,7 +32,9 @@ export class Bootstrap {
     #drawingVectors = new Map();
     #renderers = new Map();
     #renderSteps = [];
+    #particleEmitters = []
     #particles = [];
+    #bodyParticle = new Map();
 
     #statsElement;
     #stats = {
@@ -135,18 +137,29 @@ export class Bootstrap {
     }
 
     /**
+     * @param {ParticleEmitter} emitter
+     */
+    addParticleEmitter(emitter) {
+        this.#particleEmitters.push(emitter);
+    }
+
+    /**
      * @param {Particle} particle
      */
     addParticle(particle) {
+        if (this.#bodyParticle.has(particle.body)) throw new Error("Body already used");
+
         this.#particles.push(particle);
-        this.addRigidBody(particle.body, particle.renderer)
+        this.addRigidBody(particle.body, particle.renderer);
+        this.#bodyParticle.set(particle.body, particle);
     }
 
     destroyParticle(particle) {
         const index = this.#particles.indexOf(particle);
         if (index !== -1) {
             this.#particles.splice(index, 1);
-            this.destroyBody(particle.body);
+            this.#bodyParticle.delete(particle.body);
+            this.#destroyBodyImpl(particle.body);
         } else {
             console.warn(`Unable to find particle ${particle}`);
         }
@@ -156,6 +169,14 @@ export class Bootstrap {
      * @param {Body} body
      */
     destroyBody(body) {
+        if (this.#bodyParticle.has(body)) {
+            this.destroyParticle(this.#bodyParticle.get(body));
+        } else {
+            this.#destroyBodyImpl(body);
+        }
+    }
+
+    #destroyBodyImpl(body) {
         const index = this.#solver.rigidBodies.indexOf(body);
         if (index !== -1) {
             this.#solver.rigidBodies.splice(index, 1);
@@ -308,8 +329,14 @@ export class Bootstrap {
     }
 
     #physicsStep(elapsed) {
-        this.#solver.solve(elapsed * this.#slowMotion);
-        const delta = this.#solver.stepInfo.delta;
+        const delta = Math.max(0, Math.min(0.1, elapsed * this.#slowMotion));
+        if (delta === 0) return;
+
+        for (let emitter of this.#particleEmitters) {
+            emitter.step(delta, p => this.addParticle(p));
+        }
+
+        this.#solver.solve(delta);
 
         for (const particle of this.#particles) {
             particle.step(delta);

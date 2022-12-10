@@ -1,7 +1,11 @@
-import {LineBody, PolygonBody} from "../../../lib/physics/body.js";
+import {CircleBody, LineBody, PolygonBody} from "../../../lib/physics/body.js";
 import {Vector2} from "../../../lib/utils/vector.js";
 import {LineRenderer, PolygonBodyRenderer} from "../../../lib/render/renderer.js";
-import {SnowdriftCollider, Tags, UnionPolyBody} from "./misc.js";
+import {SmokeCollider, SmokeState, SnowdriftCollider, Tags, UnionPolyBody} from "./misc.js";
+import {AnimationProperty, KeyframeType, Particle, ParticleState, StateKeyframe} from "../../../lib/render/particle.js";
+import {AnimatedSpriteRenderer, SpriteRenderer} from "../../../lib/render/sprite.js";
+import Settings from "../settings.js";
+import * as Utils from "../../common/utils.js";
 
 export class SnowDriftSegmentBody extends LineBody {
     #renderer;
@@ -93,5 +97,71 @@ export class RoofSnowDriftBody extends PolygonBody {
         this.renderer = new SnowDriftRenderer(this);
         this.renderer.smooth = false;
         this.renderer.z = 2;
+    }
+}
+
+export class SnowParticle extends Particle {
+    constructor(x, y, snowSprite, worldBox, options) {
+        const size = 2 + Math.floor(Math.random() * 4);
+
+        const pos = new Vector2(x, y);
+        Utils.clampBodyPosition(pos, worldBox, size, Settings.Snow.Border);
+
+        const body = new CircleBody(pos.x, pos.y, size, size / 20)
+            .setTag(Tags.snowflake)
+            .setFriction(options.friction)
+            .setRestitution(options.restitution);
+
+        const renderer = new SpriteRenderer(body, snowSprite, Math.floor(Math.random() * snowSprite.count));
+        super(body, renderer);
+    }
+}
+
+export class SmokeParticle extends Particle {
+
+    /**
+     * @param {number} x
+     * @param {number} y
+     * @param {SpriteSeries} smokeSprite
+     */
+    constructor(x, y, smokeSprite) {
+        const smokeRadius = 5 + Math.random() * 15;
+        const mass = 0.045 - Math.random() * 0.01;
+        const smokeBody = new CircleBody(x, y, smokeRadius, mass)
+            .setTag(Tags.smoke)
+            .setAngle(Math.random() * Math.PI * 2)
+            .setInertiaFactor(1000)
+            .setRestitution(0)
+            .setFriction(0);
+
+        const renderer = new AnimatedSpriteRenderer(smokeBody, smokeSprite, Settings.Smoke.Framerate, Math.floor(Math.random() * smokeSprite.count));
+        renderer.opacity = 0.05 + Math.random() * 0.25;
+
+        super(smokeBody, renderer);
+
+        smokeBody.collider = new SmokeCollider(this);
+
+        this.addState(SmokeState.born, new ParticleState()
+            .addKeyframe(new StateKeyframe(AnimationProperty.opacity, 0, 1, 500, KeyframeType.relative)));
+
+        this.addState(SmokeState.active, new ParticleState()
+            .addKeyframe(new StateKeyframe(AnimationProperty.radius, 1, 7, 7000, KeyframeType.relative))
+            .addKeyframe(new StateKeyframe(AnimationProperty.opacity, 1, 0.2, 15000, KeyframeType.relative)));
+
+        this.addState(SmokeState.fade, new ParticleState()
+            .addKeyframe(new StateKeyframe(AnimationProperty.radius, 1, 7, 7000, KeyframeType.relative))
+            .addKeyframe(new StateKeyframe(AnimationProperty.opacity, 1, 0.2, 15000, KeyframeType.relative)));
+
+        this.addState(SmokeState.destroy, new ParticleState()
+            .addKeyframe(new StateKeyframe(AnimationProperty.opacity, 1, 0, 1000, KeyframeType.relative)));
+
+        this.addSequentialTransition([SmokeState.born, SmokeState.active, SmokeState.fade, SmokeState.destroy, Particle.DestroyState]);
+        this.setState(SmokeState.born);
+    }
+
+    onStateChanged(state) {
+        if (state) {
+            this.body.collider.noCollide = true;
+        }
     }
 }

@@ -1,16 +1,14 @@
-import {CircleBody} from "../../../lib/physics/body.js";
-import {SpriteRenderer, SpriteSeries} from "../../../lib/render/sprite.js";
+import {SpriteSeries} from "../../../lib/render/sprite.js";
 import * as CollisionUtils from "../../../lib/utils/geom.js";
 import {Vector2} from "../../../lib/utils/vector.js";
-
-import {State} from "../../common/bootstrap.js";
 import * as Utils from "../../common/utils.js";
 
 import Settings from "../settings.js";
-import {SnowDriftSegmentBody, SnowDriftStaticBody} from "./body.js";
+import {SnowDriftSegmentBody, SnowDriftStaticBody, SnowParticle} from "./body.js";
 import {Tags} from "./misc.js";
 import * as SnowUtils from "../utils/common.js";
 import * as CommonUtils from "../../../lib/utils/common.js";
+import {LinerRateProvider, NumericValueProvider, ParticleEmitter, VectorValueProvider} from "../../../lib/render/particle_system.js";
 
 
 export class SnowCloud {
@@ -18,7 +16,7 @@ export class SnowCloud {
 
     /** @type {SpriteSeries} */
     #snowSpriteSeries = null;
-    #snowInterval = null;
+    #snowEmitter = null;
 
     #engine;
     #worldBox;
@@ -51,7 +49,7 @@ export class SnowCloud {
             throw new Error("Used before initialization. Call init method first");
         }
 
-        if (this.#snowInterval !== null) {
+        if (this.#snowEmitter !== null) {
             console.error("Already snowing");
             return;
         }
@@ -71,7 +69,16 @@ export class SnowCloud {
             this.#emitSnow(point);
         }
 
-        this.#snowInterval = setInterval(this.#periodicSnow.bind(this), Settings.Snow.EmitPeriod);
+        this.#snowEmitter = new ParticleEmitter(
+            SnowParticle,
+            new VectorValueProvider(
+                new NumericValueProvider(this.#worldBox.center.x).setSpread(this.#worldBox.width),
+                new NumericValueProvider(this.#worldBox.top + border / 2).setSpread(border),
+            ),
+            new LinerRateProvider(1000 / Settings.Snow.EmitPeriod)
+        ).setParticleArguments(this.#snowSpriteSeries, this.#worldBox, this.#options);
+
+        this.#engine.addParticleEmitter(this.#snowEmitter);
     }
 
     setupInteractions() {
@@ -118,31 +125,12 @@ export class SnowCloud {
         }
     }
 
-    #periodicSnow() {
-        if (this.#engine.state !== State.play) return;
-
-        const border = Settings.Snow.Border;
-        const x = border + this.#worldBox.left + Math.random() * (this.#worldBox.width - border * 2);
-        const y = this.#worldBox.top + Math.random() * border / 2;
-
-        this.#emitSnow(new Vector2(x, y));
-    }
-
     #emitSnow(origin) {
         if (origin.y >= this.#worldBox.bottom) return;
 
-        const size = 2 + Math.floor(Math.random() * 4);
-
-        const pos = Vector2.fromAngle(Math.random() * Math.PI * 2).scale(size).add(origin);
-        Utils.clampBodyPosition(pos, this.#worldBox, size, Settings.Snow.Border);
-
-        const body = new CircleBody(pos.x, pos.y, size, size / 20)
-            .setTag(Tags.snowflake)
-            .setFriction(this.#options.friction)
-            .setRestitution(this.#options.restitution);
-
-        const renderer = new SpriteRenderer(body, this.#snowSpriteSeries, Math.floor(Math.random() * this.#snowSpriteSeries.count));
-        return this.#engine.addRigidBody(body, renderer);
+        const pos = Vector2.fromAngle(Math.random() * Math.PI * 2).scale(4).add(origin);
+        const snow = new SnowParticle(pos.x, pos.y, this.#snowSpriteSeries, this.#worldBox, this.#options);
+        return this.#engine.addParticle(snow);
     }
 }
 
