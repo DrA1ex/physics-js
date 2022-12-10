@@ -22,7 +22,7 @@
 .dawn-theme {
     --sun-angle: 180deg;
 
-    --bg-color-1: #ffe7d5;
+    --bg-color-1: #fff2f2;
     --bg-color-2: #fffbf8;
     --bg-color-3: #f8ebd9;
 
@@ -43,21 +43,20 @@
 .twilight-theme {
     --sun-angle: 210deg;
 
-    --bg-color-1: #f8e6d6;
-    --bg-color-2: #f5f1ea;
-    --bg-color-3: #f9e7d1;
-
-    --snow-color: #c8eaf1;
-    --smoke-color: #37799b;
+    --bg-color-1: #fef7db;
+    --bg-color-2: #ffe8bf;
+    --bg-color-3: #fae9da;
+    --snow-color: #f1e3f0;
+    --smoke-color: #a881a0;
 
     /* Background */
-    --mountain-color-top: #7cd4ed;
-    --mountain-color-bottom: #1a6e9c;
-    --tree-color-top: #6abada;
-    --tree-color-bottom: #023048;
+    --mountain-color-top: #ced7ec;
+    --mountain-color-bottom: #a16291;
+    --tree-color-top: #986167;
+    --tree-color-bottom: #4f2e31;
 
     /* House sprite*/
-    --house-fill: #0a4c7b;
+    --house-fill: #402632;
     --light-color: #fcf3e7;
 }
 
