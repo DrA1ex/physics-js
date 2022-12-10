@@ -39,10 +39,10 @@ export class SnowCloud {
     }
 
     async init() {
-        this.#snowSpriteSeries = new SpriteSeries("./sprites/snowflakes.svg", 9, 1, 32, 32, 3);
+        this.#snowSpriteSeries = new SpriteSeries("./sprites/snowflakes.svg", 9, 1, 32, 32, 0);
         await this.#snowSpriteSeries.wait();
 
-        this.#snowSpriteSeries.setupPreRendering(312, 32);
+        this.#snowSpriteSeries.setupPreRendering(this.#snowSpriteSeries.count * this.#snowSpriteSeries.width, this.#snowSpriteSeries.height);
         this.#initialized = true;
     }
 
