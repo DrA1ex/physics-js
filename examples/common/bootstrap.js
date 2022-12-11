@@ -3,6 +3,8 @@ import {Debug} from "../../lib/debug.js";
 import * as Utils from "../../lib/utils/common.js";
 import {Body} from "../../lib/physics/body.js";
 import {RendererMapping} from "../../lib/render/renderer.js";
+import * as CommonUtils from "./utils.js";
+import {Particle} from "../../lib/render/particle.js";
 
 /*** @enum {number} */
 export const State = {
@@ -29,6 +31,8 @@ export class Bootstrap {
     #vectorId = 0;
     #drawingVectors = new Map();
     #renderers = new Map();
+    #renderSteps = [];
+    #particles = [];
 
     #statsElement;
     #stats = {
@@ -44,6 +48,7 @@ export class Bootstrap {
     };
 
     #debug = false;
+    #useDpr;
     #slowMotion = 1;
     #dpr;
     #canvasWidth;
@@ -51,6 +56,7 @@ export class Bootstrap {
 
     get state() {return this.#state;}
 
+    get canvas() {return this.#canvas;}
     get dpr() {return this.#dpr;}
     get canvasWidth() {return this.#canvasWidth;}
     get canvasHeight() {return this.#canvasHeight;}
@@ -63,9 +69,9 @@ export class Bootstrap {
     /**
      * @param {HTMLCanvasElement} canvas
      * @param {{
-     *          debug?: boolean, slowMotion?: number,
+     *          debug?: boolean, slowMotion?: number, useDpr?: boolean,
      *          showBoundary?: boolean, showVectorLength?: boolean, showVector?: boolean, statistics?: boolean,
-     *          solverSteps?: number, solverBias?: number, solverBeta?: number, solverWarming?: boolean,
+     *          solverSteps?: number, solverBias?: number, solverBeta?: number, allowedOverlap?: boolean, solverWarming?: boolean,
      *          solverTreeDivider?: number, solverTreeMaxCount?: number
      * }} options
      */
@@ -75,11 +81,13 @@ export class Bootstrap {
 
         this.#debug = options.debug;
         this.#slowMotion = Math.max(0.01, Math.min(2, options.slowMotion ?? 1));
+        this.#useDpr = options.useDpr;
 
         this.#solver = new ImpulseBasedSolver();
         if (Number.isFinite(options.solverSteps)) this.#solver.steps = options.solverSteps;
         if (Number.isFinite(options.solverBias)) this.#solver.velocityBiasFactor = options.solverBias;
         if (Number.isFinite(options.solverBeta)) this.#solver.positionCorrectionBeta = options.solverBeta;
+        if (Number.isFinite(options.allowedOverlap)) this.#solver.allowedOverlap = options.allowedOverlap;
         if (Number.isFinite(options.solverTreeDivider)) this.#solver.treeDivider = options.solverTreeDivider;
         if (Number.isFinite(options.solverTreeMaxCount)) this.#solver.treeMaxCount = options.solverTreeMaxCount;
         if (options.solverWarming !== undefined) this.#solver.warming = options.solverWarming;
@@ -100,16 +108,61 @@ export class Bootstrap {
 
     /**
      * @param {Body} body
+     * @param {BodyRenderer} [renderer=null]
      * @return {{body: Body, renderer: BodyRenderer}}
      */
-    addRigidBody(body) {
+    addRigidBody(body, renderer = null) {
+        if (!body) {
+            throw new Error("Body should be specified");
+        }
+
         this.#solver.addRigidBody(body);
 
-        const rendererClass = RendererMapping.has(body.constructor) ? RendererMapping.get(body.constructor) : RendererMapping.get(Body);
-        const renderer = new rendererClass(body);
-        this.#renderers.set(body, renderer);
+        if (renderer === null) {
+            const rendererClass = RendererMapping.has(body.constructor) ? RendererMapping.get(body.constructor) : RendererMapping.get(Body);
+            renderer = new rendererClass(body);
+        }
 
+        this.#renderers.set(body, renderer);
         return {body, renderer};
+    }
+
+    /**
+     * @param {IRenderer} renderer
+     */
+    addRenderStep(renderer) {
+        this.#renderSteps.push(renderer);
+    }
+
+    /**
+     * @param {Particle} particle
+     */
+    addParticle(particle) {
+        this.#particles.push(particle);
+        this.addRigidBody(particle.body, particle.renderer)
+    }
+
+    destroyParticle(particle) {
+        const index = this.#particles.indexOf(particle);
+        if (index !== -1) {
+            this.#particles.splice(index, 1);
+            this.destroyBody(particle.body);
+        } else {
+            console.warn(`Unable to find particle ${particle}`);
+        }
+    }
+
+    /**
+     * @param {Body} body
+     */
+    destroyBody(body) {
+        const index = this.#solver.rigidBodies.indexOf(body);
+        if (index !== -1) {
+            this.#solver.rigidBodies.splice(index, 1);
+            this.#renderers.delete(body);
+        } else {
+            console.warn(`Unable to find object ${body}`);
+        }
     }
 
     /** @param constraint */
@@ -196,16 +249,11 @@ export class Bootstrap {
     }
 
     #init() {
-        const rect = this.#canvas.getBoundingClientRect();
+        const {dpr, canvasWidth, canvasHeight} = CommonUtils.initCanvas(this.#canvas, this.#useDpr);
 
-        this.#dpr = window.devicePixelRatio;
-        this.#canvasWidth = rect.width;
-        this.#canvasHeight = rect.height;
-
-        this.#canvas.style.width = this.canvasWidth + "px";
-        this.#canvas.style.height = this.canvasHeight + "px";
-        this.#canvas.width = this.canvasWidth * this.dpr;
-        this.#canvas.height = this.canvasHeight * this.dpr;
+        this.#dpr = dpr;
+        this.#canvasWidth = canvasWidth;
+        this.#canvasHeight = canvasHeight;
 
         this.#ctx.scale(this.dpr, this.dpr);
 
@@ -229,6 +277,11 @@ export class Bootstrap {
         const t = performance.now();
         if (this.state !== State.pause) {
             this.#physicsStep(this.#stats.elapsed / 1000);
+
+            for (const collision of this.#solver.stepInfo.collisions) {
+                collision.aBody.collider.onCollide(collision, collision.bBody);
+                collision.bBody.collider.onCollide(collision, collision.aBody);
+            }
         }
 
         if (this.state === State.step) {
@@ -247,7 +300,7 @@ export class Bootstrap {
             this.#stats.lastStepTime = timestamp;
 
             const t = performance.now();
-            this.#render();
+            this.#render(this.#solver.stepInfo.delta);
             this.#stats.renderTime = performance.now() - t;
 
             setTimeout(() => this.#step());
@@ -256,9 +309,18 @@ export class Bootstrap {
 
     #physicsStep(elapsed) {
         this.#solver.solve(elapsed * this.#slowMotion);
+        const delta = this.#solver.stepInfo.delta;
+
+        for (const particle of this.#particles) {
+            particle.step(delta);
+        }
+
+        for (const particle of this.#particles.filter(p => p.destroyed)) {
+            this.destroyParticle(particle);
+        }
     }
 
-    #render() {
+    #render(delta) {
         this.#ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
 
         this.#ctx.strokeStyle = "black";
@@ -266,10 +328,13 @@ export class Bootstrap {
             this.#ctx.strokeRect(box.left, box.top, box.width, box.height);
         }
 
-        if (!this.#debug || this.#debugInstance.showBodies) {
-            for (const renderer of this.#renderers.values()) {
-                renderer.render(this.#ctx);
-            }
+        const renderers = [
+            ...this.#renderSteps,
+            ...(!this.#debug || this.#debugInstance.showBodies ? this.#renderers.values() : [])
+        ].sort((r1, r2) => r1.z - r2.z);
+
+        for (const renderer of renderers) {
+            renderer.render(this.#ctx, this.state === State.play ? delta : 1e-12);
         }
 
         if (this.#debug) {

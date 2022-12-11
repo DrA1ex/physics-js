@@ -1,17 +1,52 @@
+/**
+ * @param {*} param
+ * @return {boolean|null}
+ */
 function parseBool(param) {
-    if (param instanceof Boolean) return param;
+    if (typeof param === "boolean") return param;
 
     if (param === "1") return true;
     else if (param === "0") return false;
-    return null
+    return null;
 }
 
+/**
+ * @param {*} param
+ * @param {function(*): number} parser
+ * @return {number|null}
+ */
 function parseNumber(param, parser) {
-    if (param instanceof Number) return param;
+    if (typeof param === "number") return param;
 
     const value = parser(param);
     if (Number.isFinite(value)) return value;
     return null;
+}
+
+/**
+ * @param {Object} type
+ * @return {(function(*): (*|null))}
+ */
+function parseEnum(type) {
+    return (v) => {
+        const value = type[v];
+        if (value === undefined) {
+            return Object.values(type).indexOf(v) !== -1 ? v : null;
+        }
+
+        return value;
+    }
+}
+
+export const Parser = {
+    /** @param {*} v */
+    bool: parseBool,
+    /** @param {*} v */
+    int: (v) => parseNumber(v, Number.parseInt),
+    /** @param {*} v */
+    float: (v) => parseNumber(v, Number.parseFloat),
+    /** @param {Object} type */
+    enum: type => parseEnum(type),
 }
 
 export function parse(def = {}) {
@@ -27,6 +62,8 @@ export function parse(def = {}) {
     const result = {
         debug: parseBool(params["debug"]) ?? false,
         statistics: parseBool(params["stats"]) ?? true,
+        useDpr: parseBool(params["dpr"]) ?? true,
+
         showBodies: parseBool(params["debug_body"]) ?? true,
         showVector: parseBool(params["debug_vector"]),
         showPoints: parseBool(params["debug_point"]),
@@ -50,6 +87,7 @@ export function parse(def = {}) {
 
         solverBias: parseNumber(params["bias"], Number.parseFloat),
         solverBeta: parseNumber(params["beta"], Number.parseFloat),
+        allowedOverlap: parseNumber(params["overlap"], Number.parseFloat),
         solverSteps: parseNumber(params["steps"], Number.parseInt),
         solverTreeDivider: parseNumber(params["tree_divider"], Number.parseInt),
         solverTreeMaxCount: parseNumber(params["tree_cnt"], Number.parseInt),
@@ -63,4 +101,20 @@ export function parse(def = {}) {
 
         return res;
     }, {});
+}
+
+export function parseSettings(config) {
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const params = Object.fromEntries(urlSearchParams.entries());
+
+    const result = {}
+    for (const [key, {parser, param, default: def}] of Object.entries(config)) {
+        const value = parser(params[param]) ?? def;
+
+        if (value !== null) {
+            result[key] = value;
+        }
+    }
+
+    return result;
 }

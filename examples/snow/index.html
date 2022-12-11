@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+    <title>physics.js: Snow Demo</title>
+    <link href="./themes.css" rel="stylesheet">
+    <link href="./style.css" rel="stylesheet">
+</head>
+<body class="default-theme">
+<div id="container">
+    <div class="fill bg-gradient"></div>
+    <canvas class="canvas" id="canvas" style="z-index: 1000"></canvas>
+    <div id="hint" class="hint fill flex-centered fading-out" style="display: none">Click to snow</div>
+    <div id="loader" class="fill flex-centered flex-column loading-screen">
+        <img class="loader-icon rotating">
+        <p id="loader-state">Loading scripts...</p>
+    </div>
+</div>
+</body>
+<script type="module" src="index.js"></script>
+</html>

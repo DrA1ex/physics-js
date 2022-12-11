@@ -2,7 +2,7 @@ import {Bootstrap, State} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
 import {BoundaryBox, RectBody} from "../../lib/physics/body.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
-import {Collider} from "../../lib/physics/collision.js";
+import {Collider} from "../../lib/physics/collider.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import * as Utils from "../common/utils.js";
 import {GravityForce, ResistanceForce} from "../../lib/physics/force.js";

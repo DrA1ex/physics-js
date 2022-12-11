@@ -5,7 +5,6 @@ import * as Params from "../common/params.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
 import * as Utils from "../common/utils.js";
 import {Vector2} from "../../lib/utils/vector.js";
-import * as CommonUtils from "../../lib/utils/common.js";
 import * as GeomUtils from "../../lib/utils/geom.js";
 
 function _createBody(position, size) {
@@ -37,8 +36,7 @@ function _createBodies(origin, box) {
     const size = Math.floor(1 + Math.random() * 4) * 10;
 
     const pos = Vector2.fromAngle(Math.random() * Math.PI * 2).scale(size).add(origin);
-    pos.x = CommonUtils.clamp(box.left + size + border, box.right - size - border, pos.x);
-    pos.y = CommonUtils.clamp(box.top + size + border, box.bottom - size - border, pos.y);
+    Utils.clampBodyPosition(pos, box, size, border);
 
     BootstrapInstance.addRigidBody(_createBody(pos, size))
 }

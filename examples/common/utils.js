@@ -1,5 +1,6 @@
 import {Vector2} from "../../lib/utils/vector.js";
 import {PolygonBody, RectBody} from "../../lib/physics/body.js";
+import * as CommonUtils from "../../lib/utils/common.js";
 
 /**
  * @param {Vector2} position
@@ -47,4 +48,82 @@ export function randomColor(minComponent, maxComponent, alpha = 1) {
     components[3] = Math.floor(alpha * 255);
 
     return "#" + components.map(v => Math.min(255, Math.max(0, v)).toString(16)).join("");
+}
+
+
+/***
+ * @param {Vector2} pos
+ * @param {BoundaryBox} box
+ * @param {number} size
+ * @param {number} [border=0]
+ * @return {void}
+ */
+export function clampBodyPosition(pos, box, size, border = 0) {
+    pos.x = CommonUtils.clamp(box.left + size + border, box.right - size - border, pos.x);
+    pos.y = CommonUtils.clamp(box.top + size + border, box.bottom - size - border, pos.y);
+}
+
+
+/**
+ * @param {HTMLCanvasElement} canvas
+ * @param {boolean} [useDpr=true]
+ * @return {{canvasWidth: number, dpr: number, canvasHeight: number}}
+ */
+export function initCanvas(canvas, useDpr = true) {
+    const rect = canvas.getBoundingClientRect();
+
+    const dpr = useDpr ? window.devicePixelRatio : 1;
+    const canvasWidth = rect.width;
+    const canvasHeight = rect.height;
+
+    canvas.style.width = canvasWidth + "px";
+    canvas.style.height = canvasHeight + "px";
+    canvas.width = canvasWidth * dpr;
+    canvas.height = canvasHeight * dpr;
+
+    return {dpr, canvasWidth, canvasHeight};
+}
+
+export function applyViewportScale(mediaQueries, userSalable = 0) {
+    let pageScale = 1;
+    for (const {media, scale} of mediaQueries) {
+        if (window.matchMedia(media).matches) {
+            pageScale = scale;
+            break;
+        }
+    }
+
+    let viewport = document.querySelector("meta[name=viewport]");
+    if (!viewport) {
+        viewport = document.createElement("meta");
+        viewport.name = "viewport";
+
+        document.head.appendChild(viewport);
+    }
+
+    const viewportAttData = `width=device-width, initial-scale=${pageScale}, maximum-scale=${pageScale}, user-scalable=${userSalable}, viewport-fit=cover`
+    viewport.setAttribute('content', viewportAttData);
+
+    return pageScale;
+}
+
+export function isMobile() {
+    if (globalThis.window) {
+        return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    }
+
+    return false;
+}
+
+export function installGlobalErrorHook() {
+    addEventListener("error", (event) => {
+        alert(event.error?.stack ?? event.message);
+    });
+}
+
+
+export function* reversed(array) {
+    for (let i = array.length - 1; i >= 0; i--) {
+        yield array[i];
+    }
 }
