@@ -3,6 +3,9 @@ import {PolygonBody} from "../../../lib/physics/body.js";
 import {Vector2} from "../../../lib/utils/vector.js";
 import * as GeomUtils from "../../../lib/utils/geom.js";
 
+/**
+ * @enum {number}
+ */
 export const SmokeState = {
     born: 0,
     active: 1,
@@ -10,6 +13,9 @@ export const SmokeState = {
     destroy: 3
 }
 
+/**
+ * @enum {string}
+ */
 export const Tags = {
     snowflake: "snowflake",
     snowDrift: "snowDrift",

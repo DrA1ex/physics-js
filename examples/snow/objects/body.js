@@ -2,10 +2,11 @@ import {CircleBody, LineBody, PolygonBody} from "../../../lib/physics/body.js";
 import {Vector2} from "../../../lib/utils/vector.js";
 import {LineRenderer, PolygonBodyRenderer} from "../../../lib/render/renderer.js";
 import {SmokeCollider, SmokeState, SnowdriftCollider, Tags, UnionPolyBody} from "./misc.js";
-import {AnimationProperty, KeyframeType, Particle, ParticleState, StateKeyframe} from "../../../lib/render/particle.js";
+import {Particle} from "../../../lib/render/particle.js";
 import {AnimatedSpriteRenderer, SpriteRenderer} from "../../../lib/render/sprite.js";
 import Settings from "../settings.js";
 import * as Utils from "../../common/utils.js";
+import {AnimationProperty, KeyframeType, ParticleState, StateKeyframe} from "../../../lib/render/particle_animation.js";
 
 export class SnowDriftSegmentBody extends LineBody {
     #renderer;
@@ -138,30 +139,26 @@ export class SmokeParticle extends Particle {
         renderer.opacity = 0.05 + Math.random() * 0.25;
 
         super(smokeBody, renderer);
-
         smokeBody.collider = new SmokeCollider(this);
 
         this.addState(SmokeState.born, new ParticleState()
-            .addKeyframe(new StateKeyframe(AnimationProperty.opacity, 0, 1, 500, KeyframeType.relative)));
+            .addKeyframe(new StateKeyframe(AnimationProperty.opacity, 0, 1, 500, KeyframeType.relative))
+        );
 
         this.addState(SmokeState.active, new ParticleState()
             .addKeyframe(new StateKeyframe(AnimationProperty.radius, 1, 7, 7000, KeyframeType.relative))
-            .addKeyframe(new StateKeyframe(AnimationProperty.opacity, 1, 0.2, 15000, KeyframeType.relative)));
+            .addKeyframe(new StateKeyframe(AnimationProperty.opacity, 1, 0.2, 15000, KeyframeType.relative))
+        );
 
         this.addState(SmokeState.fade, new ParticleState()
             .addKeyframe(new StateKeyframe(AnimationProperty.radius, 1, 7, 7000, KeyframeType.relative))
-            .addKeyframe(new StateKeyframe(AnimationProperty.opacity, 1, 0.2, 15000, KeyframeType.relative)));
+            .addKeyframe(new StateKeyframe(AnimationProperty.opacity, 1, 0.2, 15000, KeyframeType.relative))
+        );
 
         this.addState(SmokeState.destroy, new ParticleState()
-            .addKeyframe(new StateKeyframe(AnimationProperty.opacity, 1, 0, 1000, KeyframeType.relative)));
+            .addKeyframe(new StateKeyframe(AnimationProperty.opacity, 1, 0, 1000, KeyframeType.relative))
+        );
 
         this.addSequentialTransition([SmokeState.born, SmokeState.active, SmokeState.fade, SmokeState.destroy, Particle.DestroyState]);
-        this.setState(SmokeState.born);
-    }
-
-    onStateChanged(state) {
-        if (state) {
-            this.body.collider.noCollide = true;
-        }
     }
 }

@@ -5,6 +5,7 @@ import {Body} from "../../lib/physics/body.js";
 import {RendererMapping} from "../../lib/render/renderer.js";
 import * as CommonUtils from "./utils.js";
 import {Particle} from "../../lib/render/particle.js";
+import {ParticleSystem} from "../../lib/render/particle_system.js";
 
 /*** @enum {number} */
 export const State = {
@@ -21,6 +22,8 @@ export class Bootstrap {
     #debugInstance;
     /** @type {ImpulseBasedSolver} */
     #solver;
+    /** @type {ParticleSystem} */
+    #particleSystem;
     /** @type {HTMLCanvasElement} */
     #canvas;
     /** @type {CanvasRenderingContext2D} */
@@ -32,8 +35,7 @@ export class Bootstrap {
     #drawingVectors = new Map();
     #renderers = new Map();
     #renderSteps = [];
-    #particleEmitters = []
-    #particles = [];
+
     #bodyParticle = new Map();
 
     #statsElement;
@@ -84,6 +86,10 @@ export class Bootstrap {
         this.#debug = options.debug;
         this.#slowMotion = Math.max(0.01, Math.min(2, options.slowMotion ?? 1));
         this.#useDpr = options.useDpr;
+
+        this.#particleSystem = new ParticleSystem();
+        this.#particleSystem.onParticleCreated.subscribe(this, this.#addParticle.bind(this));
+        this.#particleSystem.onParticleDeleted.subscribe(this, this.#destroyParticle.bind(this));
 
         this.#solver = new ImpulseBasedSolver();
         if (Number.isFinite(options.solverSteps)) this.#solver.steps = options.solverSteps;
@@ -140,29 +146,34 @@ export class Bootstrap {
      * @param {ParticleEmitter} emitter
      */
     addParticleEmitter(emitter) {
-        this.#particleEmitters.push(emitter);
+        this.#particleSystem.addParticleEmitter(emitter);
     }
 
-    /**
+    /***
      * @param {Particle} particle
      */
     addParticle(particle) {
+        this.#particleSystem.addParticle(particle);
+    }
+
+    /**
+     * @param {ParticleSystem} sender
+     * @param {Particle} particle
+     */
+    #addParticle(sender, particle) {
         if (this.#bodyParticle.has(particle.body)) throw new Error("Body already used");
 
-        this.#particles.push(particle);
         this.addRigidBody(particle.body, particle.renderer);
         this.#bodyParticle.set(particle.body, particle);
     }
 
-    destroyParticle(particle) {
-        const index = this.#particles.indexOf(particle);
-        if (index !== -1) {
-            this.#particles.splice(index, 1);
-            this.#bodyParticle.delete(particle.body);
-            this.#destroyBodyImpl(particle.body);
-        } else {
-            console.warn(`Unable to find particle ${particle}`);
-        }
+    /**
+     * @param {ParticleSystem} sender
+     * @param {Particle} particle
+     */
+    #destroyParticle(sender, particle) {
+        this.#bodyParticle.delete(particle.body);
+        this.#destroyBodyImpl(particle.body);
     }
 
     /**
@@ -170,7 +181,7 @@ export class Bootstrap {
      */
     destroyBody(body) {
         if (this.#bodyParticle.has(body)) {
-            this.destroyParticle(this.#bodyParticle.get(body));
+            this.#bodyParticle.get(body).destroy();
         } else {
             this.#destroyBodyImpl(body);
         }
@@ -332,19 +343,8 @@ export class Bootstrap {
         const delta = Math.max(0, Math.min(0.1, elapsed * this.#slowMotion));
         if (delta === 0) return;
 
-        for (let emitter of this.#particleEmitters) {
-            emitter.step(delta, p => this.addParticle(p));
-        }
-
+        this.#particleSystem.step(delta);
         this.#solver.solve(delta);
-
-        for (const particle of this.#particles) {
-            particle.step(delta);
-        }
-
-        for (const particle of this.#particles.filter(p => p.destroyed)) {
-            this.destroyParticle(particle);
-        }
     }
 
     #render(delta) {

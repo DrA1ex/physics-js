@@ -130,7 +130,7 @@ export class SnowCloud {
 
         const pos = Vector2.fromAngle(Math.random() * Math.PI * 2).scale(4).add(origin);
         const snow = new SnowParticle(pos.x, pos.y, this.#snowSpriteSeries, this.#worldBox, this.#options);
-        return this.#engine.addParticle(snow);
+        this.#engine.addParticle(snow);
     }
 }
 

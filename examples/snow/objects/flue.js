@@ -2,7 +2,7 @@ import {RectBody} from "../../../lib/physics/body.js";
 import {SpotWindForce} from "../../../lib/physics/force.js";
 import {Vector2} from "../../../lib/utils/vector.js";
 import {SpriteSeries} from "../../../lib/render/sprite.js";
-import {Tags} from "./misc.js";
+import {SmokeState, Tags} from "./misc.js";
 import Settings from "../settings.js";
 import {LinerRateProvider, NumericValueProvider, ParticleEmitter, VectorValueProvider} from "../../../lib/render/particle_system.js";
 import {SmokeParticle} from "./body.js";
@@ -11,6 +11,8 @@ export class HouseFlue {
     #engine;
     #houseFlue;
     #smokeSprite;
+
+    /** @type {ParticleEmitter<SmokeState>} */
     #smokeEmitter;
 
     get smokeSprite() {return this.#smokeSprite;}
