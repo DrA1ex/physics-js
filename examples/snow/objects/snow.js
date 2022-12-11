@@ -6,7 +6,6 @@ import * as Utils from "../../common/utils.js";
 import Settings from "../settings.js";
 import {SnowDriftSegmentBody, SnowDriftStaticBody, SnowParticle} from "./body.js";
 import {Tags} from "./misc.js";
-import * as SnowUtils from "../utils/common.js";
 import * as CommonUtils from "../../../lib/utils/common.js";
 import {LinerRateProvider, NumericValueProvider, ParticleEmitter, VectorValueProvider} from "../../../lib/render/particle_system.js";
 
@@ -254,18 +253,18 @@ export class SnowDrift {
             const stepCount = Settings.Snow.Reducing.StepCount;
             const step = 1 / stepCount;
             for (let k = 0; k < stepCount; k++) {
-                let prevDelta = deltas[0];
-                for (let i = 0; i < deltas.length; i++) {
-                    const delta = deltas[i];
-                    this.segments[i].updatePoints(
-                        new Vector2(0, prevDelta * step),
-                        new Vector2(0, delta * step)
-                    );
+                await this.#engine.requestPhysicsFrame(() => {
+                    let prevDelta = deltas[0];
+                    for (let i = 0; i < deltas.length; i++) {
+                        const delta = deltas[i];
+                        this.segments[i].updatePoints(
+                            new Vector2(0, prevDelta * step),
+                            new Vector2(0, delta * step)
+                        );
 
-                    prevDelta = delta;
-                }
-
-                await SnowUtils.delay(Settings.Snow.Reducing.AnimationInterval);
+                        prevDelta = delta;
+                    }
+                });
             }
         }
     }

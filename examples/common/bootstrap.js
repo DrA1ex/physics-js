@@ -7,6 +7,13 @@ import * as CommonUtils from "./utils.js";
 import {Particle} from "../../lib/render/particle.js";
 import {ParticleSystem} from "../../lib/render/particle_system.js";
 
+/**
+ * @template T
+ * @typedef {function(delta: number): T} WaiterCallback
+ *
+ * @typedef {function(delta: number): void} WaiterItem
+ */
+
 /*** @enum {number} */
 export const State = {
     play: 0,
@@ -35,6 +42,10 @@ export class Bootstrap {
     #drawingVectors = new Map();
     #renderers = new Map();
     #renderSteps = [];
+    /** @type {Set<WaiterItem>}*/
+    #renderWaiters = new Set();
+    /** @type {Set<WaiterItem>}*/
+    #physicsWaiters = new Set();
 
     #bodyParticle = new Map();
 
@@ -154,6 +165,36 @@ export class Bootstrap {
      */
     addParticle(particle) {
         this.#particleSystem.addParticle(particle);
+    }
+
+    /**
+     * @template TRet
+     * @param {WaiterCallback<TRet>} callback
+     * @return {Promise<TRet>}
+     */
+    async requestRenderFrame(callback) {
+        return await this.#addWaiter(this.#renderWaiters, callback);
+    }
+
+    /**
+     * @template TRet
+     * @param {WaiterCallback<TRet>} callback
+     * @return {Promise<TRet>}
+     */
+    async requestPhysicsFrame(callback) {
+        return await this.#addWaiter(this.#physicsWaiters, callback);
+    }
+
+    async #addWaiter(collection, callback) {
+        return new Promise((resolve, reject) => {
+            collection.add(delta => {
+                try {
+                    resolve(callback(delta));
+                } catch (e) {
+                    reject(e);
+                }
+            });
+        });
     }
 
     /**
@@ -343,6 +384,9 @@ export class Bootstrap {
         const delta = Math.max(0, Math.min(0.1, elapsed * this.#slowMotion));
         if (delta === 0) return;
 
+        for (const waiterCb of this.#physicsWaiters) waiterCb(delta);
+        this.#physicsWaiters.clear();
+
         this.#particleSystem.step(delta);
         this.#solver.solve(delta);
     }
@@ -362,6 +406,11 @@ export class Bootstrap {
 
         for (const renderer of renderers) {
             renderer.render(this.#ctx, this.state === State.play ? delta : 1e-12);
+        }
+
+        if (this.state === State.play) {
+            for (const waiterCb of this.#renderWaiters) waiterCb(delta);
+            this.#renderWaiters.clear();
         }
 
         if (this.#debug) {

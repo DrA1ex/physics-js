@@ -7,19 +7,20 @@ export class ThemeManager {
     #lastProps = {};
     #initialized = false;
 
+    #engine;
     #worldBox;
     #bgDrawer;
     #house;
     #snowCloud;
     #snowDrift;
 
-    constructor(worldBox, bgDrawer, house, snowCloud, snowDrift) {
+    constructor(engine, worldBox, bgDrawer, house, snowCloud, snowDrift) {
+        this.#engine = engine;
         this.#worldBox = worldBox;
         this.#bgDrawer = bgDrawer;
         this.#house = house;
         this.#snowCloud = snowCloud;
         this.#snowDrift = snowDrift;
-
     }
 
     /**
@@ -163,13 +164,21 @@ export class ThemeManager {
         const currentProps = {};
         while (hasNextValue) {
             hasNextValue = false;
-            for (const [key, animation] of Object.entries(animations)) {
-                currentProps[key] = animation.next(Settings.Style.Animation.Interval / 1000);
-                hasNextValue ||= animation.hasNextValue();
-            }
 
-            await this.#applyTheme(currentProps);
-            await Utils.delay(Settings.Style.Animation.Interval);
+            const t = performance.now();
+            await this.#engine.requestRenderFrame(async (delta) => {
+                for (const [key, animation] of Object.entries(animations)) {
+                    currentProps[key] = animation.next(Math.max(delta, Settings.Style.Animation.Interval / 1000));
+                    hasNextValue ||= animation.hasNextValue();
+                }
+
+                await this.#applyTheme(currentProps)
+            });
+
+            const waitTime = Settings.Style.Animation.Interval - (performance.now() - t);
+            if (waitTime > 0) {
+                await Utils.delay(waitTime);
+            }
         }
     }
 }

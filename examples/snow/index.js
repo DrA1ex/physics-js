@@ -59,7 +59,7 @@ snowCloud.letItSnow();
 
 const snowDrift = new SnowDrift(BootstrapInstance, WorldBox);
 
-const themeManager = new ThemeManager(WorldBox, bgDrawer, house, snowCloud, snowDrift);
+const themeManager = new ThemeManager(BootstrapInstance, WorldBox, bgDrawer, house, snowCloud, snowDrift);
 
 loaderState.innerText = "Initialize sun positioning...";
 

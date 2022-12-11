@@ -51,7 +51,7 @@ const snowOptions = Params.parseSettings({
     sunChangeInterval: {parser: Params.Parser.float, param: "sun_interval", default: 60},
 
     themeChangeAnimationStep: {parser: Params.Parser.float, param: "theme_step", default: isMobile ? 1 : 0.25},
-    themeChangeAnimationInterval: {parser: Params.Parser.float, param: "theme_interval", default: isMobile ? 1000 / 6 : 1000 / 24},
+    themeChangeAnimationInterval: {parser: Params.Parser.float, param: "theme_interval", default: isMobile ? 1000 / 10 : 1000 / 24},
     themeChangeEasing: {parser: Params.Parser.enum(EasingFunctions), param: "theme_easing", default: EasingFunctions.easeInOutCubic},
 
     detectCoordinates: {parser: Params.Parser.bool, param: "gps", default: true},
@@ -69,7 +69,6 @@ const snowOptions = Params.parseSettings({
 
     snowReducingCheckInterval: {parser: Params.Parser.float, param: "reducing_interval", default: 5000},
     snowReducingSteps: {parser: Params.Parser.float, param: "reducing_steps", default: 200},
-    snowReducingAnimationInterval: {parser: Params.Parser.float, param: "reducing_animation", default: isMobile ? 1000 / 24 : 1000 / 60},
 
     houseWidth: {parser: Params.Parser.float, param: "house_w", default: 400},
     houseHeight: {parser: Params.Parser.float, param: "house_h", default: 250},
@@ -104,7 +103,6 @@ export default {
         Reducing: {
             CheckInterval: snowOptions.snowReducingCheckInterval,
             StepCount: snowOptions.snowReducingSteps,
-            AnimationInterval: snowOptions.snowReducingAnimationInterval,
         }
     },
 
