@@ -6,6 +6,7 @@
     "build": "webpack"
   },
   "devDependencies": {
+    "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.2",
     "css-minimizer-webpack-plugin": "^4.2.2",
     "glob": "^8.0.3",

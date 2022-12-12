@@ -6,6 +6,7 @@ import fs from "fs";
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
+import CopyPlugin from "copy-webpack-plugin";
 
 const LibChunks = new Set(["render", "physics", "misc"]);
 const ExcludeExamples = new Set(["common"]);
@@ -98,6 +99,12 @@ export default {
         new MiniCssExtractPlugin({
             filename: "style/[contenthash].css",
             ignoreOrder: false,
+        }),
+        new CopyPlugin({
+            patterns: [
+                {from: "./index.html", to: "./"},
+                {from: "./LICENSE", to: "./"}
+            ]
         }),
         ...htmlPlugins
     ]
