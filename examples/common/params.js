@@ -1,3 +1,5 @@
+import * as CommonUtils from "../common/utils.js";
+
 /**
  * @param {*} param
  * @return {boolean|null}
@@ -53,6 +55,8 @@ export function parse(def = {}) {
     const urlSearchParams = new URLSearchParams(window.location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
 
+    const isMobile = CommonUtils.isMobile();
+
     for (const [key, defValue] of Object.entries(def)) {
         if (params[key] === undefined || params[key] === "") {
             params[key] = defValue;
@@ -62,7 +66,7 @@ export function parse(def = {}) {
     const result = {
         debug: parseBool(params["debug"]) ?? false,
         statistics: parseBool(params["stats"]) ?? true,
-        useDpr: parseBool(params["dpr"]) ?? true,
+        useDpr: parseBool(params["dpr"]) ?? !isMobile,
 
         showBodies: parseBool(params["debug_body"]) ?? true,
         showVector: parseBool(params["debug_vector"]),
