@@ -4,6 +4,36 @@ Yet another physics engine implementation.
 
 ![image](https://user-images.githubusercontent.com/1194059/203562067-41b3fcb0-a169-46e8-bcb9-04db29d6e556.png)
 
+## Snowcase
+### Snow
+<img width="1498" alt="image" src="https://user-images.githubusercontent.com/1194059/206975949-c1e56c28-7e7f-47d7-b970-ab6d9d81af5d.png">
+
+### Features
+- Realtime snow physics
+- Snowdrift grows as snow falls on it
+- Realtime smoke particle system with enabled physics interactions (e.g. it is repelled by a snowdrift)
+- Procedurally generated terrain
+- 6 different themes for each time of day
+- Theme synchronization corresponsing to local sun position (need to allow geoposition access)
+- Can be used as Desktop live wallpapper (using Wallpaper Engine, Plash, etc.)
+- [Configurable](https://github.com/DrA1ex/physics-js/blob/master/examples/snow/settings.js#L44)
+
+### Themes (click to open demo)
+
+[<img width="33%" src="https://user-images.githubusercontent.com/1194059/206976857-8bc9a591-ea12-4a24-b026-6550cf7e9a4c.jpg">](https://dra1ex.github.io/physics-js/examples/snow/?sun=fixed&theme=dawn)
+[<img width="33%" src="https://user-images.githubusercontent.com/1194059/206976858-7f5c77ac-3ba7-4427-a032-256bc0a43e84.jpg">](https://dra1ex.github.io/physics-js/examples/snow/?sun=fixed&theme=twilight)
+[<img width="33%" src="https://user-images.githubusercontent.com/1194059/206976859-8dd54630-bf8b-4e1c-a91b-5860ba4242cb.jpg">](https://dra1ex.github.io/physics-js/examples/snow/?sun=fixed&theme=day)
+
+[<img width="33%" src="https://user-images.githubusercontent.com/1194059/206976864-6ab6085c-d89f-4aad-9c80-80ae2a17bdb8.jpeg">](https://dra1ex.github.io/physics-js/examples/snow/?sun=fixed&theme=sunset)
+[<img width="33%" src="https://user-images.githubusercontent.com/1194059/206976852-2fb476d7-b7c1-4180-b525-0a94b5f7b927.jpeg">](https://dra1ex.github.io/physics-js/examples/snow/?sun=fixed&theme=dusk)
+[<img width="33%" src="https://user-images.githubusercontent.com/1194059/206976856-423e9df8-e97a-41ac-b204-a2d0f9dbad9e.jpg">](https://dra1ex.github.io/physics-js/examples/snow/?sun=fixed&theme=night)
+
+### Links
+- Theme synchronization mode: [link](https://dra1ex.github.io/physics-js/examples/snow/)
+- Periodic theme change mode: [link](https://dra1ex.github.io/physics-js/examples/snow/?sun=periodic)
+- Debug mode: [link](https://dra1ex.github.io/physics-js/examples/snow/?stats=1&debug=1)
+- Tree debug mode: [link](https://dra1ex.github.io/physics-js/examples/snow/?stats=1&debug=1&debug_tree=1&debug_velocity=0&debug_boundary=1&smoke_interval=500&snow_emit=200)
+
 ## Examples
 
 - Ramp: [link](https://dra1ex.github.io/physics-js/examples/ramp)
