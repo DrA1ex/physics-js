@@ -1,5 +1,4 @@
-# Sample workflow for building and deploying a Jekyll site to GitHub Pages
-name: Deploy Jekyll with GitHub Pages dependencies preinstalled
+name: GitHub Pages
 
 on:
   # Runs on pushes targeting the default branch
@@ -27,10 +26,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - name: Minify Action
+        uses: dra1ex/minify-action@v1.0.3
       - name: Setup Pages
         uses: actions/configure-pages@v2
-      - name: Minify Action
-        uses: anthonyftwang/minify-action@v1.0.1
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
