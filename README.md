@@ -20,13 +20,13 @@ Yet another physics engine implementation.
 
 ### Themes (click to open demo)
 
-[<img width="33%" src="https://user-images.githubusercontent.com/1194059/206976857-8bc9a591-ea12-4a24-b026-6550cf7e9a4c.jpg">](https://dra1ex.github.io/physics-js/examples/snow/?sun=fixed&theme=dawn)
-[<img width="33%" src="https://user-images.githubusercontent.com/1194059/206976858-7f5c77ac-3ba7-4427-a032-256bc0a43e84.jpg">](https://dra1ex.github.io/physics-js/examples/snow/?sun=fixed&theme=twilight)
-[<img width="33%" src="https://user-images.githubusercontent.com/1194059/206976859-8dd54630-bf8b-4e1c-a91b-5860ba4242cb.jpg">](https://dra1ex.github.io/physics-js/examples/snow/?sun=fixed&theme=day)
+[<img width="30%" src="https://user-images.githubusercontent.com/1194059/206976857-8bc9a591-ea12-4a24-b026-6550cf7e9a4c.jpg">](https://dra1ex.github.io/physics-js/examples/snow/?sun=fixed&theme=dawn)
+[<img width="30%" src="https://user-images.githubusercontent.com/1194059/206976858-7f5c77ac-3ba7-4427-a032-256bc0a43e84.jpg">](https://dra1ex.github.io/physics-js/examples/snow/?sun=fixed&theme=twilight)
+[<img width="30%" src="https://user-images.githubusercontent.com/1194059/206976859-8dd54630-bf8b-4e1c-a91b-5860ba4242cb.jpg">](https://dra1ex.github.io/physics-js/examples/snow/?sun=fixed&theme=day)
 
-[<img width="33%" src="https://user-images.githubusercontent.com/1194059/206976864-6ab6085c-d89f-4aad-9c80-80ae2a17bdb8.jpeg">](https://dra1ex.github.io/physics-js/examples/snow/?sun=fixed&theme=sunset)
-[<img width="33%" src="https://user-images.githubusercontent.com/1194059/206976852-2fb476d7-b7c1-4180-b525-0a94b5f7b927.jpeg">](https://dra1ex.github.io/physics-js/examples/snow/?sun=fixed&theme=dusk)
-[<img width="33%" src="https://user-images.githubusercontent.com/1194059/206976856-423e9df8-e97a-41ac-b204-a2d0f9dbad9e.jpg">](https://dra1ex.github.io/physics-js/examples/snow/?sun=fixed&theme=night)
+[<img width="30%" src="https://user-images.githubusercontent.com/1194059/206976864-6ab6085c-d89f-4aad-9c80-80ae2a17bdb8.jpeg">](https://dra1ex.github.io/physics-js/examples/snow/?sun=fixed&theme=sunset)
+[<img width="30%" src="https://user-images.githubusercontent.com/1194059/206976852-2fb476d7-b7c1-4180-b525-0a94b5f7b927.jpeg">](https://dra1ex.github.io/physics-js/examples/snow/?sun=fixed&theme=dusk)
+[<img width="30%" src="https://user-images.githubusercontent.com/1194059/206976856-423e9df8-e97a-41ac-b204-a2d0f9dbad9e.jpg">](https://dra1ex.github.io/physics-js/examples/snow/?sun=fixed&theme=night)
 
 ### Links
 - Theme synchronization mode: [link](https://dra1ex.github.io/physics-js/examples/snow/)
