@@ -36,6 +36,7 @@ Yet another physics engine implementation.
 
 ## Examples
 
+- Particles: [link](https://dra1ex.github.io/physics-js/examples/particles) 
 - Ramp: [link](https://dra1ex.github.io/physics-js/examples/ramp)
 - Friction: [link](https://dra1ex.github.io/physics-js/examples/friction)
 - Tower: [link](https://dra1ex.github.io/physics-js/examples/tower)
