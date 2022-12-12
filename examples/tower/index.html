@@ -3,51 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Physics: Tower Demo</title>
-    <style>
-        html, body {
-            height: 100%;
-        }
-
-        body {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 1rem;
-        }
-
-        #canvas {
-            width: 100%;
-            height: 100%;
-        }
-
-        .stats-block {
-            bottom: calc(50px + 2rem) !important;
-            left: 2rem !important;
-        }
-
-        .hint {
-            position: absolute;
-            bottom: 1.5rem;
-            left: 1rem;
-            right: 1rem;
-            text-align: center;
-            pointer-events: none;
-
-            font-size: 2rem;
-            text-shadow: 0 0 2px #9f9f9f;
-        }
-
-        .fading-out {
-            animation-duration: 1s;
-            animation-delay: 2s;
-            animation-fill-mode: forwards;
-            animation-name: fading-out;
-        }
-
-        @keyframes fading-out {
-            from {opacity: 100%;}
-            to {opacity: 0;}
-        }
-    </style>
+    <link href="./style.css" rel="stylesheet">
 </head>
 <body>
 <canvas id="canvas"></canvas>

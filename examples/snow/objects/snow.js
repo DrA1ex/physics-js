@@ -10,6 +10,8 @@ import * as CommonUtils from "../../../lib/utils/common.js";
 import {LinerRateProvider, NumericValueProvider, ParticleEmitter, VectorValueProvider} from "../../../lib/render/particle_system.js";
 
 
+const SnowflakesSpriteUrl = new URL("../sprites/snowflakes.svg", import.meta.url)
+
 export class SnowCloud {
     #initialized = false;
 
@@ -36,7 +38,7 @@ export class SnowCloud {
     }
 
     async init() {
-        this.#snowSpriteSeries = new SpriteSeries("./sprites/snowflakes.svg", 9, 1, 32, 32, 0);
+        this.#snowSpriteSeries = new SpriteSeries(SnowflakesSpriteUrl, 9, 1, 32, 32, 0);
         await this.#snowSpriteSeries.wait();
 
         this.#snowSpriteSeries.setupPreRendering(this.#snowSpriteSeries.count * this.#snowSpriteSeries.width, this.#snowSpriteSeries.height);

@@ -7,6 +7,8 @@ import Settings from "../settings.js";
 import {LinerRateProvider, NumericValueProvider, ParticleEmitter, VectorValueProvider} from "../../../lib/render/particle_system.js";
 import {SmokeParticle} from "./body.js";
 
+const SmokeSpriteUrl = new URL("../sprites/smoke_animation.png", import.meta.url)
+
 export class HouseFlue {
     #engine;
     #houseFlue;
@@ -21,7 +23,7 @@ export class HouseFlue {
 
     constructor(engine, x, y, width, height) {
         this.#engine = engine;
-        this.#smokeSprite = new SpriteSeries("./sprites/smoke_animation.png", 8, 8, 128, 128);
+        this.#smokeSprite = new SpriteSeries(SmokeSpriteUrl, 8, 8, 128, 128);
 
         this.#houseFlue = engine.addRigidBody(
             new RectBody(x, y, width, height)

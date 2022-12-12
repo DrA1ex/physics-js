@@ -8,6 +8,8 @@ import {HouseFlue} from "./flue.js";
 import Settings from "../settings.js";
 import * as ColorUtils from "../../../lib/utils/color.js";
 
+const HouseSpriteUrl = new URL('../sprites/house.svg', import.meta.url)
+
 const HouseSize = new Vector2(Settings.House.Width, Settings.House.Height);
 const RoofPoly = [
     new Vector2(-0.4453, -0.0396), new Vector2(-0.5000, -0.0393),
@@ -40,7 +42,7 @@ export class House {
     }
 
     async init() {
-        this.houseSvg = await SvgWrapper.fromRemote("./sprites/house.svg");
+        this.houseSvg = await SvgWrapper.fromRemote(HouseSpriteUrl);
         this.houseSprite = new Sprite(this.houseSvg.getSource());
         await this.houseSprite.wait();
         this.houseSprite.setupPreRendering(Settings.House.Width, Settings.House.Height);
