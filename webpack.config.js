@@ -8,7 +8,7 @@ import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
 import CopyPlugin from "copy-webpack-plugin";
 
-const LibChunks = new Set(["render", "physics", "misc"]);
+const LibChunks = new Set(["render", "physics"]);
 const ExcludeExamples = new Set(["common"]);
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
@@ -42,19 +42,21 @@ const htmlPlugins = chunks.map(chunk => {
         templateContent: modified,
         chunks: [chunk.name, ...LibChunks.values()],
     });
-})
+});
+
+const isDev = process.env.DEV === "1";
 
 export default {
     mode: "production",
     entry: {
-        misc: {
+        physics: {
             import: [
+                ...glob.sync("./lib/physics/**/*.js"),
                 ...glob.sync("./lib/utils/**/*.js"),
                 "./lib/debug.js",
             ]
         },
-        physics: {import: glob.sync("./lib/physics/**/*.js"), dependOn: "misc"},
-        render: {import: glob.sync("./lib/render/**/*.js"), dependOn: "misc"},
+        render: {import: glob.sync("./lib/render/**/*.js"), dependOn: "physics"},
         ...exampleEntries,
     },
     devtool: 'source-map',
@@ -69,7 +71,7 @@ export default {
             return `examples/${name}/[name].min.js`;
         },
         assetModuleFilename: "assets/[contenthash][ext]",
-        publicPath: "/physics-js/"
+        publicPath: isDev ? undefined : "/physics-js/"
     },
     experiments: {
         topLevelAwait: true,
@@ -108,5 +110,4 @@ export default {
         }),
         ...htmlPlugins
     ]
-}
-;
+};
