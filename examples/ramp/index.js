@@ -1,12 +1,14 @@
 import {Bootstrap} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
-import {BoundaryBox, CircleBody, LineBody} from "../../lib/physics/body.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
 import {GravityForce} from "../../lib/physics/force.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import * as Utils from "../common/utils.js";
-import {Collider} from "../../lib/physics/collider.js";
-import {NoCollision} from "../../lib/utils/collision.js";
+import {BoundaryBox} from "../../lib/physics/common/boundary.js";
+import {LineBody} from "../../lib/physics/body/line.js";
+import {CircleBody} from "../../lib/physics/body/circle.js";
+import {Collider} from "../../lib/physics/collider/base.js";
+import {NoCollision} from "../../lib/physics/common/collision.js";
 
 function cycloid(t, r) {
     return new Vector2(r * (t - Math.sin(t)), r * (1 - Math.cos(t)));
@@ -14,6 +16,10 @@ function cycloid(t, r) {
 
 class NonInteractionCollider extends Collider {
     #collider;
+
+    get order() {return this.#collider.order;}
+    get type() {return this.#collider.type;}
+
 
     constructor(body, collider) {
         super(body);

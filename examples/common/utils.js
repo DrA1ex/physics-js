@@ -1,6 +1,7 @@
 import {Vector2} from "../../lib/utils/vector.js";
-import {PolygonBody, RectBody} from "../../lib/physics/body.js";
 import * as CommonUtils from "../../lib/utils/common.js";
+import {PolygonBody} from "../../lib/physics/body/poly.js";
+import {RectBody} from "../../lib/physics/body/rect.js";
 
 /**
  * @param {Vector2} position

@@ -1,15 +1,17 @@
 import {Bootstrap} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
-import {BoundaryBox, CircleBody, RectBody} from "../../lib/physics/body.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
 import {GlobalWind, ResistanceForce} from "../../lib/physics/force.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import {Particle} from "../../lib/render/particle.js";
 import {CircleBodyRenderer, RectBodyRenderer, RendererMapping} from "../../lib/render/renderer.js";
 import {LinerRateProvider, NumericValueProvider, ParticleEmitter, VectorValueProvider} from "../../lib/render/particle_system.js";
-import {CircleCollider} from "../../lib/physics/collider.js";
 import {AnimationProperty, KeyframeType, ParticleState, StateKeyframe} from "../../lib/render/particle_animation.js";
 import {EasingFunctions} from "../../lib/render/animation.js";
+import {BoundaryBox} from "../../lib/physics/common/boundary.js";
+import {RectBody} from "../../lib/physics/body/rect.js";
+import {CircleBody} from "../../lib/physics/body/circle.js";
+import {CircleCollider} from "../../lib/physics/collider/circle.js";
 
 const Tags = {
     world: "world"

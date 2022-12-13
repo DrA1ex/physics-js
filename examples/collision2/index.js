@@ -1,8 +1,11 @@
 import {Bootstrap} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
-import {BoundaryBox, CircleBody, PolygonBody, RectBody} from "../../lib/physics/body.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
+import {BoundaryBox} from "../../lib/physics/common/boundary.js";
+import {PolygonBody} from "../../lib/physics/body/poly.js";
+import {RectBody} from "../../lib/physics/body/rect.js";
+import {CircleBody} from "../../lib/physics/body/circle.js";
 
 const options = Params.parse({restitution: 1});
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), Object.assign({solverBias: 0.01}, options));

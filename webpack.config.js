@@ -53,11 +53,11 @@ export default {
     entry: {
         [LibShared]: {
             import: [
-                ...glob.sync("./lib/physics/**/*.js"),
                 ...glob.sync("./lib/utils/**/*.js"),
+                ...glob.sync("./lib/misc/**/*.js"),
+                ...glob.sync("./lib/physics/**/*.js"),
                 ...glob.sync("./lib/render/**/*.js"),
                 ...glob.sync("./examples/common/**/*.js"),
-                "./lib/debug.js",
             ]
         },
         ...exampleEntries,

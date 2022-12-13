@@ -1,4 +1,3 @@
-import {BoundaryBox} from "../../lib/physics/body.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
 import {GlobalWind, GravityForce, ResistanceForce} from "../../lib/physics/force.js";
 import {Vector2} from "../../lib/utils/vector.js";
@@ -14,6 +13,7 @@ import {Tags, WorldBorderCollider} from "./objects/misc.js";
 import {House} from "./objects/house.js";
 import {ThemeManager} from "./theme.js";
 import * as GeoUtils from "./utils/geo.js";
+import {BoundaryBox} from "../../lib/physics/common/boundary.js";
 
 CommonUtils.installGlobalErrorHook();
 document.body.classList.add(Settings.Sun.Theme);

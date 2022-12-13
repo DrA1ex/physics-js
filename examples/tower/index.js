@@ -1,9 +1,11 @@
 import {Bootstrap} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
-import {BoundaryBox, CircleBody, RectBody} from "../../lib/physics/body.js";
 import {GravityForce, ResistanceForce} from "../../lib/physics/force.js";
 import * as Utils from "../common/utils.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
+import {BoundaryBox} from "../../lib/physics/common/boundary.js";
+import {RectBody} from "../../lib/physics/body/rect.js";
+import {CircleBody} from "../../lib/physics/body/circle.js";
 
 
 const options = Params.parse({beta: 0.8, bias: 0.2});

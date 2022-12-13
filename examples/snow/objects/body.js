@@ -1,18 +1,17 @@
-import {CircleBody, LineBody, PolygonBody} from "../../../lib/physics/body.js";
 import {Vector2} from "../../../lib/utils/vector.js";
 import {LineRenderer, PolygonBodyRenderer} from "../../../lib/render/renderer.js";
-import {SmokeCollider, SmokeState, SnowdriftCollider, Tags, UnionPolyBody} from "./misc.js";
 import {Particle} from "../../../lib/render/particle.js";
 import {AnimatedSpriteRenderer, SpriteRenderer} from "../../../lib/render/sprite.js";
+import {AnimationProperty, KeyframeType, ParticleState, StateKeyframe} from "../../../lib/render/particle_animation.js";
+import {PolygonBody} from "../../../lib/physics/body/poly.js";
+import {LineBody} from "../../../lib/physics/body/line.js";
+import {CircleBody} from "../../../lib/physics/body/circle.js";
+import {SmokeCollider, SmokeState, SnowdriftCollider, Tags, UnionPolyBody} from "./misc.js";
 import Settings from "../settings.js";
 import * as Utils from "../../common/utils.js";
-import {AnimationProperty, KeyframeType, ParticleState, StateKeyframe} from "../../../lib/render/particle_animation.js";
 
 export class SnowDriftSegmentBody extends LineBody {
     #renderer;
-
-    get renderer() {return this.#renderer;}
-
     constructor(parent, xLast, yLast, x, y) {
         super(xLast, yLast, x, y);
 
@@ -25,6 +24,7 @@ export class SnowDriftSegmentBody extends LineBody {
         this.setActive(false);
         this.setFriction(0.3);
     }
+    get renderer() {return this.#renderer;}
 }
 
 class SnowDriftRenderer extends PolygonBodyRenderer {

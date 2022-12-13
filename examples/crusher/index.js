@@ -1,12 +1,13 @@
 import {Bootstrap, State} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
-import {BoundaryBox, RectBody} from "../../lib/physics/body.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
-import {Collider} from "../../lib/physics/collider.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import * as Utils from "../common/utils.js";
 import {GravityForce, ResistanceForce} from "../../lib/physics/force.js";
 import * as GeomUtils from "../../lib/utils/geom.js";
+import {BoundaryBox} from "../../lib/physics/common/boundary.js";
+import {RectBody} from "../../lib/physics/body/rect.js";
+import {Collider} from "../../lib/physics/collider/base.js";
 
 
 const options = Params.parse({g: 500, steps: 20, bias: 0.1, beta: 0.8});

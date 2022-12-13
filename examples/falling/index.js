@@ -1,11 +1,13 @@
 import {Bootstrap} from "../common/bootstrap.js";
-import {BoundaryBox, CircleBody, RectBody} from "../../lib/physics/body.js";
 import {GravityForce, ResistanceForce} from "../../lib/physics/force.js";
 import * as Params from "../common/params.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
 import * as Utils from "../common/utils.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import * as GeomUtils from "../../lib/utils/geom.js";
+import {BoundaryBox} from "../../lib/physics/common/boundary.js";
+import {RectBody} from "../../lib/physics/body/rect.js";
+import {CircleBody} from "../../lib/physics/body/circle.js";
 
 function _createBody(position, size) {
     let body;

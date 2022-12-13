@@ -1,7 +1,9 @@
-import {CircleCollider, Collider, LineCollider} from "../../../lib/physics/collider.js";
-import {PolygonBody} from "../../../lib/physics/body.js";
 import {Vector2} from "../../../lib/utils/vector.js";
 import * as GeomUtils from "../../../lib/utils/geom.js";
+import {PolygonBody} from "../../../lib/physics/body/poly.js";
+import {Collider} from "../../../lib/physics/collider/base.js";
+import {CircleCollider} from "../../../lib/physics/collider/circle.js";
+import {PolygonCollider} from "../../../lib/physics/collider/poly.js";
 
 /**
  * @enum {number}
@@ -25,7 +27,7 @@ export const Tags = {
     house: "house",
 }
 
-export class SnowdriftCollider extends LineCollider {
+export class SnowdriftCollider extends PolygonCollider {
     #onCollideHandler;
 
     constructor(body, onCollideFn) {
@@ -52,6 +54,9 @@ export class WorldBorderCollider extends Collider {
             this.#engine.destroyBody(body2);
         }
     }
+
+    get order() {return super.order;}
+    get type() {return super.type;}
 }
 
 export class UnionPolyBody extends PolygonBody {
