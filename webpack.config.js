@@ -40,6 +40,7 @@ const htmlPlugins = chunks.map(chunk => {
     return new HtmlWebpackPlugin({
         filename: `./examples/${chunk.name}/index.html`,
         templateContent: modified,
+        inject: "body",
         chunks: [chunk.name, ...LibChunks.values()],
     });
 });
