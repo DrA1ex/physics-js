@@ -1,11 +1,11 @@
 import {Body} from "../../lib/physics/body/base.js";
 import {Debug} from "../../lib/misc/debug.js";
-import {Particle} from "../../lib/render/particle.js";
-import {ParticleSystem} from "../../lib/render/particle_system.js";
+import {Particle} from "../../lib/render/particles/particle.js";
+import {ParticleSystem} from "../../lib/render/particles/system.js";
 import {ImpulseBasedSolver} from "../../lib/physics/solver.js";
-import {RendererMapping} from "../../lib/render/renderer.js";
 import * as Utils from "../../lib/utils/common.js";
 import * as CommonUtils from "./utils.js";
+import {RendererMapping} from "../../lib/render/renderer/mapping.js";
 
 /**
  * @template T

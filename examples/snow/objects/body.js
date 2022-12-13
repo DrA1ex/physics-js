@@ -1,14 +1,16 @@
 import {Vector2} from "../../../lib/utils/vector.js";
-import {LineRenderer, PolygonBodyRenderer} from "../../../lib/render/renderer.js";
-import {Particle} from "../../../lib/render/particle.js";
-import {AnimatedSpriteRenderer, SpriteRenderer} from "../../../lib/render/sprite.js";
-import {AnimationProperty, KeyframeType, ParticleState, StateKeyframe} from "../../../lib/render/particle_animation.js";
 import {PolygonBody} from "../../../lib/physics/body/poly.js";
 import {LineBody} from "../../../lib/physics/body/line.js";
 import {CircleBody} from "../../../lib/physics/body/circle.js";
 import {SmokeCollider, SmokeState, SnowdriftCollider, Tags, UnionPolyBody} from "./misc.js";
 import Settings from "../settings.js";
 import * as Utils from "../../common/utils.js";
+import {Particle} from "../../../lib/render/particles/particle.js";
+import {PolygonBodyRenderer} from "../../../lib/render/renderer/poly.js";
+import {LineRenderer} from "../../../lib/render/renderer/line.js";
+import {AnimatedSpriteRenderer, SpriteRenderer} from "../../../lib/render/renderer/sprite.js";
+import {AnimationProperty, KeyframeType} from "../../../lib/render/animation/base.js";
+import {ParticleState, StateKeyframe} from "../../../lib/render/particles/state.js";
 
 export class SnowDriftSegmentBody extends LineBody {
     #renderer;

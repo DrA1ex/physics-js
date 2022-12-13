@@ -1,5 +1,4 @@
-import {SvgWrapper} from "../../../lib/render/svg.js";
-import {Sprite, SpriteRenderer} from "../../../lib/render/sprite.js";
+import {SvgWrapper} from "../../../lib/render/misc/svg.js";
 import {Vector2} from "../../../lib/utils/vector.js";
 import {Tags} from "./misc.js";
 import {RoofSnowDriftBody} from "./body.js";
@@ -8,6 +7,8 @@ import Settings from "../settings.js";
 import * as ColorUtils from "../../../lib/utils/color.js";
 import {PolygonBody} from "../../../lib/physics/body/poly.js";
 import {RectBody} from "../../../lib/physics/body/rect.js";
+import {SpriteRenderer} from "../../../lib/render/renderer/sprite.js";
+import {Sprite} from "../../../lib/render/misc/sprite.js";
 
 const HouseSpriteUrl = new URL('../sprites/house.svg', import.meta.url)
 
