@@ -8,7 +8,8 @@ import MiniCssExtractPlugin from "mini-css-extract-plugin";
 import CssMinimizerPlugin from "css-minimizer-webpack-plugin";
 import CopyPlugin from "copy-webpack-plugin";
 
-const LibChunks = new Set(["render", "physics"]);
+
+const LibShared = "lib";
 const ExcludeExamples = new Set(["common"]);
 
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
@@ -25,7 +26,7 @@ const exampleEntries = chunks.reduce((obj, chunk) => {
             ...glob.sync(path.resolve(chunk.path, "**/*.css")),
             ...glob.sync(path.resolve(chunk.path, "**/*.+(png|svg|jpg|jpeg|gif)")),
         ],
-        dependOn: Array.from(LibChunks.values())
+        dependOn: [LibShared]
     };
 
     return obj;
@@ -41,7 +42,7 @@ const htmlPlugins = chunks.map(chunk => {
         filename: `./examples/${chunk.name}/index.html`,
         templateContent: modified,
         inject: "body",
-        chunks: [chunk.name, ...LibChunks.values()],
+        chunks: [LibShared, chunk.name],
     });
 });
 
@@ -50,14 +51,15 @@ const isDev = process.env.DEV === "1";
 export default {
     mode: "production",
     entry: {
-        physics: {
+        [LibShared]: {
             import: [
                 ...glob.sync("./lib/physics/**/*.js"),
                 ...glob.sync("./lib/utils/**/*.js"),
+                ...glob.sync("./lib/render/**/*.js"),
+                ...glob.sync("./examples/common/**/*.js"),
                 "./lib/debug.js",
             ]
         },
-        render: {import: glob.sync("./lib/render/**/*.js"), dependOn: "physics"},
         ...exampleEntries,
     },
     devtool: 'source-map',
@@ -66,7 +68,7 @@ export default {
         filename: ({chunk: {name}}) => {
             if (!name) {
                 return "bundle/[contenthash].js";
-            } else if (LibChunks.has(name)) {
+            } else if (name === LibShared) {
                 return "lib/[name].min.js";
             }
             return `examples/${name}/[name].min.js`;
