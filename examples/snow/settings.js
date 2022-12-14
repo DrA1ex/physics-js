@@ -3,6 +3,7 @@ import {EasingFunctions} from "../../lib/render/animation/base.js";
 import {ColorAnimation} from "../../lib/render/animation/color.js";
 import * as Params from "../common/params.js";
 import * as CommonUtils from "../common/utils.js";
+import {Browser, Platform} from "../common/utils.js";
 
 /** @enum {number} */
 export const SunAzimuth = {
@@ -40,8 +41,117 @@ const scale = CommonUtils.applyViewportScale([
     {media: "(orientation: portrait) and (max-height: 1400px)", scale: 1},
 ]);
 
+/**
+ * @typedef {{
+ *      name: string,
+ *      theme: {step: number, interval: number},
+ *      snow: {emit: number, spawn: number, segments: number},
+ *      smoke: {interval: number},
+ *      dpr: boolean
+ * }} Preset
+ *
+ * @enum {Preset}
+ */
+const GraphicsPreset = {
+    microwave: {
+        name: "Microwave",
+        theme: {
+            step: 4,
+            interval: 1000,
+        },
+        snow: {
+            emit: 1000 / 3,
+            spawn: 1000 / 10,
+            segments: 30,
+        },
+        smoke: {
+            interval: 1000,
+        },
+        dpr: false,
+    },
+    low: {
+        name: "Low",
+        theme: {
+            step: 2,
+            interval: 1000 / 6,
+        },
+        snow: {
+            emit: 1000 / 24,
+            spawn: 1000 / 50,
+            segments: 60,
+        },
+        smoke: {
+            interval: 1000 / 6,
+        },
+        dpr: false,
+    },
+    medium: {
+        name: "Medium",
+        theme: {
+            step: 1,
+            interval: 1000 / 12,
+        },
+        snow: {
+            emit: 1000 / 40,
+            spawn: 1000 / 80,
+            segments: 100
+        },
+        smoke: {
+            interval: 1000 / 12
+        },
+        dpr: false,
+    },
+    high: {
+        name: "High",
+        theme: {
+            step: 0.25,
+            interval: 1000 / 30,
+        },
+        snow: {
+            emit: 1000 / 80,
+            spawn: 1000 / 160,
+            segments: 200
+        },
+        smoke: {
+            interval: 1000 / 24
+        },
+        dpr: true,
+    },
+    ultra: {
+        name: "Ultra",
+        theme: {
+            step: 0.1,
+            interval: 1000 / 60,
+        },
+        snow: {
+            emit: 1000 / 100,
+            spawn: 1000 / 200,
+            segments: 300
+        },
+        smoke: {
+            interval: 1000 / 40
+        },
+        dpr: true,
+    }
+}
+
 const isMobile = CommonUtils.isMobile();
+const browser = CommonUtils.getBrowser();
 const isPortrait = window.matchMedia("(orientation: portrait)").matches;
+
+const defaultPreset = isMobile ? GraphicsPreset.medium : (
+    browser.browser === Browser.chrome ? GraphicsPreset.high : (
+        browser.browser === Browser.firefox && browser.os === Platform.windows ? GraphicsPreset.high : GraphicsPreset.medium
+    )
+);
+
+console.log(browser);
+console.log(defaultPreset.name);
+
+/** @type {Preset} */
+const preset = Params.parseSettings({
+    preset: {parser: Params.Parser.enum(GraphicsPreset), param: "preset", default: defaultPreset}
+}).preset;
 
 const snowOptions = Params.parseSettings({
     watch: {parser: Params.Parser.bool, param: "watch", default: false},
@@ -52,18 +162,18 @@ const snowOptions = Params.parseSettings({
     theme: {parser: Params.Parser.enum(Themes), param: "theme", default: Themes.day},
     sunChangeInterval: {parser: Params.Parser.float, param: "sun_interval", default: 60},
 
-    themeChangeAnimationStep: {parser: Params.Parser.float, param: "theme_step", default: isMobile ? 1 : 0.25},
-    themeChangeAnimationInterval: {parser: Params.Parser.float, param: "theme_interval", default: isMobile ? 1000 / 10 : 1000 / 24},
+    themeChangeAnimationStep: {parser: Params.Parser.float, param: "theme_step", default: preset.theme.step},
+    themeChangeAnimationInterval: {parser: Params.Parser.float, param: "theme_interval", default: preset.theme.interval},
     themeChangeEasing: {parser: Params.Parser.enum(EasingFunctions), param: "theme_easing", default: EasingFunctions.easeInOutCubic},
 
     detectCoordinates: {parser: Params.Parser.bool, param: "gps", default: true},
     lat: {parser: Params.Parser.float, param: "lat", default: null},
     lon: {parser: Params.Parser.float, param: "lon", default: null},
 
-    snowSpawnPeriod: {parser: Params.Parser.float, param: "snow_spawn", default: isMobile ? 1000 / 80 : 1000 / 160},
-    snowPeriod: {parser: Params.Parser.float, param: "snow_emit", default: isMobile ? 1000 / 40 : 1000 / 80},
+    snowSpawnPeriod: {parser: Params.Parser.float, param: "snow_spawn", default: preset.snow.spawn},
+    snowPeriod: {parser: Params.Parser.float, param: "snow_emit", default: preset.snow.emit},
 
-    snowdriftSegmentCount: {parser: Params.Parser.float, param: "sd_seg_cnt", default: isMobile ? 100 : 200},
+    snowdriftSegmentCount: {parser: Params.Parser.float, param: "sd_seg_cnt", default: preset.snow.segments},
     snowDriftInitialHeight: {parser: Params.Parser.float, param: "sd_height", default: 30},
     snowDriftMaxHeight: {parser: Params.Parser.float, param: "sd_max_height", default: 250},
 
@@ -83,10 +193,11 @@ const snowOptions = Params.parseSettings({
     treeWiggle: {parser: Params.Parser.float, param: "tree_wiggle", default: Math.PI / 180 * 10},
     treeWiggleSpeed: {parser: Params.Parser.float, param: "tree_wiggle_speed", default: Math.PI / 180 * 2},
 
-    smokeInterval: {parser: Params.Parser.float, param: "smoke_interval", default: isMobile ? 1000 / 12 : 1000 / 24},
+    smokeInterval: {parser: Params.Parser.float, param: "smoke_interval", default: preset.smoke.interval},
 });
 
 export default {
+    Preset: preset,
     World: {
         OffsetTop: snowOptions.offsetTop,
         OffsetBottom: snowOptions.offsetBottom,

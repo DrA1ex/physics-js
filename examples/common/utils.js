@@ -1,7 +1,7 @@
-import {Vector2} from "../../lib/utils/vector.js";
-import * as CommonUtils from "../../lib/utils/common.js";
 import {PolygonBody} from "../../lib/physics/body/poly.js";
 import {RectBody} from "../../lib/physics/body/rect.js";
+import * as CommonUtils from "../../lib/utils/common.js";
+import {Vector2} from "../../lib/utils/vector.js";
 
 /**
  * @param {Vector2} position
@@ -114,6 +114,55 @@ export function isMobile() {
     }
 
     return false;
+}
+
+/** @enum {string} */
+export const Browser = {
+    chrome: "Chrome",
+    firefox: "Firefox",
+    safari: "Safari",
+    edge: "Edge",
+    ie: "Internet Explorer",
+    other: "Other",
+}
+
+/** @enum {string} */
+export const Platform = {
+    windows: "Windows",
+    macos: "Mac OS",
+    linux: "Linux",
+    ios: "iOS",
+    android: "Android",
+    other: "Other"
+}
+
+/** @return {{browser: Browser, os: Platform}} */
+export function getBrowser() {
+    const browser = navigator.userAgent.match(/(Chrome|Firefox|Safari|Edg|MSIE)/i)[1] ?? "";
+    const platform = navigator.userAgent.match(/(mac|win|linux|android|ipad|iphone|ipod)/i)[1] ?? "";
+
+    const browserMapping = {
+        chrome: Browser.chrome,
+        firefox: Browser.firefox,
+        safari: Browser.safari,
+        edg: Browser.edge,
+        msie: Browser.ie,
+    }
+
+    const platformMapping = {
+        mac: Platform.macos,
+        win: Platform.windows,
+        linux: Platform.linux,
+        android: Platform.android,
+        ipad: Platform.ios,
+        iphone: Platform.ios,
+        ipod: Platform.ios
+    }
+
+    return {
+        browser: browserMapping[browser.toLowerCase()] ?? Browser.other,
+        os: platformMapping[platform.toLowerCase()] ?? Platform.other
+    };
 }
 
 export function installGlobalErrorHook() {

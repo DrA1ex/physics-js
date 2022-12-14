@@ -22,10 +22,11 @@ const loaderState = document.getElementById("loader-state");
 loaderState.innerText = "Initialize engine...";
 
 const options = Params.parse({
-    restitution: 0, friction: 0.8, overlap: 0.5, beta: 1, bias: 0.1, stats: false, tree_cnt: 13, dpr: !CommonUtils.isMobile()
+    restitution: 0, friction: 0.8, overlap: 0.5, beta: 1, bias: 0.1, stats: false, tree_cnt: 13, dpr: Settings.Preset.dpr
 });
 
 const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
+BootstrapInstance.statsExtra["Preset"] = Settings.Preset.name;
 
 BootstrapInstance.addForce(new GravityForce(options.gravity));
 BootstrapInstance.addForce(new ResistanceForce(options.resistance));
@@ -78,11 +79,14 @@ if (Settings.Sun.Mode === SunMode.sync) {
 loaderState.innerText = "Apply style...";
 
 if (Settings.Sun.Mode === SunMode.sync && coords) {
+    BootstrapInstance.statsExtra["Sun mode"] = SunMode.sync;
     await themeManager.setupAstroSync(coords.lat, coords.lon);
 } else if (Settings.Sun.Mode === SunMode.fixed) {
+    BootstrapInstance.statsExtra["Sun mode"] = SunMode.fixed;
     await themeManager.updateStyling();
     if (Settings.Style.Watch) themeManager.watch();
 } else {
+    BootstrapInstance.statsExtra["Sun mode"] = SunMode.periodic;
     await themeManager.setTheme(Settings.Sun.Theme);
     themeManager.setupPeriodicChange(Settings.Sun.Theme, Settings.Sun.Interval * 1000);
 }

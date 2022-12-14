@@ -13,6 +13,7 @@ export class ThemeManager {
     #house;
     #snowCloud;
     #snowDrift;
+    #theme;
 
     constructor(engine, worldBox, bgDrawer, house, snowCloud, snowDrift) {
         this.#engine = engine;
@@ -21,6 +22,8 @@ export class ThemeManager {
         this.#house = house;
         this.#snowCloud = snowCloud;
         this.#snowDrift = snowDrift;
+
+        this.#theme = Settings.Sun.Theme;
     }
 
     /**
@@ -30,6 +33,7 @@ export class ThemeManager {
     async setTheme(name) {
         document.body.classList.remove(...Settings.Style.Themes);
         document.body.classList.add(name);
+        this.#theme = name;
 
         await this.updateStyling();
     }
@@ -78,12 +82,16 @@ export class ThemeManager {
         if (!this.#initialized) {
             await this.#applyTheme(nextProps)
             this.#initialized = true;
+            this.#engine.statsExtra["Theme"] = this.#theme;
         } else if (hasChanges) {
             if (animated) {
+                this.#engine.statsExtra["Theme"] = "changing";
                 await this.#animateThemeChanges(this.#lastProps, nextProps);
             } else {
                 await this.#applyTheme(nextProps);
             }
+
+            this.#engine.statsExtra["Theme"] = this.#theme;
         }
 
         this.#lastProps = nextProps;
@@ -176,7 +184,7 @@ export class ThemeManager {
             });
 
             const waitTime = Settings.Style.Animation.Interval - (performance.now() - t);
-            if (waitTime > 0) {
+            if (hasNextValue && waitTime > 0) {
                 await Utils.delay(waitTime);
             }
         }
