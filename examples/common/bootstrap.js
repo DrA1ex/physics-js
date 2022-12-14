@@ -4,6 +4,7 @@ import {ImpulseBasedSolver} from "../../lib/physics/solver.js";
 import {Particle} from "../../lib/render/particles/particle.js";
 import {ParticleSystem} from "../../lib/render/particles/system.js";
 import {RendererMapping} from "../../lib/render/renderer/mapping.js";
+import {WebglRenderer} from "../../lib/render/webgl/renderer.js";
 import * as Utils from "../../lib/utils/common.js";
 import * as CommonUtils from "./utils.js";
 
@@ -35,6 +36,8 @@ export class Bootstrap {
     #canvas;
     /** @type {CanvasRenderingContext2D} */
     #ctx;
+
+    #renderer;
 
     #pointId = 0;
     #drawingPoints = new Map();
@@ -94,8 +97,14 @@ export class Bootstrap {
      * }} options
      */
     constructor(canvas, options = {}) {
-        this.#canvas = canvas;
-        this.#ctx = canvas.getContext("2d");
+        this.#canvas = document.createElement("canvas");
+        this.#canvas.classList.add("canvas");
+        this.#canvas.style.zIndex = canvas.style.zIndex;
+        document.body.appendChild(this.#canvas);
+
+        this.#ctx = this.#canvas.getContext("2d");
+
+        this.#renderer = new WebglRenderer(canvas, options.useDpr);
 
         this.#debug = options.debug;
         this.#slowMotion = Math.max(0.01, Math.min(2, options.slowMotion ?? 1));
@@ -325,6 +334,8 @@ export class Bootstrap {
     }
 
     #init() {
+        this.#renderer.init();
+
         const {dpr, canvasWidth, canvasHeight} = CommonUtils.initCanvas(this.#canvas, this.#useDpr);
 
         this.#dpr = dpr;
@@ -404,8 +415,10 @@ export class Bootstrap {
 
         const renderers = [
             ...this.#renderSteps,
-            ...(!this.#debug || this.#debugInstance.showBodies ? this.#renderers.values() : [])
+            //...(!this.#debug || this.#debugInstance.showBodies ? this.#renderers.values() : [])
         ].sort((r1, r2) => r1.z - r2.z);
+
+        this.#renderer.render(Array.from(this.#renderers.values()).sort((r1, r2) => r1.z - r2.z));
 
         for (const renderer of renderers) {
             renderer.render(this.#ctx, this.state === State.play ? delta : 1e-12);
