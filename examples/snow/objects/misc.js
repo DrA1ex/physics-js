@@ -1,9 +1,9 @@
-import {Vector2} from "../../../lib/utils/vector.js";
-import * as GeomUtils from "../../../lib/utils/geom.js";
 import {PolygonBody} from "../../../lib/physics/body/poly.js";
 import {Collider} from "../../../lib/physics/collider/base.js";
 import {CircleCollider} from "../../../lib/physics/collider/circle.js";
 import {PolygonCollider} from "../../../lib/physics/collider/poly.js";
+import * as GeomUtils from "../../../lib/utils/geom.js";
+import {Vector2} from "../../../lib/utils/vector.js";
 
 /**
  * @enum {number}

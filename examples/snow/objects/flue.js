@@ -1,12 +1,12 @@
+import {RectBody} from "../../../lib/physics/body/rect.js";
 import {SpotWindForce} from "../../../lib/physics/force.js";
+import {LinerRateProvider, NumericValueProvider, VectorValueProvider} from "../../../lib/render/misc/provider.js";
+import {SpriteSeries} from "../../../lib/render/misc/sprite_series.js";
+import {ParticleEmitter} from "../../../lib/render/particles/emitter.js";
 import {Vector2} from "../../../lib/utils/vector.js";
-import {SmokeState, Tags} from "./misc.js";
 import Settings from "../settings.js";
 import {SmokeParticle} from "./body.js";
-import {RectBody} from "../../../lib/physics/body/rect.js";
-import {SpriteSeries} from "../../../lib/render/misc/sprite_series.js";
-import {LinerRateProvider, NumericValueProvider, VectorValueProvider} from "../../../lib/render/misc/provider.js";
-import {ParticleEmitter} from "../../../lib/render/particles/emitter.js";
+import {SmokeState, Tags} from "./misc.js";
 
 const SmokeSpriteUrl = new URL("../sprites/smoke_animation.png", import.meta.url)
 

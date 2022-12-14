@@ -1,7 +1,7 @@
-import Settings, {Themes} from "./settings.js";
-import * as GeoUtils from "./utils/geo.js";
-import * as Utils from "./utils/common.js";
 import * as CommonUtils from "../../lib/utils/common.js";
+import Settings, {Themes} from "./settings.js";
+import * as Utils from "./utils/common.js";
+import * as GeoUtils from "./utils/geo.js";
 
 export class ThemeManager {
     #lastProps = {};

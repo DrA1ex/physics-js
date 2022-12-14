@@ -1,3 +1,4 @@
+import {BoundaryBox} from "../../lib/physics/common/boundary.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
 import {GlobalWind, GravityForce, ResistanceForce} from "../../lib/physics/force.js";
 import {Vector2} from "../../lib/utils/vector.js";
@@ -5,15 +6,14 @@ import {Vector2} from "../../lib/utils/vector.js";
 import {Bootstrap} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
 import * as CommonUtils from "../common/utils.js";
+import {BackgroundDrawer} from "./background.js";
+import {House} from "./objects/house.js";
+import {Tags, WorldBorderCollider} from "./objects/misc.js";
+import {SnowCloud, SnowDrift} from "./objects/snow.js";
 
 import Settings, {SunMode} from "./settings.js";
-import {BackgroundDrawer} from "./background.js";
-import {SnowCloud, SnowDrift} from "./objects/snow.js";
-import {Tags, WorldBorderCollider} from "./objects/misc.js";
-import {House} from "./objects/house.js";
 import {ThemeManager} from "./theme.js";
 import * as GeoUtils from "./utils/geo.js";
-import {BoundaryBox} from "../../lib/physics/common/boundary.js";
 
 CommonUtils.installGlobalErrorHook();
 document.body.classList.add(Settings.Sun.Theme);

@@ -1,3 +1,7 @@
+import {LinerRateProvider, NumericValueProvider, VectorValueProvider} from "../../../lib/render/misc/provider.js";
+import {SpriteSeries} from "../../../lib/render/misc/sprite_series.js";
+import {ParticleEmitter} from "../../../lib/render/particles/emitter.js";
+import * as CommonUtils from "../../../lib/utils/common.js";
 import * as CollisionUtils from "../../../lib/utils/geom.js";
 import {Vector2} from "../../../lib/utils/vector.js";
 import * as Utils from "../../common/utils.js";
@@ -5,10 +9,6 @@ import * as Utils from "../../common/utils.js";
 import Settings from "../settings.js";
 import {SnowDriftSegmentBody, SnowDriftStaticBody, SnowParticle} from "./body.js";
 import {Tags} from "./misc.js";
-import * as CommonUtils from "../../../lib/utils/common.js";
-import {SpriteSeries} from "../../../lib/render/misc/sprite_series.js";
-import {LinerRateProvider, NumericValueProvider, VectorValueProvider} from "../../../lib/render/misc/provider.js";
-import {ParticleEmitter} from "../../../lib/render/particles/emitter.js";
 
 
 const SnowflakesSpriteUrl = new URL("../sprites/snowflakes.svg", import.meta.url)

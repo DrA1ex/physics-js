@@ -1,7 +1,8 @@
+import {AngleAnimation} from "../../lib/render/animation/angle.js";
+import {EasingFunctions} from "../../lib/render/animation/base.js";
+import {ColorAnimation} from "../../lib/render/animation/color.js";
 import * as Params from "../common/params.js";
 import * as CommonUtils from "../common/utils.js";
-import {EasingFunctions} from "../../lib/render/animation/base.js";
-import {AngleAnimation, ColorAnimation} from "../../lib/render/animation/parametric.js";
 
 /** @enum {number} */
 export const SunAzimuth = {
