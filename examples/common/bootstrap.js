@@ -104,7 +104,7 @@ export class Bootstrap {
 
         this.#ctx = this.#canvas.getContext("2d");
 
-        this.#renderer = new WebglRenderer(canvas, options.useDpr);
+        this.#renderer = new WebglRenderer(canvas, options);
 
         this.#debug = options.debug;
         this.#slowMotion = Math.max(0.01, Math.min(2, options.slowMotion ?? 1));
@@ -414,7 +414,7 @@ export class Bootstrap {
         }
 
         const renderers = [
-            //...this.#renderSteps,
+            ...this.#renderSteps,
             //...(!this.#debug || this.#debugInstance.showBodies ? this.#renderers.values() : [])
         ].sort((r1, r2) => r1.z - r2.z);
 

@@ -1,14 +1,14 @@
-import {Bootstrap} from "../common/bootstrap.js";
-import * as Params from "../common/params.js";
+import {CircleBody} from "../../lib/physics/body/circle.js";
+import {LineBody} from "../../lib/physics/body/line.js";
+import {Collider} from "../../lib/physics/collider/base.js";
+import {BoundaryBox} from "../../lib/physics/common/boundary.js";
+import {NoCollision} from "../../lib/physics/common/collision.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
 import {GravityForce} from "../../lib/physics/force.js";
 import {Vector2} from "../../lib/utils/vector.js";
+import {Bootstrap} from "../common/bootstrap.js";
+import * as Params from "../common/params.js";
 import * as Utils from "../common/utils.js";
-import {BoundaryBox} from "../../lib/physics/common/boundary.js";
-import {LineBody} from "../../lib/physics/body/line.js";
-import {CircleBody} from "../../lib/physics/body/circle.js";
-import {Collider} from "../../lib/physics/collider/base.js";
-import {NoCollision} from "../../lib/physics/common/collision.js";
 
 function cycloid(t, r) {
     return new Vector2(r * (t - Math.sin(t)), r * (1 - Math.cos(t)));
@@ -70,7 +70,7 @@ for (let i = 1; i < rampPoints.length; i++) {
     ).setActive(false);
 
     BootstrapInstance.addRigidBody(body);
-    BootstrapInstance.getRenderer(body).strokeStyle = "green";
+    BootstrapInstance.getRenderer(body).strokeStyle = "#008000";
 }
 
 const balls = [new CircleBody(xOffset + ballRadius + rampWidth * 0.05, yOffset - ballRadius - rampHeight * 0.05, ballRadius, 50)];
@@ -92,8 +92,9 @@ for (const ball of balls) {
     ball.collider = new NonInteractionCollider(ball, ball.collider);
 
     const {renderer} = BootstrapInstance.addRigidBody(ball);
-    renderer.strokeStyle = "green";
-    renderer.fillStyle = Utils.randomColor(128, 192, 0.3);
+    renderer.strokeStyle = "#008000";
+    renderer.fillStyle = Utils.randomColor(128, 192);
+    renderer.opacity = 0.3;
 }
 
 for (const body of BootstrapInstance.rigidBodies) {
