@@ -176,7 +176,7 @@ export class SnowDrift {
         }
 
         this.snowDriftBody = new SnowDriftStaticBody(this.segments, this.#worldBox);
-        this.#engine.addRenderStep(this.snowDriftBody.renderer);
+        this.#engine.addRigidBody(this.snowDriftBody, this.snowDriftBody.renderer);
 
         const _snowDriftReducer = async () => {
             await this.#reduceSnowDrift();

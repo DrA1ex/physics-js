@@ -414,7 +414,7 @@ export class Bootstrap {
         }
 
         const renderers = [
-            ...this.#renderSteps,
+            //...this.#renderSteps,
             //...(!this.#debug || this.#debugInstance.showBodies ? this.#renderers.values() : [])
         ].sort((r1, r2) => r1.z - r2.z);
 
