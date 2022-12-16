@@ -59,7 +59,7 @@ export class House {
         );
 
         houseSpriteRenderer.z = 2;
-        this.#engine.addRenderStep(houseSpriteRenderer);
+        //this.#engine.addRenderStep(houseSpriteRenderer);
 
         this.roof = new PolygonBody(this.#worldBox.center.x, bottom - Settings.House.Height / 2, RoofPoly)
             .setTag(Tags.house)
