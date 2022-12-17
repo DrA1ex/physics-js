@@ -60,37 +60,64 @@ export class WorldBorderCollider extends Collider {
 }
 
 export class UnionPolyBody extends PolygonBody {
+    #pointIndices = [];
     #globalPoints;
     #bodies;
 
-    constructor(x, y, bodies, mass = 1) {
+    constructor(x, y, bodies, mass = 1, eps = 1e-3) {
         super(x, y, []);
 
-        this.#bodies = bodies;
+        this.#bodies = bodies.concat();
 
         let count = 0;
         for (const body of this.#bodies) {
             count += body.points.length;
         }
 
-        this.#globalPoints = new Array(count);
+        let prevPoint = null;
+        let index = 0;
+        for (const body of this.#bodies) {
+            for (const point of body.points) {
+                if (prevPoint === null || Math.abs(prevPoint.x - point.x) > eps || Math.abs(prevPoint.y - point.y) > eps) {
+                    this.#pointIndices.push(index);
+                }
+
+                ++index;
+                prevPoint = point;
+            }
+        }
+
+        this.#globalPoints = new Array(this.#pointIndices.length);
         for (let i = 0; i < this.#globalPoints.length; i++) {
             this.#globalPoints[i] = new Vector2();
         }
     }
 
     get points() {
-        let pos = 0;
+        let currentPointIndex = 0;
+        let nextPointIndex = this.#pointIndices[0];
+        let index = 0;
 
         for (const body of this.#bodies) {
             for (const point of body.points) {
-                this.#globalPoints[pos].set(point);
-                if (this.scale.x !== 1 || this.scale.y !== 1 || this.skew.x !== 0 || this.skew.y !== 0) {
-                    GeomUtils.transform(this.#globalPoints[pos].sub(this.position), this.scale, this.skew, this.#globalPoints[pos]);
-                    this.#globalPoints[pos].add(this.position);
+                if (index === nextPointIndex) {
+                    const globalPoint = this.#globalPoints[currentPointIndex];
+                    globalPoint.set(point);
+
+                    if (this.scale.x !== 1 || this.scale.y !== 1 || this.skew.x !== 0 || this.skew.y !== 0) {
+                        GeomUtils.transform(globalPoint.sub(this.position), this.scale, this.skew, globalPoint);
+                        globalPoint.add(this.position);
+
+                    }
+
+                    if (++currentPointIndex === this.#pointIndices.length) {
+                        return this.#globalPoints;
+                    }
+
+                    nextPointIndex = this.#pointIndices[currentPointIndex];
                 }
 
-                pos++;
+                index += 1;
             }
         }
 
