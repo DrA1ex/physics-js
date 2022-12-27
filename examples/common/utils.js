@@ -37,16 +37,13 @@ export function getMousePos(e) {
 /**
  * @param {number} minComponent
  * @param {number} maxComponent
- * @param {number} [alpha=1]
  * @return {string}
  */
-export function randomColor(minComponent, maxComponent, alpha = 1) {
-    const components = new Array(4);
+export function randomColor(minComponent, maxComponent) {
+    const components = new Array(3);
     for (let i = 0; i < 3; i++) {
         components[i] = Math.floor(minComponent + Math.random() * (maxComponent - minComponent));
     }
-
-    components[3] = Math.floor(alpha * 255);
 
     return "#" + components.map(v => Math.min(255, Math.max(0, v)).toString(16)).join("");
 }

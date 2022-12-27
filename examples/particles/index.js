@@ -9,7 +9,6 @@ import {LinerRateProvider, NumericValueProvider, VectorValueProvider} from "../.
 import {ParticleEmitter} from "../../lib/render/particles/emitter.js";
 import {Particle} from "../../lib/render/particles/particle.js";
 import {ParticleState, StateKeyframe} from "../../lib/render/particles/state.js";
-import {RendererMapping} from "../../lib/render/renderer/canvas/mapping.js";
 import {CircleBodyRenderer} from "../../lib/render/renderer/canvas/objects/circle.js";
 import {RectBodyRenderer} from "../../lib/render/renderer/canvas/objects/rect.js";
 import {CanvasRenderer} from "../../lib/render/renderer/canvas/renderer.js";
@@ -125,7 +124,7 @@ BootstrapInstance.addConstraint(worldConstraint);
 BootstrapInstance.addForce(new ResistanceForce(options.resistance));
 BootstrapInstance.addForce(new GlobalWind(new Vector2(0.3, -2)));
 
-RendererMapping.set(BarrierBody, BarrierRenderer);
+BootstrapInstance.renderer.bodyToRenderObjectMapping.set(BarrierBody, BarrierRenderer);
 
 BootstrapInstance.addRigidBody(
     new BarrierBody(WorldBox.center.x + 100, WorldBox.bottom - 200, 50, 400)
