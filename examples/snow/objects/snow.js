@@ -1,4 +1,4 @@
-import {LinerRateProvider, NumericValueProvider, VectorValueProvider} from "../../../lib/render/misc/provider.js";
+import {LinearRateProvider, NumericValueProvider, VectorValueProvider} from "../../../lib/render/misc/provider.js";
 import {SpriteSeries} from "../../../lib/render/renderer/canvas/misc/sprite_series.js";
 import {ParticleEmitter} from "../../../lib/render/particles/emitter.js";
 import * as CommonUtils from "../../../lib/utils/common.js";
@@ -77,7 +77,7 @@ export class SnowCloud {
                 new NumericValueProvider(this.#worldBox.center.x).setSpread(this.#worldBox.width),
                 new NumericValueProvider(this.#worldBox.top + border / 2).setSpread(border),
             ),
-            new LinerRateProvider(1000 / Settings.Snow.EmitPeriod)
+            new LinearRateProvider(1000 / Settings.Snow.EmitPeriod)
         ).setParticleArguments(this.#snowSpriteSeries, this.#worldBox, this.#options);
 
         this.#engine.addParticleEmitter(this.#snowEmitter);

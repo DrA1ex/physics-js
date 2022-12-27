@@ -1,6 +1,6 @@
 import {RectBody} from "../../../lib/physics/body/rect.js";
 import {SpotWindForce} from "../../../lib/physics/force.js";
-import {LinerRateProvider, NumericValueProvider, VectorValueProvider} from "../../../lib/render/misc/provider.js";
+import {LinearRateProvider, NumericValueProvider, VectorValueProvider} from "../../../lib/render/misc/provider.js";
 import {SpriteSeries} from "../../../lib/render/renderer/canvas/misc/sprite_series.js";
 import {ParticleEmitter} from "../../../lib/render/particles/emitter.js";
 import {Vector2} from "../../../lib/utils/vector.js";
@@ -54,7 +54,7 @@ export class HouseFlue {
                 new NumericValueProvider(this.#houseFlue.body.position.x),
                 new NumericValueProvider(this.#houseFlue.body.position.y - this.#houseFlue.body.height / 2),
             ),
-            new LinerRateProvider(1000 / Settings.Smoke.Interval)
+            new LinearRateProvider(1000 / Settings.Smoke.Interval)
         ).setParticleArguments(this.#smokeSprite);
 
         this.#engine.addParticleEmitter(this.#smokeEmitter);

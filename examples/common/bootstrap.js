@@ -208,7 +208,7 @@ export class Bootstrap {
     #addParticle(sender, particle) {
         if (this.#bodyParticle.has(particle.body)) throw new Error("Body already used");
 
-        this.addRigidBody(particle.body, particle.renderer);
+        this.addRigidBody(particle.body, particle.renderObject);
         this.#bodyParticle.set(particle.body, particle);
     }
 
