@@ -4,7 +4,7 @@ Yet another physics engine implementation.
 
 ![image](https://user-images.githubusercontent.com/1194059/203562067-41b3fcb0-a169-46e8-bcb9-04db29d6e556.png)
 
-## Snowcase
+## Showcase
 ### Snow
 <img width="1498" alt="image" src="https://user-images.githubusercontent.com/1194059/206975949-c1e56c28-7e7f-47d7-b970-ab6d9d81af5d.png">
 
