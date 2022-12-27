@@ -1,5 +1,5 @@
 import {LinerRateProvider, NumericValueProvider, VectorValueProvider} from "../../../lib/render/misc/provider.js";
-import {SpriteSeries} from "../../../lib/render/misc/sprite_series.js";
+import {SpriteSeries} from "../../../lib/render/renderer/canvas/misc/sprite_series.js";
 import {ParticleEmitter} from "../../../lib/render/particles/emitter.js";
 import * as CommonUtils from "../../../lib/utils/common.js";
 import * as CollisionUtils from "../../../lib/utils/geom.js";

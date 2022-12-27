@@ -3,9 +3,9 @@ import {Body} from "../../lib/physics/body/base.js";
 import {ImpulseBasedSolver} from "../../lib/physics/solver.js";
 import {Particle} from "../../lib/render/particles/particle.js";
 import {ParticleSystem} from "../../lib/render/particles/system.js";
-import {RendererMapping} from "../../lib/render/renderer/mapping.js";
 import * as Utils from "../../lib/utils/common.js";
 import * as CommonUtils from "./utils.js";
+
 
 /**
  * @template T
@@ -22,6 +22,12 @@ export const State = {
     step: 3
 }
 
+const ShapeType = {
+    point: 0,
+    vector: 1,
+    rect: 2
+}
+
 export class Bootstrap {
     /** @type {State} */
     #state = State.stop;
@@ -31,17 +37,15 @@ export class Bootstrap {
     #solver;
     /** @type {ParticleSystem} */
     #particleSystem;
+    #renderer;
     /** @type {HTMLCanvasElement} */
-    #canvas;
+    #auxCanvas;
     /** @type {CanvasRenderingContext2D} */
-    #ctx;
+    #auxCtx;
 
-    #pointId = 0;
-    #drawingPoints = new Map();
-    #vectorId = 0;
-    #drawingVectors = new Map();
-    #renderers = new Map();
-    #renderSteps = [];
+    #shapeId = 0;
+    #drawingShapes = new Map();
+    #bodyToRenderObj = new Map();
     /** @type {Set<WaiterItem>}*/
     #renderWaiters = new Set();
     /** @type {Set<WaiterItem>}*/
@@ -64,18 +68,20 @@ export class Bootstrap {
     };
 
     #debug = false;
-    #useDpr;
     #slowMotion = 1;
-    #dpr;
-    #canvasWidth;
-    #canvasHeight;
 
     get state() {return this.#state;}
 
-    get canvas() {return this.#canvas;}
-    get dpr() {return this.#dpr;}
-    get canvasWidth() {return this.#canvasWidth;}
-    get canvasHeight() {return this.#canvasHeight;}
+    get renderer() { return this.#renderer;}
+
+    /** @deprecated Use renderer instead */
+    get canvas() {return this.#renderer.canvas;}
+    /** @deprecated Use renderer instead */
+    get dpr() {return this.#renderer.dpr;}
+    /** @deprecated Use renderer instead */
+    get canvasWidth() {return this.#renderer.canvasWidth;}
+    /** @deprecated Use renderer instead */
+    get canvasHeight() {return this.#renderer.canvasHeight;}
 
     get stats() {return {...this.#stats};}
     get statsExtra() {return this.#stats.extra;}
@@ -85,7 +91,7 @@ export class Bootstrap {
 
 
     /**
-     * @param {HTMLCanvasElement} canvas
+     * @param renderer
      * @param {{
      *          debug?: boolean, slowMotion?: number, useDpr?: boolean,
      *          showBoundary?: boolean, showVectorLength?: boolean, showVector?: boolean, statistics?: boolean,
@@ -93,13 +99,11 @@ export class Bootstrap {
      *          solverTreeDivider?: number, solverTreeMaxCount?: number
      * }} options
      */
-    constructor(canvas, options = {}) {
-        this.#canvas = canvas;
-        this.#ctx = canvas.getContext("2d");
+    constructor(renderer, options = {}) {
+        this.#renderer = renderer;
 
         this.#debug = options.debug;
         this.#slowMotion = Math.max(0.01, Math.min(2, options.slowMotion ?? 1));
-        this.#useDpr = options.useDpr;
 
         this.#particleSystem = new ParticleSystem();
         this.#particleSystem.onParticleCreated.subscribe(this, this.#addParticle.bind(this));
@@ -139,21 +143,18 @@ export class Bootstrap {
         }
 
         this.#solver.addRigidBody(body);
-
-        if (renderer === null) {
-            const rendererClass = RendererMapping.has(body.constructor) ? RendererMapping.get(body.constructor) : RendererMapping.get(Body);
-            renderer = new rendererClass(body);
+        if (renderer !== null) {
+            this.#renderer.addObject(renderer);
+        } else {
+            renderer = this.#renderer.addBody(body);
         }
 
-        this.#renderers.set(body, renderer);
+        this.#bodyToRenderObj.set(body, renderer);
         return {body, renderer};
     }
 
-    /**
-     * @param {IRenderer} renderer
-     */
     addRenderStep(renderer) {
-        this.#renderSteps.push(renderer);
+        this.#renderer.addObject(renderer);
     }
 
     /**
@@ -235,7 +236,12 @@ export class Bootstrap {
         const index = this.#solver.rigidBodies.indexOf(body);
         if (index !== -1) {
             this.#solver.rigidBodies.splice(index, 1);
-            this.#renderers.delete(body);
+
+            const rendererObj = this.#bodyToRenderObj.get(body);
+            if (rendererObj) {
+                this.#renderer.removeObject(rendererObj);
+                this.#bodyToRenderObj.delete(body);
+            }
         } else {
             console.warn(`Unable to find object ${body}`);
         }
@@ -255,8 +261,8 @@ export class Bootstrap {
      * @param {Body} body
      * @return {BodyRenderer}
      */
-    getRenderer(body) {
-        return this.#renderers.get(body);
+    getRenderObject(body) {
+        return this.#bodyToRenderObj.get(body);
     }
 
     run() {
@@ -293,24 +299,23 @@ export class Bootstrap {
     }
 
     addPoint(point, color = "black") {
-        this.#drawingPoints.set(this.#pointId, {point, color});
-        return this.#pointId++;
-    }
-
-    removePoint(id) {
-        if (this.#drawingPoints.has(id)) {
-            this.#drawingPoints.delete(id);
-        }
+        this.#drawingShapes.set(this.#shapeId, {type: ShapeType.point, point, color});
+        return this.#shapeId++;
     }
 
     addVector(point, size, color = "black") {
-        this.#drawingVectors.set(this.#vectorId, {point, size, color});
-        return this.#vectorId++;
+        this.#drawingShapes.set(this.#shapeId, {type: ShapeType.vector, point, size, color});
+        return this.#shapeId++;
     }
 
-    removeVector(id) {
-        if (this.#drawingVectors.has(id)) {
-            this.#drawingVectors.delete(id);
+    addRect(rect, color = "black") {
+        this.#drawingShapes.set(this.#shapeId, {type: ShapeType.rect, rect, color});
+        return this.#shapeId++;
+    }
+
+    removeShape(id) {
+        if (this.#drawingShapes.has(id)) {
+            this.#drawingShapes.delete(id);
         }
     }
 
@@ -325,13 +330,24 @@ export class Bootstrap {
     }
 
     #init() {
-        const {dpr, canvasWidth, canvasHeight} = CommonUtils.initCanvas(this.#canvas, this.#useDpr);
+        this.#renderer.init();
 
-        this.#dpr = dpr;
-        this.#canvasWidth = canvasWidth;
-        this.#canvasHeight = canvasHeight;
+        const rect = this.#renderer.canvas.getBoundingClientRect();
 
-        this.#ctx.scale(this.dpr, this.dpr);
+        this.#auxCanvas = document.createElement("canvas");
+        this.#auxCanvas.style.pointerEvents = "none";
+        this.#auxCanvas.style.touchAction = "none";
+        this.#auxCanvas.style.position = "absolute";
+        this.#auxCanvas.style.left = rect.left + "px";
+        this.#auxCanvas.style.top = rect.top + "px";
+        this.#auxCanvas.style.width = rect.width + "px";
+        this.#auxCanvas.style.height = rect.height + "px";
+
+        document.body.appendChild(this.#auxCanvas);
+
+        const {dpr} = CommonUtils.initCanvas(this.#auxCanvas);
+        this.#auxCtx = this.#auxCanvas.getContext("2d");
+        this.#auxCtx.scale(dpr, dpr)
 
         if (this.#statsElement) {
             this.#statsElement.className = "stats-block";
@@ -395,20 +411,8 @@ export class Bootstrap {
     }
 
     #render(delta) {
-        this.#ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
-
-        this.#ctx.strokeStyle = "black";
-        for (const {box} of this.#solver.constraints) {
-            this.#ctx.strokeRect(box.left, box.top, box.width, box.height);
-        }
-
-        const renderers = [
-            ...this.#renderSteps,
-            ...(!this.#debug || this.#debugInstance.showBodies ? this.#renderers.values() : [])
-        ].sort((r1, r2) => r1.z - r2.z);
-
-        for (const renderer of renderers) {
-            renderer.render(this.#ctx, this.state === State.play ? delta : 1e-12);
+        if (!this.#debugInstance || this.#debugInstance.showBodies) {
+            this.#renderer.render(this.state === State.play ? delta : 1e-12);
         }
 
         if (this.state === State.play) {
@@ -416,16 +420,26 @@ export class Bootstrap {
             this.#renderWaiters.clear();
         }
 
+        if (this.#debugInstance || this.#shapeId > 0) {
+            this.#auxCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+        }
+
         if (this.#debug) {
-            this.#debugInstance.render(this.#ctx, this.#solver.rigidBodies, this.#solver.stepInfo.tree);
+            this.#debugInstance.render(this.#auxCtx, this.#solver.rigidBodies, this.#solver.stepInfo.tree);
         }
 
-        for (const {point, color} of this.#drawingPoints.values()) {
-            this.#drawPoint(point, color);
-        }
-
-        for (const {point, size, color} of this.#drawingVectors.values()) {
-            this.#drawVector(point, size, color);
+        for (const shape of this.#drawingShapes.values()) {
+            switch (shape.type) {
+                case ShapeType.point:
+                    this.#drawPoint(shape.point, shape.color);
+                    break;
+                case ShapeType.vector:
+                    this.#drawVector(shape.point, shape.size, shape.color);
+                    break;
+                case ShapeType.rect:
+                    this.#drawRect(shape.rect, shape.color);
+                    break;
+            }
         }
 
         if (this.#statsElement) {
@@ -454,23 +468,27 @@ export class Bootstrap {
     }
 
     #drawPoint(point, color, size = 2) {
-        this.#ctx.strokeStyle = color;
-        this.#ctx.fillStyle = color;
+        this.#auxCtx.strokeStyle = color;
+        this.#auxCtx.fillStyle = color;
 
-        this.#ctx.beginPath();
-        this.#ctx.arc(point.x, point.y, size, 0, Math.PI * 2);
-        this.#ctx.fill()
+        this.#auxCtx.beginPath();
+        this.#auxCtx.arc(point.x, point.y, size, 0, Math.PI * 2);
+        this.#auxCtx.fill()
     }
 
     #drawVector(point, size, color, pointSize = 2) {
-        this.#ctx.strokeStyle = color;
-        this.#ctx.fillStyle = color;
+        this.#auxCtx.strokeStyle = color;
 
-        this.#ctx.beginPath();
-        this.#ctx.moveTo(point.x, point.y);
-        this.#ctx.lineTo(point.x + size.x, point.y + size.y);
-        this.#ctx.stroke()
+        this.#auxCtx.beginPath();
+        this.#auxCtx.moveTo(point.x, point.y);
+        this.#auxCtx.lineTo(point.x + size.x, point.y + size.y);
+        this.#auxCtx.stroke()
 
         this.#drawPoint(point.copy().add(size), color, pointSize);
+    }
+
+    #drawRect(rect, color) {
+        this.#auxCtx.strokeStyle = color;
+        this.#auxCtx.strokeRect(rect.left, rect.top, rect.width, rect.height);
     }
 }

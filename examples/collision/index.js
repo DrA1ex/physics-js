@@ -1,17 +1,21 @@
+import {CircleBody} from "../../lib/physics/body/circle.js";
+import {BoundaryBox} from "../../lib/physics/common/boundary.js";
+import {InsetConstraint} from "../../lib/physics/constraint.js";
+import {CanvasRenderer} from "../../lib/render/renderer/canvas/renderer.js";
+import {Vector2} from "../../lib/utils/vector.js";
 import {Bootstrap, State} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
-import {Vector2} from "../../lib/utils/vector.js";
-import {InsetConstraint} from "../../lib/physics/constraint.js";
 import * as Utils from "../common/utils.js";
-import {BoundaryBox} from "../../lib/physics/common/boundary.js";
-import {CircleBody} from "../../lib/physics/body/circle.js";
 
 const options = Params.parse()
-const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), Object.assign({solverBias: 0.1}, options));
-
-BootstrapInstance.addConstraint(
-    new InsetConstraint(new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, BootstrapInstance.canvasHeight), 0.3)
+const BootstrapInstance = new Bootstrap(
+    new CanvasRenderer(document.getElementById("canvas"), options),
+    Object.assign({solverBias: 0.1}, options)
 );
+
+const WorldRect = new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, BootstrapInstance.canvasHeight);
+BootstrapInstance.addConstraint(new InsetConstraint(WorldRect, 0.3));
+BootstrapInstance.addRect(WorldRect)
 
 const count = 50;
 const size = 25;
@@ -39,7 +43,7 @@ for (let i = 0; i < count; i++) {
 
 const rotatingBody = new CircleBody(center.x + distance / 2, center.y + distance / 2, size * 2, 20);
 BootstrapInstance.addRigidBody(rotatingBody);
-BootstrapInstance.getRenderer(rotatingBody).fill = false;
+BootstrapInstance.getRenderObject(rotatingBody).fill = false;
 
 BootstrapInstance.enableHotKeys();
 BootstrapInstance.run();

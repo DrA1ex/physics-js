@@ -1,6 +1,7 @@
 import {BoundaryBox} from "../../lib/physics/common/boundary.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
 import {GlobalWind, GravityForce, ResistanceForce} from "../../lib/physics/force.js";
+import {CanvasRenderer} from "../../lib/render/renderer/canvas/renderer.js";
 import {Vector2} from "../../lib/utils/vector.js";
 
 import {Bootstrap} from "../common/bootstrap.js";
@@ -25,7 +26,7 @@ const options = Params.parse({
     restitution: 0, friction: 0.8, overlap: 0.5, beta: 1, bias: 0.1, stats: false, tree_cnt: 13, dpr: Settings.Preset.dpr
 });
 
-const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
+const BootstrapInstance = new Bootstrap(new CanvasRenderer(document.getElementById("canvas"), options), options);
 BootstrapInstance.statsExtra["Preset"] = Settings.Preset.name;
 
 BootstrapInstance.addForce(new GravityForce(options.gravity));

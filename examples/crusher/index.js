@@ -1,17 +1,17 @@
+import {RectBody} from "../../lib/physics/body/rect.js";
+import {BoundaryBox} from "../../lib/physics/common/boundary.js";
+import {InsetConstraint} from "../../lib/physics/constraint.js";
+import {GravityForce, ResistanceForce} from "../../lib/physics/force.js";
+import {CanvasRenderer} from "../../lib/render/renderer/canvas/renderer.js";
+import * as GeomUtils from "../../lib/utils/geom.js";
+import {Vector2} from "../../lib/utils/vector.js";
 import {Bootstrap, State} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
-import {InsetConstraint} from "../../lib/physics/constraint.js";
-import {Vector2} from "../../lib/utils/vector.js";
 import * as Utils from "../common/utils.js";
-import {GravityForce, ResistanceForce} from "../../lib/physics/force.js";
-import * as GeomUtils from "../../lib/utils/geom.js";
-import {BoundaryBox} from "../../lib/physics/common/boundary.js";
-import {RectBody} from "../../lib/physics/body/rect.js";
-import {Collider} from "../../lib/physics/collider/base.js";
 
 
 const options = Params.parse({g: 500, steps: 20, bias: 0.1, beta: 0.8});
-const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
+const BootstrapInstance = new Bootstrap(new CanvasRenderer(document.getElementById("canvas"), options), options);
 
 const {canvasWidth, canvasHeight} = BootstrapInstance;
 const yOffset = 20;
@@ -29,7 +29,10 @@ const trashMaxSize = 40;
 
 const delta = 1000 / 60;
 
-BootstrapInstance.addConstraint(new InsetConstraint(new BoundaryBox(1, canvasWidth, 1, canvasHeight - 1), 0, 1));
+const WorldRect = new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, BootstrapInstance.canvasHeight);
+BootstrapInstance.addConstraint(new InsetConstraint(WorldRect, 0.3));
+BootstrapInstance.addRect(WorldRect)
+
 BootstrapInstance.addForce(new GravityForce(options.gravity));
 BootstrapInstance.addForce(new ResistanceForce(options.resistance));
 

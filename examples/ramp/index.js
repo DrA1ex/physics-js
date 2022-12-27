@@ -1,14 +1,15 @@
-import {Bootstrap} from "../common/bootstrap.js";
-import * as Params from "../common/params.js";
+import {CircleBody} from "../../lib/physics/body/circle.js";
+import {LineBody} from "../../lib/physics/body/line.js";
+import {Collider} from "../../lib/physics/collider/base.js";
+import {BoundaryBox} from "../../lib/physics/common/boundary.js";
+import {NoCollision} from "../../lib/physics/common/collision.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
 import {GravityForce} from "../../lib/physics/force.js";
+import {CanvasRenderer} from "../../lib/render/renderer/canvas/renderer.js";
 import {Vector2} from "../../lib/utils/vector.js";
+import {Bootstrap} from "../common/bootstrap.js";
+import * as Params from "../common/params.js";
 import * as Utils from "../common/utils.js";
-import {BoundaryBox} from "../../lib/physics/common/boundary.js";
-import {LineBody} from "../../lib/physics/body/line.js";
-import {CircleBody} from "../../lib/physics/body/circle.js";
-import {Collider} from "../../lib/physics/collider/base.js";
-import {NoCollision} from "../../lib/physics/common/collision.js";
 
 function cycloid(t, r) {
     return new Vector2(r * (t - Math.sin(t)), r * (1 - Math.cos(t)));
@@ -36,7 +37,7 @@ class NonInteractionCollider extends Collider {
 }
 
 const options = Params.parse({friction: 0.5, restitution: 0.2});
-const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
+const BootstrapInstance = new Bootstrap(new CanvasRenderer(document.getElementById("canvas"), options), options);
 
 const {canvasWidth, canvasHeight} = BootstrapInstance;
 const bottom = canvasHeight - 120;
@@ -46,7 +47,10 @@ const rampWidth = canvasWidth * 2 / 3;
 const rampHeight = canvasHeight / 2;
 const ballRadius = 40;
 
-BootstrapInstance.addConstraint(new InsetConstraint(new BoundaryBox(1, canvasWidth, 1, bottom), 0, 1));
+const WorldRect = new BoundaryBox(1, canvasWidth, 1, bottom)
+BootstrapInstance.addConstraint(new InsetConstraint(WorldRect, 0, 1));
+BootstrapInstance.addRect(WorldRect)
+
 BootstrapInstance.addForce(new GravityForce(options.gravity));
 
 const cycloidPoints = [];
@@ -70,7 +74,7 @@ for (let i = 1; i < rampPoints.length; i++) {
     ).setActive(false);
 
     BootstrapInstance.addRigidBody(body);
-    BootstrapInstance.getRenderer(body).strokeStyle = "green";
+    BootstrapInstance.getRenderObject(body).strokeStyle = "green";
 }
 
 const balls = [new CircleBody(xOffset + ballRadius + rampWidth * 0.05, yOffset - ballRadius - rampHeight * 0.05, ballRadius, 50)];

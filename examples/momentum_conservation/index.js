@@ -1,3 +1,4 @@
+import {CanvasRenderer} from "../../lib/render/renderer/canvas/renderer.js";
 import {Bootstrap} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
 import {Vector2} from "../../lib/utils/vector.js";
@@ -7,7 +8,7 @@ import {RectBody} from "../../lib/physics/body/rect.js";
 import {CircleBody} from "../../lib/physics/body/circle.js";
 
 const options = Params.parse({friction: 0, restitution: 1, bias: 0, steps: 1, beta: 1})
-const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
+const BootstrapInstance = new Bootstrap(new CanvasRenderer(document.getElementById("canvas"), options), options);
 
 BootstrapInstance.addConstraint(
     new InsetConstraint(new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, BootstrapInstance.canvasHeight), 1)

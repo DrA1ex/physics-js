@@ -1,15 +1,16 @@
+import {CircleBody} from "../../lib/physics/body/circle.js";
+import {RectBody} from "../../lib/physics/body/rect.js";
+import {BoundaryBox} from "../../lib/physics/common/boundary.js";
+import {InsetConstraint} from "../../lib/physics/constraint.js";
+import {GravityForce, ResistanceForce} from "../../lib/physics/force.js";
+import {CanvasRenderer} from "../../lib/render/renderer/canvas/renderer.js";
 import {Bootstrap} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
-import {GravityForce, ResistanceForce} from "../../lib/physics/force.js";
 import * as Utils from "../common/utils.js";
-import {InsetConstraint} from "../../lib/physics/constraint.js";
-import {BoundaryBox} from "../../lib/physics/common/boundary.js";
-import {RectBody} from "../../lib/physics/body/rect.js";
-import {CircleBody} from "../../lib/physics/body/circle.js";
 
 
 const options = Params.parse({beta: 0.8, bias: 0.2});
-const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
+const BootstrapInstance = new Bootstrap(new CanvasRenderer(document.getElementById("canvas"), options), options);
 
 const minBallSize = 10;
 const maxBallSize = 30;
@@ -27,9 +28,9 @@ const bottom = BootstrapInstance.canvasHeight - bottomOffset - 1;
 BootstrapInstance.addForce(new GravityForce(options.gravity));
 BootstrapInstance.addForce(new ResistanceForce(options.resistance));
 
-BootstrapInstance.addConstraint(
-    new InsetConstraint(new BoundaryBox(1, BootstrapInstance.canvasWidth - 1, 1, BootstrapInstance.canvasHeight - 1), 0.3)
-);
+const WorldRect = new BoundaryBox(1, BootstrapInstance.canvasWidth - 1, 1, BootstrapInstance.canvasHeight - 1);
+BootstrapInstance.addConstraint(new InsetConstraint(WorldRect, 0.3));
+BootstrapInstance.addRect(WorldRect)
 
 BootstrapInstance.addRigidBody(
     new RectBody(BootstrapInstance.canvasWidth / 2, bottom + bottomOffset / 2, BootstrapInstance.canvasWidth - 2, bottomOffset).setActive(false)
@@ -91,7 +92,7 @@ document.onmousemove = document.ontouchmove = (e) => {
     e.preventDefault();
     const pos = Utils.getMousePos(e);
 
-    if (vectorId !== null) BootstrapInstance.removeVector(vectorId);
+    if (vectorId !== null) BootstrapInstance.removeShape(vectorId);
     vectorId = BootstrapInstance.addVector(startPoint, _constraintVectorLength(startPoint.delta(pos), maxDisplaySpeed), "red");
 }
 
@@ -106,7 +107,7 @@ document.onmouseup = document.ontouchend = (e) => {
     creatingBody.setActive(true);
     creatingBody.setVelocity(_constraintVectorLength(startPoint.delta(pos).scale(maxSpeed / maxDisplaySpeed), maxSpeed));
 
-    BootstrapInstance.removeVector(vectorId);
+    BootstrapInstance.removeShape(vectorId);
     startPoint = null;
     vectorId = null;
     creatingBody = null;

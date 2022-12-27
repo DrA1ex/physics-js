@@ -1,13 +1,14 @@
-import {Bootstrap} from "../common/bootstrap.js";
-import {GravityForce, ResistanceForce} from "../../lib/physics/force.js";
-import * as Params from "../common/params.js";
-import {InsetConstraint} from "../../lib/physics/constraint.js";
-import * as Utils from "../common/utils.js";
-import {Vector2} from "../../lib/utils/vector.js";
-import * as GeomUtils from "../../lib/utils/geom.js";
-import {BoundaryBox} from "../../lib/physics/common/boundary.js";
-import {RectBody} from "../../lib/physics/body/rect.js";
 import {CircleBody} from "../../lib/physics/body/circle.js";
+import {RectBody} from "../../lib/physics/body/rect.js";
+import {BoundaryBox} from "../../lib/physics/common/boundary.js";
+import {InsetConstraint} from "../../lib/physics/constraint.js";
+import {GravityForce, ResistanceForce} from "../../lib/physics/force.js";
+import {CanvasRenderer} from "../../lib/render/renderer/canvas/renderer.js";
+import * as GeomUtils from "../../lib/utils/geom.js";
+import {Vector2} from "../../lib/utils/vector.js";
+import {Bootstrap} from "../common/bootstrap.js";
+import * as Params from "../common/params.js";
+import * as Utils from "../common/utils.js";
 
 function _createBody(position, size) {
     let body;
@@ -77,13 +78,17 @@ function _createBodiesByPattern(initBodies) {
 
 const options = Params.parse()
 const canvas = document.getElementById("canvas")
-const BootstrapInstance = new Bootstrap(canvas, options);
+const BootstrapInstance = new Bootstrap(new CanvasRenderer(canvas, options), options);
 
 BootstrapInstance.addForce(new GravityForce(options.gravity));
 BootstrapInstance.addForce(new ResistanceForce(options.resistance));
 
 const bottom = BootstrapInstance.canvasHeight - 120 - 1;
-BootstrapInstance.addConstraint(new InsetConstraint(new BoundaryBox(1, BootstrapInstance.canvasWidth - 1, 1, bottom), 0.3));
+
+const WorldRect = new BoundaryBox(1, BootstrapInstance.canvasWidth - 1, 1, bottom)
+BootstrapInstance.addConstraint(new InsetConstraint(WorldRect, 0.3));
+BootstrapInstance.addRect(WorldRect)
+
 BootstrapInstance.addRigidBody(
     new RectBody(BootstrapInstance.canvasWidth / 2, bottom - 10, BootstrapInstance.canvasWidth - 2, 20)
         .setActive(false)

@@ -1,7 +1,7 @@
 import {RectBody} from "../../../lib/physics/body/rect.js";
 import {SpotWindForce} from "../../../lib/physics/force.js";
 import {LinerRateProvider, NumericValueProvider, VectorValueProvider} from "../../../lib/render/misc/provider.js";
-import {SpriteSeries} from "../../../lib/render/misc/sprite_series.js";
+import {SpriteSeries} from "../../../lib/render/renderer/canvas/misc/sprite_series.js";
 import {ParticleEmitter} from "../../../lib/render/particles/emitter.js";
 import {Vector2} from "../../../lib/utils/vector.js";
 import Settings from "../settings.js";

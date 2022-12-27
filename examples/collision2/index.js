@@ -1,18 +1,22 @@
-import {Bootstrap} from "../common/bootstrap.js";
-import * as Params from "../common/params.js";
-import {Vector2} from "../../lib/utils/vector.js";
-import {InsetConstraint} from "../../lib/physics/constraint.js";
-import {BoundaryBox} from "../../lib/physics/common/boundary.js";
+import {CircleBody} from "../../lib/physics/body/circle.js";
 import {PolygonBody} from "../../lib/physics/body/poly.js";
 import {RectBody} from "../../lib/physics/body/rect.js";
-import {CircleBody} from "../../lib/physics/body/circle.js";
+import {BoundaryBox} from "../../lib/physics/common/boundary.js";
+import {InsetConstraint} from "../../lib/physics/constraint.js";
+import {CanvasRenderer} from "../../lib/render/renderer/canvas/renderer.js";
+import {Vector2} from "../../lib/utils/vector.js";
+import {Bootstrap} from "../common/bootstrap.js";
+import * as Params from "../common/params.js";
 
 const options = Params.parse({restitution: 1});
-const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), Object.assign({solverBias: 0.01}, options));
-
-BootstrapInstance.addConstraint(
-    new InsetConstraint(new BoundaryBox(1, BootstrapInstance.canvasWidth, 1, BootstrapInstance.canvasHeight - 1), 0, 1)
+const BootstrapInstance = new Bootstrap(
+    new CanvasRenderer(document.getElementById("canvas"), options),
+    Object.assign({solverBias: 0.01}, options)
 );
+
+const WorldRect = new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, BootstrapInstance.canvasHeight);
+BootstrapInstance.addConstraint(new InsetConstraint(WorldRect, 0.3));
+BootstrapInstance.addRect(WorldRect)
 
 const size = 100;
 const distance = size * 1.5;

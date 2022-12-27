@@ -1,20 +1,21 @@
-import {Bootstrap} from "../common/bootstrap.js";
-import * as Params from "../common/params.js";
+import {CircleBody} from "../../lib/physics/body/circle.js";
+import {RectBody} from "../../lib/physics/body/rect.js";
+import {CircleCollider} from "../../lib/physics/collider/circle.js";
+import {BoundaryBox} from "../../lib/physics/common/boundary.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
 import {GlobalWind, ResistanceForce} from "../../lib/physics/force.js";
-import {Vector2} from "../../lib/utils/vector.js";
-import {Particle} from "../../lib/render/particles/particle.js";
-import {BoundaryBox} from "../../lib/physics/common/boundary.js";
-import {RectBody} from "../../lib/physics/body/rect.js";
-import {CircleBody} from "../../lib/physics/body/circle.js";
-import {CircleCollider} from "../../lib/physics/collider/circle.js";
-import {RectBodyRenderer} from "../../lib/render/renderer/rect.js";
-import {CircleBodyRenderer} from "../../lib/render/renderer/circle.js";
-import {RendererMapping} from "../../lib/render/renderer/mapping.js";
+import {AnimationProperty, EasingFunctions, KeyframeType} from "../../lib/render/animation/base.js";
 import {LinerRateProvider, NumericValueProvider, VectorValueProvider} from "../../lib/render/misc/provider.js";
 import {ParticleEmitter} from "../../lib/render/particles/emitter.js";
-import {AnimationProperty, EasingFunctions, KeyframeType} from "../../lib/render/animation/base.js";
+import {Particle} from "../../lib/render/particles/particle.js";
 import {ParticleState, StateKeyframe} from "../../lib/render/particles/state.js";
+import {RendererMapping} from "../../lib/render/renderer/canvas/mapping.js";
+import {CircleBodyRenderer} from "../../lib/render/renderer/canvas/objects/circle.js";
+import {RectBodyRenderer} from "../../lib/render/renderer/canvas/objects/rect.js";
+import {CanvasRenderer} from "../../lib/render/renderer/canvas/renderer.js";
+import {Vector2} from "../../lib/utils/vector.js";
+import {Bootstrap} from "../common/bootstrap.js";
+import * as Params from "../common/params.js";
 
 const Tags = {
     world: "world"
@@ -112,7 +113,7 @@ class BarrierBody extends RectBody {
 }
 
 const options = Params.parse({resistance: 0.997})
-const BootstrapInstance = new Bootstrap(document.getElementById("canvas"), options);
+const BootstrapInstance = new Bootstrap(new CanvasRenderer(document.getElementById("canvas"), options), options);
 
 const border = -1;
 const WorldBox = new BoundaryBox(border, BootstrapInstance.canvasWidth - border * 2, border, BootstrapInstance.canvasHeight - border * 2);

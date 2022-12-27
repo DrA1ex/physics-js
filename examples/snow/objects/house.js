@@ -1,8 +1,8 @@
 import {PolygonBody} from "../../../lib/physics/body/poly.js";
 import {RectBody} from "../../../lib/physics/body/rect.js";
-import {Sprite} from "../../../lib/render/misc/sprite.js";
-import {SvgWrapper} from "../../../lib/render/misc/svg.js";
-import {SpriteRenderer} from "../../../lib/render/renderer/sprite.js";
+import {Sprite} from "../../../lib/render/renderer/canvas/misc/sprite.js";
+import {SvgWrapper} from "../../../lib/render/renderer/canvas/misc/svg.js";
+import {SpriteRenderer} from "../../../lib/render/renderer/canvas/objects/sprite.js";
 import * as ColorUtils from "../../../lib/utils/color.js";
 import {Vector2} from "../../../lib/utils/vector.js";
 import Settings from "../settings.js";
