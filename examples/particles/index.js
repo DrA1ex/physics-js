@@ -102,6 +102,7 @@ class BarrierRenderer extends PolygonObject {
         super(body);
 
         this.color = "#3a224f";
+        this.z = 0;
     }
 }
 
