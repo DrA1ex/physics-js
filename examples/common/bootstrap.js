@@ -337,6 +337,7 @@ export class Bootstrap {
         this.#auxCanvas = document.createElement("canvas");
         this.#auxCanvas.style.pointerEvents = "none";
         this.#auxCanvas.style.touchAction = "none";
+        this.#auxCanvas.style.zIndex = "9999999";
         this.#auxCanvas.style.position = "absolute";
         this.#auxCanvas.style.left = rect.left + "px";
         this.#auxCanvas.style.top = rect.top + "px";
