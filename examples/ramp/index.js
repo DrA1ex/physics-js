@@ -97,7 +97,8 @@ for (const ball of balls) {
 
     const {renderer} = BootstrapInstance.addRigidBody(ball);
     renderer.strokeStyle = "green";
-    renderer.fillStyle = Utils.randomColor(128, 192, 0.3);
+    renderer.fillStyle = Utils.randomColor(128, 192);
+    renderer.opacity = 0.3;
 }
 
 for (const body of BootstrapInstance.rigidBodies) {
