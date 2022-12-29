@@ -37,6 +37,7 @@ export class Bootstrap {
     #solver;
     /** @type {ParticleSystem} */
     #particleSystem;
+    /** @type {IRenderer} */
     #renderer;
     /** @type {HTMLCanvasElement} */
     #auxCanvas;
@@ -133,9 +134,11 @@ export class Bootstrap {
     }
 
     /**
+     * @template T
+     *
      * @param {Body} body
-     * @param {BodyRenderer} [renderer=null]
-     * @return {{body: Body, renderer: BodyRenderer}}
+     * @param {T} [renderer=null]
+     * @return {{body: Body, renderer: T}}
      */
     addRigidBody(body, renderer = null) {
         if (!body) {

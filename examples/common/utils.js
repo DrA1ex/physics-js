@@ -6,18 +6,20 @@ import {Vector2} from "../../lib/utils/vector.js";
 /**
  * @param {Vector2} position
  * @param {number} vertexCount
- * @param {number} size
+ * @param {number} width
+ * @param {number|null} [height=null]
  * @return {PolygonBody}
  */
-export function createRegularPoly(position, vertexCount, size) {
+export function createRegularPoly(position, vertexCount, width, height = null) {
     if (vertexCount === 4) {
-        return new RectBody(position.x, position.y, size, size);
+        return new RectBody(position.x, position.y, width, height ?? width);
     }
 
     const angleStep = Math.PI * 2 / Math.max(2, vertexCount);
     const points = new Array(vertexCount);
+    const halfSize = new Vector2(width, height ?? width).scale(0.5);
     for (let i = 0; i < vertexCount; i++) {
-        points[i] = Vector2.fromAngle(i * angleStep).scale(size / 2);
+        points[i] = Vector2.fromAngle(i * angleStep).mul(halfSize);
     }
 
     return new PolygonBody(position.x, position.y, points);
@@ -173,4 +175,17 @@ export function* reversed(array) {
     for (let i = array.length - 1; i >= 0; i--) {
         yield array[i];
     }
+}
+
+/**
+ * @param {BoundaryBox} dst
+ * @param {BoundaryBox} box
+ */
+export function unionBox(dst, box) {
+    const left = Math.min(dst.left, box.left);
+    const right = Math.max(dst.right, box.right);
+    const top = Math.min(dst.top, box.top);
+    const bottom = Math.max(dst.bottom, box.bottom);
+
+    dst.update(left, right, top, bottom);
 }

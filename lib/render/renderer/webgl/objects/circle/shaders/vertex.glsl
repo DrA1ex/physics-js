@@ -15,5 +15,5 @@ void main() {
     vec2 translated_pos = world_pos / resolution * 2.0 - 1.0;
 
     gl_Position = vec4(translated_pos * vec2(1, -1.0), position.z, 1);
-    point_color = vec4(color.rgb * color.a, color.a);
+    point_color = color;
 }

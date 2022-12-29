@@ -38,12 +38,13 @@ Yet another physics engine implementation.
 
 ## Examples
 
-- Particles: [link](https://dra1ex.github.io/physics-js/examples/particles) 
+- Particles (WebGL): [link](https://dra1ex.github.io/physics-js/examples/particles) 
 - Ramp: [link](https://dra1ex.github.io/physics-js/examples/ramp)
 - Friction: [link](https://dra1ex.github.io/physics-js/examples/friction)
 - Tower: [link](https://dra1ex.github.io/physics-js/examples/tower)
 - Falling bodies: [link](https://dra1ex.github.io/physics-js/examples/falling)
 - Crusher: [link](https://dra1ex.github.io/physics-js/examples/crusher)
+- Z-Index (WebGL): [link](https://dra1ex.github.io/physics-js/examples/z-index)
 - Collision: [link](https://dra1ex.github.io/physics-js/examples/collision)
 - Collision 2: [link](https://dra1ex.github.io/physics-js/examples/collision2)
 - Momentum Conservation: [link](https://dra1ex.github.io/physics-js/examples/momentum_conservation)
