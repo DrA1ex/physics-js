@@ -44,6 +44,7 @@ Yet another physics engine implementation.
 - Tower: [link](https://dra1ex.github.io/physics-js/examples/tower)
 - Falling bodies: [link](https://dra1ex.github.io/physics-js/examples/falling)
 - Crusher: [link](https://dra1ex.github.io/physics-js/examples/crusher)
+- Sprite (WebGL): [link](https://dra1ex.github.io/physics-js/examples/sprite)
 - Z-Index (WebGL): [link](https://dra1ex.github.io/physics-js/examples/z-index)
 - Collision: [link](https://dra1ex.github.io/physics-js/examples/collision)
 - Collision 2: [link](https://dra1ex.github.io/physics-js/examples/collision2)
