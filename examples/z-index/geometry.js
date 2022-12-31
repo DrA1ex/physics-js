@@ -1,7 +1,7 @@
 import {CircleBody} from "../../lib/physics/body/circle.js";
 import {RectBody} from "../../lib/physics/body/rect.js";
-import {CircleObject} from "../../lib/render/renderer/webgl/objects/circle/object.js";
-import {PolygonObject} from "../../lib/render/renderer/webgl/objects/poly/object.js";
+import {CircleObject} from "../../lib/render/renderer/webgl/objects/circle.js";
+import {PolygonObject} from "../../lib/render/renderer/webgl/objects/poly.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import * as CommonUtils from "../common/utils.js";
 

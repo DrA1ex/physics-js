@@ -2,7 +2,7 @@ import {CircleBody} from "../../lib/physics/body/circle.js";
 import {BoundaryBox} from "../../lib/physics/common/boundary.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
 import {ImageTexture} from "../../lib/render/renderer/webgl/misc/texture.js";
-import {SpriteObject} from "../../lib/render/renderer/webgl/objects/sprite/object.js";
+import {SpriteObject} from "../../lib/render/renderer/webgl/objects/sprite.js";
 import {WebglRenderer} from "../../lib/render/renderer/webgl/renderer.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import {Bootstrap} from "../common/bootstrap.js";

@@ -9,8 +9,8 @@ import {LinearRateProvider, NumericValueProvider, VectorValueProvider} from "../
 import {ParticleEmitter} from "../../lib/render/particles/emitter.js";
 import {Particle} from "../../lib/render/particles/particle.js";
 import {ParticleState, StateKeyframe} from "../../lib/render/particles/state.js";
-import {CircleObject} from "../../lib/render/renderer/webgl/objects/circle/object.js";
-import {PolygonObject} from "../../lib/render/renderer/webgl/objects/poly/object.js";
+import {CircleObject} from "../../lib/render/renderer/webgl/objects/circle.js";
+import {PolygonObject} from "../../lib/render/renderer/webgl/objects/poly.js";
 import {WebglRenderer} from "../../lib/render/renderer/webgl/renderer.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import {Bootstrap} from "../common/bootstrap.js";
