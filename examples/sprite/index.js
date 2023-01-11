@@ -8,7 +8,7 @@ import {Vector2} from "../../lib/utils/vector.js";
 import {Bootstrap} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
 
-const options = Params.parse({restitution: 1, beta: 0})
+const options = Params.parse({restitution: 1, bias: 0})
 const BootstrapInstance = new Bootstrap(new WebglRenderer(document.getElementById("canvas"), options), options);
 
 const WorldBox = new BoundaryBox(0, BootstrapInstance.renderer.canvasWidth, 0, BootstrapInstance.renderer.canvasHeight);
@@ -26,6 +26,12 @@ const sprites = [
     new ImageTexture(new URL("./textures/3.png", import.meta.url)),
     new ImageTexture(new URL("./textures/4.png", import.meta.url)),
 ]
+
+for (const sprite of sprites) {
+    sprite.glWrapS = WebGL2RenderingContext.CLAMP_TO_EDGE;
+    sprite.glWrapT = WebGL2RenderingContext.CLAMP_TO_EDGE;
+    sprite.glMin = WebGL2RenderingContext.LINEAR_MIPMAP_LINEAR;
+}
 
 await Promise.all(sprites.map(s => s.wait()));
 
