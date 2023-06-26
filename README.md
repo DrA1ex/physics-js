@@ -31,7 +31,7 @@ Yet another physics engine implementation.
 ### Links
 - Theme synchronization mode: [link](https://dra1ex.github.io/physics-js/examples/snow/)
 - Custom geoposition with sun sync: [link](https://dra1ex.github.io/physics-js/examples/snow/?gps=0&lat=-33.865189&lon=151.2158)
-- Periodic theme change mode: [continuosly](https://dra1ex.github.io/physics-js/examples/snow/?sun=periodic&sun_interval=0&theme_easing=linear), [every 5 minutes](https://dra1ex.github.io/physics-js/examples/snow/?sun=periodic&sun_interval=300), [every hour](https://dra1ex.github.io/physics-js/examples/snow/?sun=periodic&sun_interval=3600)
+- Periodic theme change mode: [continuosly](https://dra1ex.github.io/physics-js/examples/snow/?sun=periodic&sun_interval=0&theme_easing=linear) / [every 5 minutes](https://dra1ex.github.io/physics-js/examples/snow/?sun=periodic&sun_interval=300) / [every hour](https://dra1ex.github.io/physics-js/examples/snow/?sun=periodic&sun_interval=3600)
 - Different graphics presets: [Microwave](https://dra1ex.github.io/physics-js/examples/snow/?preset=microwave) / [Low](https://dra1ex.github.io/physics-js/examples/snow/?preset=low) / [Medium](https://dra1ex.github.io/physics-js/examples/snow/?preset=medium) / [High](https://dra1ex.github.io/physics-js/examples/snow/?preset=high) / [Ultra](https://dra1ex.github.io/physics-js/examples/snow/?preset=ultra)
 - Debug mode: [link](https://dra1ex.github.io/physics-js/examples/snow/?stats=1&debug=1)
 - Tree debug mode: [link](https://dra1ex.github.io/physics-js/examples/snow/?stats=1&debug=1&debug_tree=1&debug_velocity=0&debug_boundary=1&smoke_interval=500&snow_emit=200)
