@@ -8,15 +8,15 @@ Yet another physics engine implementation.
 ### Snow
 <img width="1498" alt="image" src="https://user-images.githubusercontent.com/1194059/206975949-c1e56c28-7e7f-47d7-b970-ab6d9d81af5d.png">
 
-### Features
-- Realtime snow physics
-- Snowdrift grows as snow falls on it
-- Realtime smoke particle system with enabled physics interactions (e.g. it is repelled by a snowdrift)
-- Procedurally generated terrain
-- 6 different themes for each time of day
-- Theme synchronization corresponsing to local sun position (need to allow geoposition access)
-- Can be used as Desktop live wallpapper (using Wallpaper Engine, Plash, etc.)
-- [Configurable](https://github.com/DrA1ex/physics-js/blob/master/examples/snow/settings.js#L44)
+### Features:
+1. Real-time snow physics.
+2. Snowdrift that grows as snow falls on it.
+3. Real-time smoke particle system with physics interactions (e.g., repelled by a snowdrift).
+4. Procedurally generated terrain.
+5. Six different themes for each time of day.
+6. Theme synchronization corresponding to the local sun position (requires geoposition access).
+7. Can be used as a desktop live wallpaper (compatible with Wallpaper Engine, Plash, etc.).
+8. Configurable [options.](https://github.com/DrA1ex/physics-js/blob/master/examples/snow/settings.js#L44)
 
 ### Themes (click to open demo)
 
