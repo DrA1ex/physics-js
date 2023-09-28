@@ -49,6 +49,8 @@ export const Parser = {
     float: (v) => parseNumber(v, Number.parseFloat),
     /** @param {Object} type */
     enum: type => parseEnum(type),
+    /** @param {*} v */
+    string: v => v?.toString(),
 }
 
 export function parse(def = {}) {
@@ -113,7 +115,10 @@ export function parseSettings(config) {
 
     const result = {}
     for (const [key, {parser, param, default: def}] of Object.entries(config)) {
-        const value = parser(params[param]) ?? def;
+        let value = parser(params[param]);
+        if (value === undefined || value === null || value === "") {
+            value = def;
+        }
 
         if (value !== null) {
             result[key] = value;

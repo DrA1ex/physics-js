@@ -25,7 +25,8 @@ const BootstrapInstance = new Bootstrap(
 );
 
 const {
-    count, minSize, maxSize, gravity, particleScale, particleOpacity, worldScale, minInteractionDistance
+    count, minSize, maxSize, gravity, particleScale, particleOpacity, worldScale, minInteractionDistance,
+    particleTextureUrl, particleBlending, particleColoring
 } = Params.parseSettings({
     count: {parser: Params.Parser.int, param: "count", default: 200},
     minSize: {parser: Params.Parser.int, param: "min_size", default: 10},
@@ -35,6 +36,14 @@ const {
     particleOpacity: {parser: Params.Parser.float, param: "opacity", default: 1},
     worldScale: {parser: Params.Parser.float, param: "w_scale", default: 40},
     minInteractionDistance: {parser: Params.Parser.float, param: "scale", default: 0.01 ** 2},
+
+    particleBlending: {parser: Params.Parser.bool, param: "blend", default: true},
+    particleColoring: {parser: Params.Parser.bool, param: "color", default: true},
+    particleTextureUrl: {
+        parser: Params.Parser.string,
+        param: "tex",
+        default: new URL("./sprites/particle.png", import.meta.url)
+    }
 });
 
 
@@ -53,9 +62,11 @@ BootstrapInstance.renderer.setProjectionMatrix(projMatrix)
 BootstrapInstance.addConstraint(new InsetConstraint(WorldRect))
 BootstrapInstance.addForce(new ResistanceForce(options.resistance));
 
-BootstrapInstance.renderer.setBlending(WebGL2RenderingContext.SRC_COLOR, WebGL2RenderingContext.ONE);
+if (particleBlending) {
+    BootstrapInstance.renderer.setBlending(WebGL2RenderingContext.SRC_COLOR, WebGL2RenderingContext.ONE);
+}
 
-const particleTexture = new ImageTexture(new URL("./sprites/particle.png", import.meta.url));
+const particleTexture = new ImageTexture(particleTextureUrl);
 particleTexture.glWrapS = WebGL2RenderingContext.CLAMP_TO_EDGE;
 particleTexture.glWrapT = WebGL2RenderingContext.CLAMP_TO_EDGE;
 particleTexture.glMin = WebGL2RenderingContext.LINEAR_MIPMAP_LINEAR;
@@ -84,7 +95,9 @@ for (let i = 0; i < count; i++) {
 
     const renderer = new SpriteObject(body);
     renderer.texture = particleTexture;
-    renderer.color = Utils.randomColor(170, 255);
+    if (particleColoring) {
+        renderer.color = Utils.randomColor(170, 255);
+    }
     renderer.opacity = particleOpacity;
     renderer.scale = particleScale;
 
