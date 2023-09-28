@@ -39,7 +39,7 @@ Yet another physics engine implementation.
 ## Examples
 
 - Particles (WebGL): [link](https://dra1ex.github.io/physics-js/examples/particles)
-- Gravity: [link](https://dra1ex.github.io/physics-js/examples/gravity)
+- Gravity (WebGL): [link](https://dra1ex.github.io/physics-js/examples/gravity)
 - Ramp: [link](https://dra1ex.github.io/physics-js/examples/ramp)
 - Friction: [link](https://dra1ex.github.io/physics-js/examples/friction)
 - Tower: [link](https://dra1ex.github.io/physics-js/examples/tower)
