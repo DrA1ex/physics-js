@@ -17,8 +17,10 @@ const options = Params.parse({
     restitution: 0.2,
     friction: 0.5
 })
+
+const renderer = new WebglRenderer(document.getElementById("canvas"), options);
 const BootstrapInstance = new Bootstrap(
-    new WebglRenderer(document.getElementById("canvas"), options),
+    renderer,
     Object.assign({solverBias: 0.5, solverBeta: 1}, options)
 );
 
@@ -34,15 +36,16 @@ const {
     minInteractionDistance: {parser: Params.Parser.float, param: "scale", default: 0.01 ** 2},
 });
 
+
 const WorldRect = new BoundaryBox(
-    -worldScale * BootstrapInstance.canvasWidth / 2,
-    worldScale * BootstrapInstance.canvasWidth / 2,
-    -worldScale * BootstrapInstance.canvasHeight / 2,
-    worldScale * BootstrapInstance.canvasHeight / 2
+    -worldScale * renderer.canvasWidth / 2,
+    worldScale * renderer.canvasWidth / 2,
+    -worldScale * renderer.canvasHeight / 2,
+    worldScale * renderer.canvasHeight / 2
 );
 
-let projMatrix = m4.projection(BootstrapInstance.canvasWidth, BootstrapInstance.canvasHeight, 2);
-projMatrix = m4.translate(projMatrix, BootstrapInstance.canvasWidth / 2, BootstrapInstance.canvasHeight / 2, 0);
+let projMatrix = m4.projection(renderer.canvasWidth, renderer.canvasHeight, 2);
+projMatrix = m4.translate(projMatrix, renderer.canvasWidth / 2, renderer.canvasHeight / 2, 0);
 projMatrix = m4.scale(projMatrix, 1 / worldScale, 1 / worldScale, 1);
 
 BootstrapInstance.renderer.setProjectionMatrix(projMatrix)
@@ -55,7 +58,6 @@ const particleTexture = new ImageTexture(new URL("./sprites/particle.png", impor
 particleTexture.glWrapS = WebGL2RenderingContext.CLAMP_TO_EDGE;
 particleTexture.glWrapT = WebGL2RenderingContext.CLAMP_TO_EDGE;
 particleTexture.glMin = WebGL2RenderingContext.LINEAR_MIPMAP_LINEAR;
-particleTexture.glMag = WebGL2RenderingContext.LINEAR_MIPMAP_LINEAR;
 
 await particleTexture.wait();
 
@@ -92,84 +94,100 @@ BootstrapInstance.enableHotKeys();
 BootstrapInstance.run();
 
 function gravityStep() {
-    BootstrapInstance.clearShapes();
     const tree = BootstrapInstance.solver.stepInfo.tree;
     if (tree) {
-        processNode(tree.root);
+        calculateTree(tree);
     }
 }
 
-function processNode(node) {
-    if (node.leafs.length > 0) {
-        const stepDelta = BootstrapInstance.solver.stepInfo.delta;
-        const count = node.leafs.length;
-        for (let i = 0; i < count; i++) {
-            const l1 = node.leafs[i];
-            const l1Items = l1.items.filter(body => body.tag === "particle");
+/**
+ * @param {SpatialTree} tree
+ */
+function calculateTree(tree) {
+    return calculateLeaf(tree.root, new Vector2());
+}
 
-            if (!l1Items.length) continue;
-
-            const l1Boundary = BoundaryBox.fromBodies(l1Items);
-            const mass1 = l1Items.reduce((p, c) => p + c.mass, 0);
-
-            for (let j = i + 1; j < count; j++) {
-                const l2 = node.leafs[j];
-                const l2Items = l2.items.filter(body => body.tag === "particle");
-
-                if (!l2Items.length) continue;
-
-                const l2Boundary = BoundaryBox.fromBodies(l2Items);
-                const mass2 = l2Items.reduce((p, c) => p + c.mass, 0);
-
-                const impulse = calculateForce(l1Boundary.center, l2Boundary.center, stepDelta).scale(mass1 * mass2);
-
-                for (const item of l1Items) applyForce(item, impulse)
-
-                const impulse2 = impulse.scaled(-1)
-                for (const item of l2Items) applyForce(item, impulse2)
-            }
-
-            processNode(l1);
-        }
+/**
+ * @param {SpatialLeaf} leaf
+ * @param {Vector2} pForce
+ */
+function calculateLeaf(leaf, pForce) {
+    const blocks = leaf.leafs;
+    if (blocks.length > 0) {
+        calculateLeafBlock(blocks, pForce);
     } else {
-        processLeaf(node);
+        calculateLeafData(leaf, pForce);
     }
 }
 
-function processLeaf(leaf) {
-    const items = leaf.items.filter(body => body.tag === "particle");
+/**
+ *
+ * @param {SpatialLeaf[]} blocks
+ * @param {Vector2} pForce
+ */
+function calculateLeafBlock(blocks, pForce) {
+    for (let i = 0; i < blocks.length; i++) {
+        const blockCenter = blocks[i].boundary.center;
+        const iForce = pForce.copy();
 
-    const stepDelta = BootstrapInstance.solver.stepInfo.delta;
-    const count = items.length;
-    for (let i = 0; i < count; i++) {
-        for (let j = i + 1; j < count; j++) {
-            const p1 = items[i];
-            const p2 = items[j];
+        for (let j = 0; j < blocks.length; j++) {
+            if (i === j) continue;
 
-            const impulse = calculateForce(p1.position, p2.position, stepDelta)
-                .scale(p1.mass * p2.mass);
+            const mass = blocks[j].items
+                .filter(b => b.tag === "particle")
+                .reduce((p, c) => p + c.mass, 0);
 
-            applyForce(p1, impulse);
-            applyForce(p2, impulse.negate());
+            const g = gravity * mass;
+            calculateForce(blockCenter, blocks[j].boundary.center, g, iForce);
+        }
+
+        calculateLeaf(blocks[i], iForce);
+    }
+}
+
+/**
+ *
+ * @param {SpatialLeaf} leaf
+ * @param {Vector2} pForce
+ */
+function calculateLeafData(leaf, pForce) {
+    for (let i = 0; i < leaf.items.length; i++) {
+        const attractor = leaf.items[i];
+        attractor.velocity.add(pForce);
+
+        for (let j = 0; j < leaf.items.length; j++) {
+            if (i === j) continue;
+
+            const particle = leaf.items[j];
+            calculateForce(particle.position, attractor.position, gravity * attractor.mass, particle);
         }
     }
 }
 
-function calculateForce(p1, p2, stepDelta) {
-    const delta = p1.delta(p2);
-    const distSqr = delta.lengthSquared();
-    if (distSqr < minInteractionDistance) {
-        return new Vector2();
+/**
+ * @param {Vector2} p1
+ * @param {Vector2} p2
+ * @param {number} g
+ * @param {Vector2|Body} out
+ */
+function calculateForce(p1, p2, g, out) {
+    const dx = p1.x - p2.x,
+        dy = p1.y - p2.y;
+
+    const distSquare = dx * dx + dy * dy;
+    if (distSquare < minInteractionDistance) return;
+
+    const force = -g / distSquare;
+    if (out.velocity !== undefined) {
+        out.velocity.x += dx * force;
+        out.velocity.y += dy * force;
+    } else {
+        out.x += dx * force;
+        out.y += dy * force;
     }
-
-    const force = -gravity / distSqr;
-    return delta.scale(force * stepDelta);
 }
 
-function applyForce(body, impulse) {
-    body.velocity.add(impulse.scaled(body.invertedMass));
-}
-
+// noinspection InfiniteLoopJS
 while (true) {
     await BootstrapInstance.requestPhysicsFrame(gravityStep);
 }
