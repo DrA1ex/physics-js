@@ -71,18 +71,19 @@ export class Bootstrap {
     #debug = false;
     #slowMotion = 1;
 
-    get state() {return this.#state;}
+    get state() {return this.#state; }
 
-    get renderer() { return this.#renderer;}
+    get renderer() { return this.#renderer; }
+    get solver() { return this.#solver; }
 
     /** @deprecated Use renderer instead */
-    get canvas() {return this.#renderer.canvas;}
+    get canvas() { return this.#renderer.canvas; }
     /** @deprecated Use renderer instead */
-    get dpr() {return this.#renderer.dpr;}
+    get dpr() { return this.#renderer.dpr; }
     /** @deprecated Use renderer instead */
-    get canvasWidth() {return this.#renderer.canvasWidth;}
+    get canvasWidth() { return this.#renderer.canvasWidth; }
     /** @deprecated Use renderer instead */
-    get canvasHeight() {return this.#renderer.canvasHeight;}
+    get canvasHeight() { return this.#renderer.canvasHeight; }
 
     get stats() {return {...this.#stats};}
     get statsExtra() {return this.#stats.extra;}
@@ -320,6 +321,10 @@ export class Bootstrap {
         if (this.#drawingShapes.has(id)) {
             this.#drawingShapes.delete(id);
         }
+    }
+
+    clearShapes() {
+        this.#drawingShapes.clear();
     }
 
     enableHotKeys() {
