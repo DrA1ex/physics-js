@@ -25,14 +25,15 @@ const BootstrapInstance = new Bootstrap(
 );
 
 const {
-    count, minSize, maxSize, gravity, particleScale, worldScale, minInteractionDistance
+    count, minSize, maxSize, gravity, particleScale, particleOpacity, worldScale, minInteractionDistance
 } = Params.parseSettings({
     count: {parser: Params.Parser.int, param: "count", default: 200},
     minSize: {parser: Params.Parser.int, param: "min_size", default: 10},
     maxSize: {parser: Params.Parser.int, param: "max_size", default: 20},
     gravity: {parser: Params.Parser.float, param: "gravity", default: 10},
-    particleScale: {parser: Params.Parser.float, param: "p_scale", default: 10},
-    worldScale: {parser: Params.Parser.float, param: "w_scale", default: 20},
+    particleScale: {parser: Params.Parser.float, param: "p_scale", default: 20},
+    particleOpacity: {parser: Params.Parser.float, param: "opacity", default: 1},
+    worldScale: {parser: Params.Parser.float, param: "w_scale", default: 40},
     minInteractionDistance: {parser: Params.Parser.float, param: "scale", default: 0.01 ** 2},
 });
 
@@ -84,6 +85,7 @@ for (let i = 0; i < count; i++) {
     const renderer = new SpriteObject(body);
     renderer.texture = particleTexture;
     renderer.color = Utils.randomColor(170, 255);
+    renderer.opacity = particleOpacity;
     renderer.scale = particleScale;
 
     BootstrapInstance.addRigidBody(body, renderer);
