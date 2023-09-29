@@ -4,10 +4,19 @@
     <meta charset="UTF-8">
     <title>physics.js: Gravity Demo</title>
     <link href="./style.css" rel="stylesheet">
+    <link href="../common/common.css" rel="stylesheet">
 </head>
 <body>
 <canvas id="canvas"></canvas>
 <div id="pause-label" style="display: none;">Paused</div>
+
+<button id="settings-button" class="settings-button icon-btn">
+    <div>⋮</div>
+</button>
+
+<div id="settings" class="settings-dialog">
+    <div id="settings-content"></div>
+</div>
 </body>
 <script type="module" src="index.js"></script>
 </html>

@@ -57,7 +57,9 @@ export default {
                 ...glob.sync("./lib/misc/**/*.js"),
                 ...glob.sync("./lib/physics/**/*.js"),
                 ...glob.sync("./lib/render/**/*.js"),
+
                 ...glob.sync("./examples/common/**/*.js"),
+                ...glob.sync("./examples/common/**/*.css"),
             ]
         },
         ...exampleEntries,

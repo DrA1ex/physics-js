@@ -1,0 +1,583 @@
+@media screen and (min-width: 1024px) and (max-width: 1440px) {
+    html {
+        font-size: 18px;
+    }
+}
+
+@media screen and (min-width: 768px) and (max-width: 1024px) {
+    html {
+        font-size: 16px;
+    }
+
+    #stats {
+        font-size: 0.6em;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    html {
+        font-size: 14px;
+    }
+
+    #stats {
+        font-size: 0.4em;
+    }
+}
+
+@media screen and (min-resolution: 280dpi) {
+    html {
+        font-size: 16px;
+    }
+
+    .loading-screen {
+        font-size: 0.6em;
+    }
+
+    #stats {
+        font-size: 0.4em;
+    }
+
+    .dialog {
+        font-size: 0.6em;
+    }
+
+    .dialog button {
+        font-size: 0.8em;
+    }
+
+    #hint {
+        font-size: 1em !important;
+    }
+}
+
+
+body {
+    position: relative;
+    padding: 0;
+    margin: 0;
+
+    overflow: hidden;
+    font: 13px Helvetica Neue, Lucida Grande, Arial;
+}
+
+button {
+    min-height: 2em;
+    border: 0.1em solid white;
+    font-family: system-ui;
+    color: rgb(200, 200, 200);
+    background: transparent;
+    padding: 0 0.5em;
+    font-size: 1rem;
+}
+
+button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    cursor: pointer;
+}
+
+button:active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+button:disabled {
+    filter: brightness(50%);
+    pointer-events: none;
+}
+
+select {
+    user-select: none;
+    padding: 0.2em;
+    background: transparent;
+    color: rgb(41, 127, 255);
+    outline: none;
+    border: none;
+    appearance: none;
+    font-size: 1em;
+    font-family: system-ui;
+}
+
+input[type=text] {
+    text-align: right;
+    border: none;
+    border-radius: 0;
+    border-bottom: 0.1em solid #c8c8c8;
+    color: #c8c8c8;
+    background: transparent;
+    outline: none;
+    appearance: none;
+    font-size: 1em;
+    font-family: system-ui;
+}
+
+input[type=text]:disabled {
+    border-color: #8a8a8a;
+    color: #8a8a8a;
+}
+
+input[type=checkbox] {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 2.8em;
+    height: 1.4em;
+    border: 0.1em solid #c8c8c8;
+    border-radius: 0;
+    background: transparent;
+    outline: none;
+    appearance: none;
+    color: red;
+}
+
+input[type=checkbox]::before {
+    content: "";
+    transform: translateX(-70%);
+    background: #c8c8c8;
+    width: 1em;
+    height: 1em;
+    transition: transform 100ms, background-color 100ms ease;
+}
+
+input[type=checkbox]:disabled {
+    border-color: #8a8a8a;
+}
+
+input[type=checkbox]:disabled::before {
+    background: #8a8a8a !important;
+}
+
+
+input[type=checkbox]:checked::before {
+    transform: translateX(70%);
+    background: #297fff;
+}
+
+input:focus {
+    border-color: rgb(41, 127, 255);
+}
+
+input[invalid=true] {
+    border-color: rgb(255, 41, 41);
+}
+
+.fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
+
+.flex-centered {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.flex-row {
+    display: flex;
+    flex-direction: row;
+}
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-centered span {
+    font-size: 2em;
+    pointer-events: none;
+    user-select: none;
+}
+
+.loading-screen {
+    background: black;
+    z-index: 1000;
+    user-select: none;
+}
+
+.loading-screen * {
+    pointer-events: none;
+}
+
+.popup {
+    display: none;
+    position: absolute;
+    border: 0.1em solid rgba(255, 255, 255, 0.5);
+}
+
+.popup.popup-shown {
+    display: block;
+}
+
+.dialog-container {
+    display: none;
+    align-items: center;
+    pointer-events: none;
+}
+
+.dialog-container.dialog-modal {
+    pointer-events: initial;
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.dialog-container.dialog-shown,
+.dialog-container.dialog-fading {
+    display: flex;
+}
+
+.dialog {
+    pointer-events: initial;
+    padding: 1em;
+    margin: 1em;
+    min-width: 20vw;
+    max-width: 80vw;
+    max-height: 80vh;
+    overflow: auto;
+    z-index: 10000;
+    background: #111111;
+    border: 0.1em solid rgba(255, 255, 255, 0.5);
+}
+
+.dialog-shown .dialog {
+    animation: 225ms;
+    animation-name: dialog-show-center;
+    animation-timing-function: ease-out;
+}
+
+.dialog-fading .dialog {
+    animation: 195ms reverse;
+    animation-timing-function: ease-in;
+}
+
+.dialog .dialog-caption {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 0.5em;
+    margin-bottom: 0.2em;
+    font-size: 2em;
+    border-bottom: 0.1em solid #2c2c2c;
+    user-select: none;
+}
+
+.dialog .dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding-top: 0.5em;
+    margin-top: 0.2em;
+    border-top: 0.1em solid #2c2c2c;
+}
+
+.dialog .dialog-actions > *:not(:first-child) {
+    margin-left: 0.5em;
+}
+
+.dialog button.dialog-close {
+    border: 0.1em solid rgba(255, 255, 255, 0.5);
+}
+
+.rotating {
+    animation-duration: 1s;
+    animation-fill-mode: forwards;
+    animation-iteration-count: infinite;
+    animation-name: rotating;
+}
+
+@keyframes rotating {
+    from {
+        transform: rotate(0);
+    }
+
+    to {
+        transform: rotate(359deg);
+    }
+}
+
+.icon-btn {
+    box-sizing: border-box;
+    border: none;
+    padding: 0.6em;
+    margin: 0;
+}
+
+.icon-btn > *:not(div) {
+    height: 2em;
+    width: 2em;
+}
+
+.icon-btn > div {
+    font-size: 2em;
+    height: 1em;
+    width: 1em;
+    transform: translateY(-15%);
+}
+
+.align-corner-end {
+    position: absolute;
+    right: 0.6em;
+    bottom: 0.6em;
+}
+
+.action-panel {
+    margin: 0;
+    background: rgba(255, 255, 255, 0.1);
+    pointer-events: initial;
+}
+
+.action-panel .icon-btn {
+    padding: 0.8em;
+}
+
+.action-panel-container {
+    overflow: hidden;
+    bottom: 4.2em;
+    pointer-events: none;
+}
+
+.action-panel-container .popup {
+    display: block;
+    border: none;
+
+    transform: translateY(100%);
+    opacity: 0;
+    transition: transform 300ms, opacity 0ms 300ms;
+}
+
+.action-panel-container .popup.popup-shown {
+    opacity: 1;
+    transform: translateY(0);
+
+    transition: transform 300ms 50ms, opacity 0ms;
+}
+
+.control-block .popup-trigger-opened {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+#hint {
+    position: absolute;
+    bottom: 1em;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2em;
+    color: rgba(255, 255, 255, 0.6);
+    text-shadow: 0 0 0.2em black;
+    pointer-events: none;
+}
+
+.fading-out {
+    animation-duration: 1s;
+    animation-delay: 2s;
+    animation-fill-mode: forwards;
+    animation-name: fading-out;
+}
+
+@keyframes fading-out {
+    from {
+        opacity: 100%;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+.control-block {
+    pointer-events: none;
+}
+
+.control-block > * {
+    pointer-events: initial;
+}
+
+
+.control-block > .icon-btn {
+    padding: 0.8em;
+}
+
+
+.settings-button {
+    position: absolute;
+    right: 1em;
+    bottom: 1em;
+}
+
+.settings-base {
+    font-size: 1em;
+    font-family: system-ui;
+}
+
+
+.settings-dialog .dialog {
+    box-sizing: border-box;
+    max-height: calc(100vh - 2em);
+}
+
+.settings-block {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0 1em;
+    justify-items: start;
+}
+
+.settings-block .settings-caption {
+    position: relative;
+    pointer-events: none;
+}
+
+.settings-block .settings-input {
+    justify-self: end;
+    text-align: right;
+}
+
+.settings-block .settings-caption[data-tooltip]:after {
+    content: "i";
+    pointer-events: all;
+
+    display: inline-block;
+    text-align: center;
+    vertical-align: super;
+
+    margin-left: 1em;
+    width: 0.8rem;
+    height: 0.8rem;
+    line-height: 0.8rem;
+
+    border-radius: 50%;
+    font-size: 0.6em;
+    font-weight: bold;
+    color: #111111;
+    background: #efefef;
+}
+
+.settings-dialog .dialog {
+    padding: 0 1em 1em 1em;
+    box-sizing: border-box;
+    max-height: calc(100vh - 1em);
+    max-width: max(40vw, 400px);
+}
+
+.settings-dialog .dialog-close.settings-close {
+    position: absolute;
+    right: 0;
+    border: none;
+}
+
+.settings-close > img {
+    width: 1.5em;
+    height: 1.5em;
+}
+
+.settings-dialog .settings-dialog-caption {
+    position: sticky;
+    background: #111111;
+    top: 0;
+    z-index: 1;
+    padding-top: 0.5em;
+}
+
+[data-tooltip]:before {
+    content: attr(data-tooltip);
+    white-space: pre-line;
+    pointer-events: none;
+    display: none;
+
+    position: absolute;
+    left: 50%;
+    bottom: 100%;
+    margin: 0.2em;
+    max-width: 20em;
+    max-height: 8em;
+    width: max-content;
+    height: max-content;
+    z-index: 10;
+
+    background: #1f1f1f;
+    border: 0.1em solid #2c2c2c;
+    padding: 0.2em;
+    opacity: 0;
+    transition: opacity 100ms 0ms;
+}
+
+[data-tooltip]:hover::before {
+    display: block;
+    opacity: 1;
+    transition: opacity 200ms 300ms;
+}
+
+[data-tooltip]:active::before {
+    display: block;
+    opacity: 1;
+    transition: opacity 200ms 0ms;
+}
+
+@keyframes pulsation {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(var(--color), 0.9);
+    }
+
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0.6em rgba(var(--color), 0);
+    }
+
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(var(--color), 0);
+    }
+}
+
+@keyframes dialog-show-center {
+    0% {
+        opacity: 0;
+        transform: scale(1);
+    }
+
+    5% {
+        transform: scale(0.8);
+    }
+
+
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes dialog-show-left {
+    0% {
+        opacity: 0;
+        transform: translateX(0);
+    }
+
+    5% {
+        transform: translateX(-50%);
+    }
+
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes dialog-show-right {
+    0% {
+        opacity: 0;
+        transform: translateX(0);
+    }
+
+    5% {
+        transform: translateX(50%);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}

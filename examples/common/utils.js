@@ -201,3 +201,35 @@ export function bmRandom() {
     if (num > 1 || num < 0) return bmRandom() // resample between 0 and 1
     return num
 }
+
+export function findKey(type, value) {
+    for (const [key, enumValue] of Object.entries(type)) {
+        if (enumValue === value) {
+            return key;
+        }
+    }
+
+    return null;
+}
+
+/**
+ * @template T
+ * @param {AppSettingsBase<T>} newSettings
+ */
+export function updateUrl(newSettings) {
+    const params = newSettings.toQueryParams();
+    const url = new URL(window.location.pathname, window.location.origin);
+    for (const param of params) {
+        if (param.exportable) continue;
+
+        url.searchParams.set(param.key, param.value ?? "");
+    }
+
+    const urlSearchParams = new URLSearchParams(window.location.search);
+    const existingParams = Object.fromEntries(urlSearchParams.entries());
+    if (existingParams.state) {
+        url.searchParams.set("state", existingParams.state);
+    }
+
+    window.history.replaceState('', '', url);
+}
