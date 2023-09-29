@@ -1,7 +1,7 @@
 import {Bootstrap} from "../common/bootstrap.js";
 import {ResistanceForce} from "../../lib/physics/force.js";
 import {InsetConstraint} from "../../lib/physics/constraint.js";
-import {GravityComponentType, GravityExampleSettings} from "./settings.js";
+import {GravityComponentType, GravityExampleSettings, ParticleColoringType} from "./settings.js";
 import {SettingsController} from "../common/ui/controllers/settings.js";
 import {Dialog, DialogPositionEnum, DialogTypeEnum} from "../common/ui/controls/dialog.js";
 import {Button} from "../common/ui/controls/button.js";
@@ -12,6 +12,8 @@ import {GravityRender} from "./render.js";
 import {updateUrl} from "../common/utils.js";
 import * as Utils from "../common/utils.js";
 import {SolverSettings} from "../common/settings/solver.js";
+import * as ColorUtils from "../../lib/utils/color.js";
+import {Vector2} from "../../lib/utils/vector.js";
 
 SolverSettings.Properties.bias.defaultValue = 0.5;
 SolverSettings.Properties.beta.defaultValue = 1;
@@ -52,10 +54,9 @@ const RenderInstance = new GravityRender(document.getElementById("canvas"), Sett
 const BootstrapInstance = new Bootstrap(
     RenderInstance.renderer,
     Settings,
-    //Object.assign({solverBias: 0.5, solverBeta: 1}, options)
 );
 
-RenderInstance.initialize();
+RenderInstance.initialize(BootstrapInstance);
 const GravityInstance = new GravityPhysics(BootstrapInstance, Settings);
 const WorldInstance = new GravityWorld(BootstrapInstance, Settings);
 await WorldInstance.initialize();
@@ -102,6 +103,8 @@ async function reconfigure(newSettings) {
 }
 
 // noinspection InfiniteLoopJS
+let max_speed = 1000;
 while (true) {
+    await BootstrapInstance.requestRenderFrame(RenderInstance.renderStep.bind(RenderInstance));
     await BootstrapInstance.requestPhysicsFrame(GravityInstance.gravityStep.bind(GravityInstance));
 }

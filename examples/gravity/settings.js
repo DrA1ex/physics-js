@@ -39,6 +39,15 @@ class ParticleSettings extends SettingsBase {
     }
 }
 
+/**
+ * @enum {string}
+ */
+export const ParticleColoringType = {
+    randomColor: "randomColor",
+    velocity: "velocity",
+    none: "none",
+}
+
 class RenderSettings extends SettingsBase {
     static Properties = {
         particleScale: Property.float("p_scale", 20)
@@ -52,9 +61,9 @@ class RenderSettings extends SettingsBase {
         particleBlending: Property.bool("blend", true)
             .setName("Particle Blending")
             .setAffects(GravityComponentType.renderer),
-        particleColoring: Property.bool("color", true)
+        particleColoring: Property.enum("color", ParticleColoringType, ParticleColoringType.velocity)
             .setName("Particle Coloring")
-            .setAffects(GravityComponentType.particleLook),
+            .setAffects(GravityComponentType.particleLook, GravityComponentType.renderer),
         particleTextureUrl: Property.string("tex", new URL("./sprites/particle.png", import.meta.url).toString())
             .setName("Particle texture url")
             .setBreaks(GravityComponentType.particleLook),

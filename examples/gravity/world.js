@@ -4,6 +4,7 @@ import {CircleBody} from "../../lib/physics/body/circle.js";
 import {SpriteObject} from "../../lib/render/renderer/webgl/objects/sprite.js";
 import {BoundaryBox} from "../../lib/physics/common/boundary.js";
 import {ImageTexture} from "../../lib/render/renderer/webgl/misc/texture.js";
+import {ParticleColoringType} from "./settings.js";
 
 export class GravityWorld {
     bootstrap;
@@ -117,10 +118,12 @@ export class GravityWorld {
 
             const renderer = this.bootstrap.getRenderObject(particle);
             if (updateLook) {
-                if (this.settings.render.particleColoring) {
+                if (this.settings.render.particleColoring === ParticleColoringType.randomColor) {
                     renderer.color = Utils.randomColor(170, 255);
-                } else {
+                } else if (this.settings.render.particleColoring === ParticleColoringType.none) {
                     renderer.color = "#ffffff";
+                } else {
+                    renderer.color = "#000000";
                 }
 
                 renderer.opacity = this.settings.render.particleOpacity;
