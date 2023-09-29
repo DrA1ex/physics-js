@@ -28,10 +28,10 @@ const {
     count, minSize, maxSize, gravity, particleScale, particleOpacity, worldScale, minInteractionDistance,
     particleTextureUrl, particleBlending, particleColoring
 } = Params.parseSettings({
-    count: {parser: Params.Parser.int, param: "count", default: 200},
-    minSize: {parser: Params.Parser.int, param: "min_size", default: 10},
-    maxSize: {parser: Params.Parser.int, param: "max_size", default: 20},
-    gravity: {parser: Params.Parser.float, param: "gravity", default: 10},
+    count: {parser: Params.Parser.int, param: "count", default: 300},
+    minSize: {parser: Params.Parser.int, param: "min_size", default: 20},
+    maxSize: {parser: Params.Parser.int, param: "max_size", default: 40},
+    gravity: {parser: Params.Parser.float, param: "gravity", default: 1000},
     particleScale: {parser: Params.Parser.float, param: "p_scale", default: 20},
     particleOpacity: {parser: Params.Parser.float, param: "opacity", default: 1},
     worldScale: {parser: Params.Parser.float, param: "w_scale", default: 40},
@@ -108,8 +108,13 @@ for (let i = 0; i < count; i++) {
 BootstrapInstance.enableHotKeys();
 BootstrapInstance.run();
 
-function gravityStep() {
+
+let stepDelta = 0;
+
+function gravityStep(delta) {
     const tree = BootstrapInstance.solver.stepInfo.tree;
+    stepDelta = delta;
+
     if (tree) {
         calculateTree(tree);
     }
@@ -168,7 +173,7 @@ function calculateLeafBlock(blocks, pForce) {
 function calculateLeafData(leaf, pForce) {
     for (let i = 0; i < leaf.items.length; i++) {
         const attractor = leaf.items[i];
-        attractor.velocity.add(pForce);
+        attractor.velocity.add(pForce.scaled(stepDelta));
 
         for (let j = 0; j < leaf.items.length; j++) {
             if (i === j) continue;
@@ -194,8 +199,8 @@ function calculateForce(p1, p2, g, out) {
 
     const force = -g / distSquare;
     if (out.velocity !== undefined) {
-        out.velocity.x += dx * force;
-        out.velocity.y += dy * force;
+        out.velocity.x += dx * force * stepDelta;
+        out.velocity.y += dy * force * stepDelta;
     } else {
         out.x += dx * force;
         out.y += dy * force;
