@@ -207,6 +207,16 @@ function calculateForce(p1, p2, g, out) {
     }
 }
 
+document.addEventListener("visibilitychange", function () {
+    if (document.hidden) {
+        BootstrapInstance.pause();
+    } else {
+        BootstrapInstance.play();
+    }
+
+    console.log(performance.now(), BootstrapInstance.state);
+});
+
 // noinspection InfiniteLoopJS
 while (true) {
     await BootstrapInstance.requestPhysicsFrame(gravityStep);
