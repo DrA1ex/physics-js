@@ -16,12 +16,10 @@ export class GravityWorld {
     /**
      * @param {Bootstrap} bootstrap
      * @param {GravityExampleSettings} settings
-     * @param options
      */
-    constructor(bootstrap, settings, options) {
+    constructor(bootstrap, settings) {
         this.bootstrap = bootstrap;
         this.settings = settings;
-        this.options = options;
 
         this.worldRect = new BoundaryBox(
             -settings.world.worldScale * bootstrap.renderer.canvasWidth / 2,
@@ -92,8 +90,6 @@ export class GravityWorld {
 
             const body = new CircleBody(position.x, position.y, 1)
                 .setVelocity(Vector2.fromAngle(Math.random() * Math.PI * 2).scale(this.settings.simulation.gravity))
-                .setFriction(this.options.friction)
-                .setRestitution(this.options.restitution)
                 .setTag("particle");
 
             const renderer = new SpriteObject(body);
@@ -109,6 +105,9 @@ export class GravityWorld {
         const maxSize = Math.max(0, this.settings.particle.maxSize - this.settings.particle.minSize);
         for (const particle of this.bootstrap.rigidBodies) {
             if (particle.tag !== "particle") continue;
+
+            particle.setFriction(this.settings.particle.friction)
+                .setRestitution(this.settings.particle.restitution);
 
             if (updateSizing) {
                 const size = this.settings.particle.minSize + Math.random() * maxSize;

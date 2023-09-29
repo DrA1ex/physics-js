@@ -25,6 +25,8 @@ export class Control {
         return /** @type {T} */ new this(e, ...params);
     }
 
+    get enabled() {return !this.element.hasAttribute("disabled");}
+
     setVisibility(show) {
         this.element.style.display = show ? null : "none";
     }

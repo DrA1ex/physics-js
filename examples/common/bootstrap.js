@@ -75,6 +75,7 @@ export class Bootstrap {
 
     get renderer() { return this.#renderer; }
     get solver() { return this.#solver; }
+    get debug() {return this.#debugInstance;}
 
     /** @deprecated Use renderer instead */
     get canvas() { return this.#renderer.canvas; }
@@ -95,16 +96,13 @@ export class Bootstrap {
     /**
      * @param renderer
      * @param {{
-     *          debug?: boolean, slowMotion?: number, useDpr?: boolean,
-     *          showBoundary?: boolean, showVectorLength?: boolean, showVector?: boolean, statistics?: boolean,
-     *          solverSteps?: number, solverBias?: number, solverBeta?: number, allowedOverlap?: boolean, solverWarming?: boolean,
-     *          solverTreeDivider?: number, solverTreeMaxCount?: number
+     *      solver: SolverSettings,
+     *      debug: DebugSettings,
      * }} options
      */
     constructor(renderer, options = {}) {
         this.#renderer = renderer;
 
-        this.#debug = options.debug;
         this.#slowMotion = Math.max(0.01, Math.min(2, options.slowMotion ?? 1));
 
         this.#particleSystem = new ParticleSystem();
@@ -112,26 +110,41 @@ export class Bootstrap {
         this.#particleSystem.onParticleDeleted.subscribe(this, this.#destroyParticle.bind(this));
 
         this.#solver = new ImpulseBasedSolver();
-        if (Number.isFinite(options.solverSteps)) this.#solver.steps = options.solverSteps;
-        if (Number.isFinite(options.solverBias)) this.#solver.velocityBiasFactor = options.solverBias;
-        if (Number.isFinite(options.solverBeta)) this.#solver.positionCorrectionBeta = options.solverBeta;
-        if (Number.isFinite(options.allowedOverlap)) this.#solver.allowedOverlap = options.allowedOverlap;
-        if (Number.isFinite(options.solverTreeDivider)) this.#solver.treeDivider = options.solverTreeDivider;
-        if (Number.isFinite(options.solverTreeMaxCount)) this.#solver.treeMaxCount = options.solverTreeMaxCount;
-        if (options.solverWarming !== undefined) this.#solver.warming = options.solverWarming;
-
-        if (options.debug) {
-            this.#debugInstance = new Debug(options);
-            this.#solver.setDebugger(this.#debugInstance);
-            window.__app = {DebugInstance: this.#debugInstance};
-        }
-
-        if (options.statistics) {
-            this.#statsElement = document.createElement("pre");
-            document.body.appendChild(this.#statsElement);
-        }
+        this.configure(options);
 
         this.#init();
+    }
+
+    configure(options) {
+        if (Number.isFinite(options.solver?.steps)) this.#solver.steps = options.solver.steps;
+        if (Number.isFinite(options.solver?.bias)) this.#solver.velocityBiasFactor = options.solver.bias;
+        if (Number.isFinite(options.solver?.beta)) this.#solver.positionCorrectionBeta = options.solver.beta;
+        if (Number.isFinite(options.solver?.overlap)) this.#solver.allowedOverlap = options.solver.overlap;
+        if (Number.isFinite(options.solver?.treeDivider)) this.#solver.treeDivider = options.solver.treeDivider;
+        if (Number.isFinite(options.solver?.treeMaxCount)) this.#solver.treeMaxCount = options.solver.treeMaxCount;
+        if (options.solver?.warming !== undefined) this.#solver.warming = options.solver.warming;
+
+        this.#debug = options.debug?.debug ?? false;
+        if (this.#debug) {
+            if (!this.#debugInstance) {
+                this.#debugInstance = new Debug(options.debug);
+                this.#solver.setDebugger(this.#debugInstance);
+                window.__app = {DebugInstance: this.#debugInstance};
+            } else {
+                this.#debugInstance.configure(options.debug);
+            }
+        }
+
+        if (options.debug?.statistics) {
+            if (!this.#statsElement) {
+                this.#statsElement = document.createElement("pre");
+                document.body.appendChild(this.#statsElement);
+            }
+
+            this.#statsElement.style.display = "block";
+        } else if (this.#statsElement) {
+            this.#statsElement.style.display = "none";
+        }
     }
 
     /**
@@ -345,7 +358,7 @@ export class Bootstrap {
         this.#auxCanvas = document.createElement("canvas");
         this.#auxCanvas.style.pointerEvents = "none";
         this.#auxCanvas.style.touchAction = "none";
-        this.#auxCanvas.style.zIndex = "9999999";
+        this.#auxCanvas.style.zIndex = "1000";
         this.#auxCanvas.style.position = "absolute";
         this.#auxCanvas.style.left = rect.left + "px";
         this.#auxCanvas.style.top = rect.top + "px";
@@ -422,6 +435,8 @@ export class Bootstrap {
     #render(delta) {
         if (!this.#debugInstance || this.#debugInstance.showBodies) {
             this.#renderer.render(this.state === State.play ? delta : 1e-12);
+        } else {
+            this.#renderer.clear();
         }
 
         if (this.state === State.play) {
@@ -430,7 +445,7 @@ export class Bootstrap {
         }
 
         if (this.#debugInstance || this.#shapeId > 0) {
-            this.#auxCtx.clearRect(0, 0, this.canvasWidth, this.canvasHeight);
+            this.#auxCtx.clearRect(0, 0, this.renderer.canvasWidth, this.renderer.canvasHeight);
         }
 
         if (this.#debug) {

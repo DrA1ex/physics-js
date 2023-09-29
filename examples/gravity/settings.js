@@ -1,5 +1,8 @@
 import {AppSettingsBase, SettingsBase, SettingsGroup, Property} from "../common/settings/base.js";
 import {ComponentType} from "../common/settings/enum.js";
+import {SolverConfigGroup, SolverSettings} from "../common/settings/solver.js";
+import {DebugConfigGroup} from "../common/settings/debug.js";
+import {RenderConfigGroup} from "../common/settings/renderer.js";
 
 /**
  * @enum {string}
@@ -27,6 +30,12 @@ class ParticleSettings extends SettingsBase {
             .setName("Particle max size")
             .setConstraints(0.1, 1000)
             .setAffects(GravityComponentType.particleSizing),
+        friction: Property.float("friction", 0.5)
+            .setName("Friction")
+            .setConstraints(0, 1),
+        restitution: Property.float("restitution", 0.2)
+            .setName("Restitution")
+            .setConstraints(0, 1),
     }
 }
 
@@ -46,7 +55,7 @@ class RenderSettings extends SettingsBase {
         particleColoring: Property.bool("color", true)
             .setName("Particle Coloring")
             .setAffects(GravityComponentType.particleLook),
-        particleTextureUrl: Property.string("tex", new URL("./sprites/particle.png", import.meta.url))
+        particleTextureUrl: Property.string("tex", new URL("./sprites/particle.png", import.meta.url).toString())
             .setName("Particle texture url")
             .setBreaks(GravityComponentType.particleLook),
     }
@@ -83,6 +92,9 @@ class WorldSettings extends SettingsBase {
             .setConstraints(1, 10000)
             .setAffects(GravityComponentType.renderer)
             .setBreaks(GravityComponentType.world),
+        resistance: Property.float("resistance", 1)
+            .setName("Resistance")
+            .setConstraints(0, 1)
     }
 }
 
@@ -91,6 +103,10 @@ export class GravityExampleSettings extends AppSettingsBase {
         particle: SettingsGroup.of(ParticleSettings).setName("Particles"),
         simulation: SettingsGroup.of(SimulationSettings).setName("Simulation"),
         render: SettingsGroup.of(RenderSettings).setName("Render"),
-        world: SettingsGroup.of(WorldSettings).setName("Display"),
+        world: SettingsGroup.of(WorldSettings).setName("World"),
+
+        ...RenderConfigGroup,
+        ...SolverConfigGroup,
+        ...DebugConfigGroup,
     }
 }

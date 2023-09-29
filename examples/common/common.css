@@ -312,6 +312,7 @@ input[invalid=true] {
     height: 1em;
     width: 1em;
     transform: translateY(-15%);
+    user-select: none;
 }
 
 .align-corner-end {

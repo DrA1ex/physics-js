@@ -48,13 +48,15 @@ export class SettingsController extends ControllerBase {
         }
 
         for (const prop of this.propData.keys()) {
-            const {key, groupKey} = this.propData.get(prop);
+            const {key, groupKey, control: propControl} = this.propData.get(prop);
             const deps = this.settings[groupKey].constructor.PropertiesDependencies.get(prop);
-            if (deps && deps.length > 0) {
-                for (const depProp of deps) {
+
+            if (deps?.properties?.length > 0) {
+                const value = !!this.settings[groupKey][key] && propControl.enabled;
+
+                for (const depProp of deps.properties) {
                     if (!(depProp instanceof ReadOnlyProperty)) {
-                        const value = this.settings[groupKey][key];
-                        this.propData.get(depProp).control.setEnabled(!!value);
+                        this.propData.get(depProp).control.setEnabled(value);
                     }
                 }
             }
@@ -77,12 +79,14 @@ export class SettingsController extends ControllerBase {
             const deps = config[groupKey].constructor.PropertiesDependencies.get(prop);
             if (deps && deps.properties.length > 0) {
                 for (const depProp of deps.properties) {
-                    this.onParameterChanged(depProp, true);
-
                     if (!(depProp instanceof ReadOnlyProperty)) {
+                        const depValue = !!value && control.enabled;
+
                         const invert = deps.options.invert && (deps.options.invert === true || deps.options.invert[depProp.key] === true);
-                        this.propData.get(depProp).control.setEnabled(invert ? !value : !!value);
+                        this.propData.get(depProp).control.setEnabled(invert ? !depValue : depValue);
                     }
+
+                    this.onParameterChanged(depProp, true);
                 }
             }
         }
