@@ -214,7 +214,7 @@ document.addEventListener("visibilitychange", function () {
         BootstrapInstance.play();
     }
 
-    console.log(performance.now(), BootstrapInstance.state);
+    document.getElementById("pause-label").style.display = document.hidden ? "block" : "none";
 });
 
 // noinspection InfiniteLoopJS
