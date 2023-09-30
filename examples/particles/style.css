@@ -6,7 +6,7 @@ body {
     box-sizing: border-box;
     margin: 0;
     padding: 1rem;
-    background: radial-gradient(circle at 10% 20%, #bc8fab 0%, #404972 80%);
+    background: radial-gradient(circle at 10% 20%, #bc8fab 0%, #404972 80%) !important;
 }
 
 #canvas {

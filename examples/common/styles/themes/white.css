@@ -1,80 +1,79 @@
-body {
+body.white-theme {
     color: #555;
     background: #ece9e9 linear-gradient(180deg, #fff, #ece9e9) no-repeat;
 }
 
-button {
-    border: 0.1em solid black;
+.white-theme button {
     color: black;
 }
 
-button:hover {
+.white-theme button:hover {
     background: rgba(155, 155, 155, 0.1);
 }
 
-button:active {
+.white-theme button:active {
     background: rgba(110, 110, 110, 0.2);
 }
 
-input[type=text] {
+.white-theme input[type=text] {
     color: black;
     border-bottom: 0.1em solid #606060;
 }
 
-input[type=text]:disabled {
+.white-theme input[type=text]:disabled {
     color: #606060;
 }
 
-input[type=checkbox] {
+.white-theme input[type=checkbox] {
     border: 0.1em solid #606060;
 }
 
-input[type=checkbox]::before {
+.white-theme input[type=checkbox]:not(:checked)::before {
     background: #606060;
 }
 
-.dialog {
+.white-theme .dialog {
     background: white;
     border: 0.1rem solid rgba(90, 90, 90, 0.5);
 }
 
-.dialog .dialog-caption {
+.white-theme .dialog .dialog-caption {
     border-bottom: 0.1rem solid #606060;
 }
 
-[data-tooltip]:before {
+.white-theme [data-tooltip]:before {
     background: #f3f3f3;
 }
 
-.dialog button.dialog-close {
+.white-theme .dialog button.dialog-close {
     border: 0.1em solid #606060;
 }
 
-.settings-button {
+.white-theme .settings-button {
     position: absolute;
     right: 1em;
     bottom: 1em;
 }
 
-.settings-dialog .dialog {
+.white-theme .settings-dialog .dialog {
     padding: 0 1em 1em 1em;
     box-sizing: border-box;
     max-height: calc(100vh - 1em);
     max-width: max(40vw, 400px);
 }
 
-.settings-dialog .dialog-close.settings-close {
+.white-theme .settings-dialog .dialog-close.settings-close {
     position: absolute;
     right: 0;
     border: none;
 }
 
-.settings-close > img {
+.white-theme .settings-close > img {
     width: 1.5em;
     height: 1.5em;
 }
 
-.settings-dialog .settings-dialog-caption {
+.white-theme .settings-dialog .settings-dialog-caption {
     position: sticky;
     top: 0;
     background: white;
