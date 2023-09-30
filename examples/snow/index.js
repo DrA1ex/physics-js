@@ -15,6 +15,7 @@ import {SnowCloud, SnowDrift} from "./objects/snow.js";
 import Settings, {SunMode} from "./settings.js";
 import {ThemeManager} from "./theme.js";
 import * as GeoUtils from "./utils/geo.js";
+import {DefaultBootstrapSettings} from "../common/settings/default.js";
 
 CommonUtils.installGlobalErrorHook();
 document.body.classList.add(Settings.Sun.Theme);
@@ -22,11 +23,15 @@ document.body.classList.add(Settings.Sun.Theme);
 const loaderState = document.getElementById("loader-state");
 loaderState.innerText = "Initialize engine...";
 
-const options = Params.parse({
-    restitution: 0, friction: 0.8, overlap: 0.5, beta: 1, bias: 0.1, stats: false, tree_cnt: 13, dpr: Settings.Preset.dpr
-});
+const options = Params.parse();
 
-const BootstrapInstance = new Bootstrap(new CanvasRenderer(document.getElementById("canvas"), options), options);
+const EngineSettings = DefaultBootstrapSettings.fromQueryParams({
+    restitution: 0, friction: 0.8, overlap: 0.5, beta: 1, bias: 0.1, treeMaxCount: 13,
+    statistics: false, useDpr: Settings.Preset.dpr
+})
+
+const BootstrapInstance = new Bootstrap(
+    new CanvasRenderer(document.getElementById("canvas"), EngineSettings.renderer), EngineSettings);
 BootstrapInstance.statsExtra["Preset"] = Settings.Preset.name;
 
 BootstrapInstance.addForce(new GravityForce(options.gravity));
