@@ -103,7 +103,7 @@ export class Bootstrap {
     constructor(renderer, options = {}) {
         this.#renderer = renderer;
 
-        this.#slowMotion = Math.max(0.01, Math.min(2, options.slowMotion ?? 1));
+        this.#slowMotion = 1;
 
         this.#particleSystem = new ParticleSystem();
         this.#particleSystem.onParticleCreated.subscribe(this, this.#addParticle.bind(this));
@@ -122,6 +122,7 @@ export class Bootstrap {
         if (Number.isFinite(options.solver?.overlap)) this.#solver.allowedOverlap = options.solver.overlap;
         if (Number.isFinite(options.solver?.treeDivider)) this.#solver.treeDivider = options.solver.treeDivider;
         if (Number.isFinite(options.solver?.treeMaxCount)) this.#solver.treeMaxCount = options.solver.treeMaxCount;
+        if (Number.isFinite(options.solver?.slowMotion)) this.#slowMotion = options.solver.slowMotion;
         if (options.solver?.warming !== undefined) this.#solver.warming = options.solver.warming;
 
         this.#debug = options.debug?.debug ?? false;

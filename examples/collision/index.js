@@ -4,14 +4,18 @@ import {InsetConstraint} from "../../lib/physics/constraint.js";
 import {CanvasRenderer} from "../../lib/render/renderer/canvas/renderer.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import {Bootstrap, State} from "../common/bootstrap.js";
-import * as Params from "../common/params.js";
 import * as Utils from "../common/utils.js";
+import {CommonBootstrapSettings, CommonSettings} from "../common/settings/default.js";
+import {SettingsController} from "../common/ui/controllers/settings.js";
 
-const options = Params.parse()
+delete CommonSettings.Properties.resistance;
+delete CommonSettings.Properties.gravity;
+const Settings = CommonBootstrapSettings.fromQueryParams({bias: 0.1});
+const settingsCtrl = SettingsController.defaultCtrl(Settings);
+
 const BootstrapInstance = new Bootstrap(
-    new CanvasRenderer(document.getElementById("canvas"), options),
-    Object.assign({solverBias: 0.1}, options)
-);
+    new CanvasRenderer(document.getElementById("canvas"), Settings.renderer), Settings);
+settingsCtrl.subscribe(this, SettingsController.RECONFIGURE_EVENT, SettingsController.defaultReconfigure(BootstrapInstance));
 
 const WorldRect = new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, BootstrapInstance.canvasHeight);
 BootstrapInstance.addConstraint(new InsetConstraint(WorldRect, 0.3));
@@ -35,7 +39,7 @@ for (let i = 0; i < count; i++) {
     }
 
     BootstrapInstance.addRigidBody(
-        body.setFriction(options.friction)
+        body.setFriction(Settings.common.friction)
             .setRestitution(Math.random())
             .setMass(1 + Math.random() * 5)
     );
@@ -49,13 +53,12 @@ BootstrapInstance.enableHotKeys();
 BootstrapInstance.run();
 
 const timeout = 1000 / 60;
-const delta = timeout / 1000 * options.slowMotion;
+const delta = timeout / 1000 * Settings.solver.slowMotion;
 setInterval(() => {
     if (BootstrapInstance.state !== State.play) {
         return;
     }
 
-    const count = BootstrapInstance.rigidBodies.length;
     if (rotatingBody._angle === undefined) {
         rotatingBody._angle = 0;
         rotatingBody._position = rotatingBody.position.copy();

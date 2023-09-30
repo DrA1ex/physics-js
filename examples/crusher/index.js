@@ -6,14 +6,17 @@ import {CanvasRenderer} from "../../lib/render/renderer/canvas/renderer.js";
 import * as GeomUtils from "../../lib/utils/geom.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import {Bootstrap, State} from "../common/bootstrap.js";
-import * as Params from "../common/params.js";
 import * as Utils from "../common/utils.js";
+import {CommonBootstrapSettings} from "../common/settings/default.js";
+import {SettingsController} from "../common/ui/controllers/settings.js";
 
 
-const options = Params.parse({g: 500, steps: 20, bias: 0.1, beta: 0.8});
-const BootstrapInstance = new Bootstrap(new CanvasRenderer(document.getElementById("canvas"), options), options);
+const Settings = CommonBootstrapSettings.fromQueryParams({gravity: 500, steps: 20, bias: 0.1, beta: 0.8});
+const settingsCtrl = SettingsController.defaultCtrl(Settings);
+const BootstrapInstance = new Bootstrap(new CanvasRenderer(document.getElementById("canvas"), Settings.renderer), Settings);
+settingsCtrl.subscribe(this, SettingsController.RECONFIGURE_EVENT, SettingsController.defaultReconfigure(BootstrapInstance));
 
-const {canvasWidth, canvasHeight} = BootstrapInstance;
+const {canvasWidth, canvasHeight} = BootstrapInstance.renderer;
 const yOffset = 20;
 
 const crusherWidth = 100;
@@ -33,8 +36,8 @@ const WorldRect = new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, Bootstrap
 BootstrapInstance.addConstraint(new InsetConstraint(WorldRect, 0.3));
 BootstrapInstance.addRect(WorldRect)
 
-BootstrapInstance.addForce(new GravityForce(options.gravity));
-BootstrapInstance.addForce(new ResistanceForce(options.resistance));
+BootstrapInstance.addForce(new GravityForce(Settings.common.gravity));
+BootstrapInstance.addForce(new ResistanceForce(Settings.common.resistance));
 
 const floor = BootstrapInstance.addRigidBody(new RectBody(canvasWidth / 2, yOffset + canvasHeight - crusherWidth / 2, canvasWidth, crusherWidth).setActive(false))
 floor.renderer.fill = true;
@@ -61,8 +64,8 @@ for (const crusher of crushers) {
 }
 
 for (const body of BootstrapInstance.rigidBodies) {
-    body.setFriction(options.friction);
-    body.setRestitution(options.restitution);
+    body.setFriction(Settings.common.friction);
+    body.setRestitution(Settings.common.restitution);
 }
 
 
@@ -86,8 +89,8 @@ for (let i = 0; i < trashCount; i++) {
     const size = trashMinSize + Math.random() * (trashMaxSize - trashMinSize);
     const vertexCount = Math.floor(3 + Math.random() * 5);
     const body = Utils.createRegularPoly(new Vector2(canvasWidth / 2, canvasHeight / 2), vertexCount, size)
-        .setFriction(options.friction)
-        .setRestitution(options.restitution);
+        .setFriction(Settings.common.friction)
+        .setRestitution(Settings.common.restitution);
 
     setTimeout(() => BootstrapInstance.addRigidBody(body), delta * i);
 }

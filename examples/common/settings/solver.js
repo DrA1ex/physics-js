@@ -6,6 +6,9 @@ export class SolverSettings extends SettingsBase {
         steps: Property.int("steps", 6)
             .setName("Steps")
             .setConstraints(1, 20),
+        slowMotion: Property.float("slow_motion", 1)
+            .setName("Slow motion")
+            .setConstraints(0.01, 1),
         bias: Property.float("bias", 0.2)
             .setName("Velocity bias")
             .setConstraints(0, 1),

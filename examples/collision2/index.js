@@ -6,13 +6,19 @@ import {InsetConstraint} from "../../lib/physics/constraint.js";
 import {CanvasRenderer} from "../../lib/render/renderer/canvas/renderer.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import {Bootstrap} from "../common/bootstrap.js";
-import * as Params from "../common/params.js";
+import {CommonBootstrapSettings, CommonSettings} from "../common/settings/default.js";
+import {SettingsController} from "../common/ui/controllers/settings.js";
 
-const options = Params.parse({restitution: 1});
+delete CommonSettings.Properties.resistance;
+delete CommonSettings.Properties.gravity;
+const Settings = CommonBootstrapSettings.fromQueryParams({restitution: 1, bias: 0.1});
+const settingsCtrl = SettingsController.defaultCtrl(Settings);
+
 const BootstrapInstance = new Bootstrap(
-    new CanvasRenderer(document.getElementById("canvas"), options),
-    Object.assign({solverBias: 0.01}, options)
+    new CanvasRenderer(document.getElementById("canvas"), Settings.renderer),
+    Settings,
 );
+settingsCtrl.subscribe(this, SettingsController.RECONFIGURE_EVENT, SettingsController.defaultReconfigure(BootstrapInstance));
 
 const WorldRect = new BoundaryBox(0, BootstrapInstance.canvasWidth, 0, BootstrapInstance.canvasHeight);
 BootstrapInstance.addConstraint(new InsetConstraint(WorldRect, 0.3));
@@ -37,8 +43,8 @@ BootstrapInstance.addRigidBody(new CircleBody(center.x + distance * 2, center.y 
 BootstrapInstance.addRigidBody(new CircleBody(center.x - distance * 2, center.y - distance + 1, size / 2).setVelocity(new Vector2(speed, 0)));
 
 for (const body of BootstrapInstance.rigidBodies) {
-    body.setFriction(options.friction);
-    body.setRestitution(options.restitution);
+    body.setFriction(Settings.common.friction);
+    body.setRestitution(Settings.common.restitution);
 }
 
 BootstrapInstance.enableHotKeys();

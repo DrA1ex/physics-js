@@ -14,10 +14,13 @@ import {PolygonObject} from "../../lib/render/renderer/webgl/objects/poly.js";
 import {WebglRenderer} from "../../lib/render/renderer/webgl/renderer.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import {Bootstrap} from "../common/bootstrap.js";
-import * as Params from "../common/params.js";
+import {SettingsController} from "../common/ui/controllers/settings.js";
+import {CommonBootstrapSettings, CommonSettings} from "../common/settings/default.js";
+import * as Utils from "../common/utils.js";
 
 const Tags = {
-    world: "world"
+    world: "world",
+    particle: "particle"
 }
 
 const SmokeState = {
@@ -53,8 +56,9 @@ class SmokeParticle extends Particle {
         const size = sizeProvider.next(1);
 
         const body = new CircleBody(x, y - size, size, massProvider.next(1))
-            .setRestitution(0)
-            .setFriction(0);
+            .setRestitution(Settings.common.restitution)
+            .setFriction(Settings.common.friction)
+            .setTag(Tags.particle);
 
         const renderObj = new CircleObject(body);
         renderObj.color = "#ffb545";
@@ -109,8 +113,17 @@ class BarrierRenderer extends PolygonObject {
 class BarrierBody extends RectBody {
 }
 
-const options = Params.parse({resistance: 0.997})
-const BootstrapInstance = new Bootstrap(new WebglRenderer(document.getElementById("canvas"), options), options);
+delete CommonSettings.Properties.gravity;
+let Settings = CommonBootstrapSettings.fromQueryParams({
+    resistance: 0.997,
+    restitution: 0,
+    friction: 0
+});
+
+const settingsCtrl = SettingsController.defaultCtrl(Settings);
+
+const Renderer = new WebglRenderer(document.getElementById("canvas"), Settings.renderer);
+const BootstrapInstance = new Bootstrap(Renderer, Settings);
 
 const border = -1;
 const WorldBox = new BoundaryBox(border, BootstrapInstance.canvasWidth - border * 2, border, BootstrapInstance.canvasHeight - border * 2);
@@ -119,7 +132,8 @@ worldConstraint.constraintBody.setTag(Tags.world);
 
 BootstrapInstance.addConstraint(worldConstraint);
 
-BootstrapInstance.addForce(new ResistanceForce(options.resistance));
+const Resistance = new ResistanceForce(Settings.common.resistance);
+BootstrapInstance.addForce(Resistance);
 BootstrapInstance.addForce(new GlobalWind(new Vector2(0.3, -2)));
 
 BootstrapInstance.renderer.bodyToRenderObjectMapping.set(BarrierBody, BarrierRenderer);
@@ -156,3 +170,16 @@ BootstrapInstance.addParticleEmitter(emitter);
 
 BootstrapInstance.enableHotKeys();
 BootstrapInstance.run();
+
+settingsCtrl.subscribe(this, SettingsController.RECONFIGURE_EVENT, (_, newSettings) => {
+    Utils.updateUrl(newSettings);
+    BootstrapInstance.configure(newSettings);
+    Resistance.resistance = newSettings.common.resistance;
+
+    for (const body of BootstrapInstance.rigidBodies) {
+        if (body.tag !== Tags.particle) continue;
+
+        body.setFriction(newSettings.common.friction)
+            .setRestitution(newSettings.common.restitution);
+    }
+});

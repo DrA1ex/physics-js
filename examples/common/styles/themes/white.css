@@ -1,0 +1,83 @@
+body {
+    color: #555;
+    background: #ece9e9 linear-gradient(180deg, #fff, #ece9e9) no-repeat;
+}
+
+button {
+    border: 0.1em solid black;
+    color: black;
+}
+
+button:hover {
+    background: rgba(155, 155, 155, 0.1);
+}
+
+button:active {
+    background: rgba(110, 110, 110, 0.2);
+}
+
+input[type=text] {
+    color: black;
+    border-bottom: 0.1em solid #606060;
+}
+
+input[type=text]:disabled {
+    color: #606060;
+}
+
+input[type=checkbox] {
+    border: 0.1em solid #606060;
+}
+
+input[type=checkbox]::before {
+    background: #606060;
+}
+
+.dialog {
+    background: white;
+    border: 0.1rem solid rgba(90, 90, 90, 0.5);
+}
+
+.dialog .dialog-caption {
+    border-bottom: 0.1rem solid #606060;
+}
+
+[data-tooltip]:before {
+    background: #f3f3f3;
+}
+
+.dialog button.dialog-close {
+    border: 0.1em solid #606060;
+}
+
+.settings-button {
+    position: absolute;
+    right: 1em;
+    bottom: 1em;
+}
+
+.settings-dialog .dialog {
+    padding: 0 1em 1em 1em;
+    box-sizing: border-box;
+    max-height: calc(100vh - 1em);
+    max-width: max(40vw, 400px);
+}
+
+.settings-dialog .dialog-close.settings-close {
+    position: absolute;
+    right: 0;
+    border: none;
+}
+
+.settings-close > img {
+    width: 1.5em;
+    height: 1.5em;
+}
+
+.settings-dialog .settings-dialog-caption {
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1;
+    padding-top: 0.5em;
+}

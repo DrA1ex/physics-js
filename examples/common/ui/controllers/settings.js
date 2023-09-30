@@ -7,12 +7,56 @@ import {Checkbox} from "../controls/checkbox.js";
 import {Label} from "../controls/label.js";
 
 import view from "./views/settings.js";
+import {Dialog, DialogPositionEnum, DialogTypeEnum} from "../controls/dialog.js";
+import {Button} from "../controls/button.js";
+import * as Utils from "../../utils.js";
 
 /**
  * @template {AppSettingsBase} SettingsT
  */
 export class SettingsController extends ControllerBase {
     static RECONFIGURE_EVENT = "start_recording";
+
+    /**
+     * @param {SettingsT} settings
+     * @param contentId
+     * @param buttonId
+     * @param type
+     * @param position
+     * @return {SettingsController}
+     */
+    static defaultCtrl(settings, {
+        contentId = "settings-content", buttonId = "settings-button",
+        type = DialogTypeEnum.popover,
+        position = DialogPositionEnum.right
+    } = {}) {
+        const settingsCtrl = new SettingsController(document.getElementById(contentId), this);
+        const settingsDialog = Dialog.byId("settings", settingsCtrl.root);
+
+        settingsDialog.type = type;
+        settingsDialog.position = position;
+
+        settingsCtrl.configure(settings);
+
+        const bSettings = Button.byId(buttonId);
+        bSettings.setOnClick(() => {
+            bSettings.setEnabled(false);
+            settingsDialog.show();
+        })
+
+        settingsDialog.setOnDismissed(() => {
+            bSettings.setEnabled(true);
+        });
+
+        return settingsCtrl;
+    }
+
+    static defaultReconfigure(bootstrap) {
+        return function (_, newSettings) {
+            Utils.updateUrl(newSettings);
+            bootstrap.configure(newSettings);
+        }
+    }
 
     /** @type {SettingsT} */
     settings;
