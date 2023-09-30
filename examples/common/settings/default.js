@@ -13,7 +13,7 @@ export class DefaultBootstrapSettings extends AppSettingsBase {
 
 export class CommonSettings extends SettingsBase {
     static Properties = {
-        gravity: Property.float("resistance", 100)
+        gravity: Property.float("gravity", 100)
             .setName("Gravity")
             .setConstraints(-10000, 10000),
         resistance: Property.float("resistance", 1)

@@ -3,13 +3,13 @@ import {VectorAnimation} from "../../lib/render/animation/vector.js";
 import {WebglRenderer} from "../../lib/render/renderer/webgl/renderer.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import {Bootstrap} from "../common/bootstrap.js";
-import * as Params from "../common/params.js";
 import * as CommonUtils from "../common/utils.js";
 import * as Geometry from "./geometry.js";
+import {CommonBootstrapSettings} from "../common/settings/default.js";
 
 
-const options = Params.parse();
-const BootstrapInstance = new Bootstrap(new WebglRenderer(document.getElementById("canvas"), options), options);
+const Settings = CommonBootstrapSettings.fromQueryParams({restitution: 1, bias: 0.1});
+const BootstrapInstance = new Bootstrap(new WebglRenderer(document.getElementById("canvas"), Settings.renderer), Settings);
 const center = new Vector2(BootstrapInstance.renderer.canvasWidth, BootstrapInstance.renderer.canvasHeight).scale(0.5);
 
 Geometry.createFromConfig(BootstrapInstance, Geometry.config, center);

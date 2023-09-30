@@ -5,12 +5,15 @@ import {InsetConstraint} from "../../lib/physics/constraint.js";
 import {GravityForce, ResistanceForce} from "../../lib/physics/force.js";
 import {CanvasRenderer} from "../../lib/render/renderer/canvas/renderer.js";
 import {Bootstrap} from "../common/bootstrap.js";
-import * as Params from "../common/params.js";
 import * as Utils from "../common/utils.js";
+import {CommonBootstrapSettings} from "../common/settings/default.js";
+import {SettingsController} from "../common/ui/controllers/settings.js";
 
-
-const options = Params.parse({beta: 0.8, bias: 0.2});
-const BootstrapInstance = new Bootstrap(new CanvasRenderer(document.getElementById("canvas"), options), options);
+const Settings = CommonBootstrapSettings.fromQueryParams({beta: 0.8, bias: 0.2});
+const settingsCtrl = SettingsController.defaultCtrl(Settings);
+const canvas = document.getElementById("canvas");
+const BootstrapInstance = new Bootstrap(new CanvasRenderer(canvas, Settings.renderer), Settings);
+settingsCtrl.subscribe(this, SettingsController.RECONFIGURE_EVENT, SettingsController.defaultReconfigure(BootstrapInstance));
 
 const minBallSize = 10;
 const maxBallSize = 30;
@@ -25,8 +28,8 @@ const towerHeight = widthDecrease > 0 ? towerWidth / widthDecrease : towerWidth;
 const bottomOffset = 60;
 const bottom = BootstrapInstance.canvasHeight - bottomOffset - 1;
 
-BootstrapInstance.addForce(new GravityForce(options.gravity));
-BootstrapInstance.addForce(new ResistanceForce(options.resistance));
+BootstrapInstance.addForce(new GravityForce(Settings.common.gravity));
+BootstrapInstance.addForce(new ResistanceForce(Settings.common.resistance));
 
 const WorldRect = new BoundaryBox(1, BootstrapInstance.canvasWidth - 1, 1, BootstrapInstance.canvasHeight - 1);
 BootstrapInstance.addConstraint(new InsetConstraint(WorldRect, 0.3));
@@ -52,14 +55,14 @@ for (let i = 0; i < towerHeight; i++) {
 }
 
 for (const body of BootstrapInstance.rigidBodies) {
-    body.setFriction(options.friction);
-    body.setRestitution(options.restitution);
+    body.setFriction(Settings.common.friction);
+    body.setRestitution(Settings.common.restitution);
 }
 
 let startPoint = null;
 let vectorId = null;
 let creatingBody = null;
-document.onmousedown = document.ontouchstart = (e) => {
+canvas.onmousedown = canvas.ontouchstart = (e) => {
     e.preventDefault();
     startPoint = Utils.getMousePos(e)
 
@@ -82,9 +85,9 @@ function _constraintVectorLength(vector, maxLength) {
     return direction.scale(Math.min(length, maxLength));
 }
 
-const maxSpeed = options.gravity * 20;
+const maxSpeed = Settings.common.gravity * 20;
 const maxDisplaySpeed = 50;
-document.onmousemove = document.ontouchmove = (e) => {
+canvas.onmousemove = canvas.ontouchmove = (e) => {
     if (!startPoint) {
         return;
     }
@@ -96,7 +99,7 @@ document.onmousemove = document.ontouchmove = (e) => {
     vectorId = BootstrapInstance.addVector(startPoint, _constraintVectorLength(startPoint.delta(pos), maxDisplaySpeed), "red");
 }
 
-document.onmouseup = document.ontouchend = (e) => {
+canvas.onmouseup = canvas.ontouchend = (e) => {
     if (!startPoint) {
         return;
     }

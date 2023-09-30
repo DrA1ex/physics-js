@@ -6,11 +6,14 @@ import {GravityForce} from "../../lib/physics/force.js";
 import {CanvasRenderer} from "../../lib/render/renderer/canvas/renderer.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import {Bootstrap} from "../common/bootstrap.js";
-import * as Params from "../common/params.js";
 import * as Utils from "../common/utils.js";
+import {SettingsController} from "../common/ui/controllers/settings.js";
+import {CommonBootstrapSettings} from "../common/settings/default.js";
 
-const options = Params.parse({friction: 0.8, restitution: 0.3});
-const BootstrapInstance = new Bootstrap(new CanvasRenderer(document.getElementById("canvas"), options), options);
+const Settings = CommonBootstrapSettings.fromQueryParams({friction: 0.8, restitution: 0.3});
+const settingsCtrl = SettingsController.defaultCtrl(Settings);
+const BootstrapInstance = new Bootstrap(new CanvasRenderer(document.getElementById("canvas"), Settings.renderer), Settings);
+settingsCtrl.subscribe(this, SettingsController.RECONFIGURE_EVENT, SettingsController.defaultReconfigure(BootstrapInstance));
 
 const size = 100;
 const speed = Math.PI * 8;
@@ -22,7 +25,7 @@ const WorldRect = new BoundaryBox(1, canvasWidth, 1, bottom);
 BootstrapInstance.addConstraint(new InsetConstraint(WorldRect, 0.3));
 BootstrapInstance.addRect(WorldRect)
 
-BootstrapInstance.addForce(new GravityForce(options.gravity));
+BootstrapInstance.addForce(new GravityForce(Settings.common.gravity));
 
 BootstrapInstance.addRigidBody(new CircleBody(size / 2 + 1, bottom - size - 1, size / 2, 3).setAngularVelocity(speed));
 
@@ -51,8 +54,8 @@ for (let i = 0; i < boxCount; i++) {
 }
 
 for (const body of BootstrapInstance.rigidBodies) {
-    body.setFriction(options.friction);
-    body.setRestitution(options.restitution);
+    body.setFriction(Settings.common.friction);
+    body.setRestitution(Settings.common.restitution);
 }
 
 

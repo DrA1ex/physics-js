@@ -6,10 +6,17 @@ import {SpriteObject} from "../../lib/render/renderer/webgl/objects/sprite.js";
 import {WebglRenderer} from "../../lib/render/renderer/webgl/renderer.js";
 import {Vector2} from "../../lib/utils/vector.js";
 import {Bootstrap} from "../common/bootstrap.js";
-import * as Params from "../common/params.js";
+import {CommonBootstrapSettings, CommonSettings} from "../common/settings/default.js";
+import {SettingsController} from "../common/ui/controllers/settings.js";
 
-const options = Params.parse({restitution: 1, bias: 0})
-const BootstrapInstance = new Bootstrap(new WebglRenderer(document.getElementById("canvas"), options), options);
+delete CommonSettings.Properties.gravity;
+delete CommonSettings.Properties.resistance;
+delete CommonSettings.Properties.friction;
+
+const Settings = CommonBootstrapSettings.fromQueryParams({restitution: 1, bias: 0});
+const settingsCtrl = SettingsController.defaultCtrl(Settings);
+const BootstrapInstance = new Bootstrap(new WebglRenderer(document.getElementById("canvas"), Settings.renderer), Settings);
+settingsCtrl.subscribe(this, SettingsController.RECONFIGURE_EVENT, SettingsController.defaultReconfigure(BootstrapInstance));
 
 const WorldBox = new BoundaryBox(0, BootstrapInstance.renderer.canvasWidth, 0, BootstrapInstance.renderer.canvasHeight);
 BootstrapInstance.addConstraint(new InsetConstraint(WorldBox, 0, 1));
@@ -40,7 +47,7 @@ for (let i = 0; i < count; i++) {
 
     const body = new CircleBody(WorldBox.width * Math.random(), WorldBox.height * Math.random(), size)
         .setVelocity(Vector2.fromAngle(Math.PI * 2 * Math.random()).scale(speed))
-        .setRestitution(options.restitution)
+        .setRestitution(Settings.common.restitution)
         .setMass(size);
 
     const renderObj = new SpriteObject(body);

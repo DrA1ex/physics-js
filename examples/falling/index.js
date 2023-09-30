@@ -9,6 +9,8 @@ import {Vector2} from "../../lib/utils/vector.js";
 import {Bootstrap} from "../common/bootstrap.js";
 import * as Params from "../common/params.js";
 import * as Utils from "../common/utils.js";
+import {CommonBootstrapSettings} from "../common/settings/default.js";
+import {SettingsController} from "../common/ui/controllers/settings.js";
 
 function _createBody(position, size) {
     let body;
@@ -22,12 +24,13 @@ function _createBody(position, size) {
             break;
     }
 
-    return body.setFriction(options.friction).setRestitution(options.restitution);
+    return body.setFriction(Settings.common.friction)
+        .setRestitution(Settings.common.restitution);
 }
 
 function _accelerateBody(body) {
     const angle = Math.random() * Math.PI * 2;
-    const force = Math.random() * options.gravity * 10 * body.mass;
+    const force = Math.random() * Settings.common.gravity * 10 * body.mass;
 
     body.applyImpulse(new Vector2(Math.cos(angle), Math.sin(angle)).scale(force), body.position);
 }
@@ -68,20 +71,23 @@ function _createBodiesByPattern(initBodies) {
         }
 
         BootstrapInstance.addRigidBody(body
-            .setFriction(options.friction)
-            .setRestitution(options.restitution));
+            .setFriction(Settings.common.friction)
+            .setRestitution(Settings.common.restitution));
 
         last = body;
     }
 }
 
 
-const options = Params.parse()
-const canvas = document.getElementById("canvas")
-const BootstrapInstance = new Bootstrap(new CanvasRenderer(canvas, options), options);
+const Settings = CommonBootstrapSettings.fromQueryParams();
+const settingsCtrl = SettingsController.defaultCtrl(Settings);
 
-BootstrapInstance.addForce(new GravityForce(options.gravity));
-BootstrapInstance.addForce(new ResistanceForce(options.resistance));
+const canvas = document.getElementById("canvas")
+const BootstrapInstance = new Bootstrap(new CanvasRenderer(canvas, Settings.renderer), Settings);
+settingsCtrl.subscribe(this, SettingsController.RECONFIGURE_EVENT, SettingsController.defaultReconfigure(BootstrapInstance));
+
+BootstrapInstance.addForce(new GravityForce(Settings.common.gravity));
+BootstrapInstance.addForce(new ResistanceForce(Settings.common.resistance));
 
 const bottom = BootstrapInstance.canvasHeight - 120 - 1;
 
