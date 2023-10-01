@@ -3,6 +3,10 @@ body.white-theme {
     background: #ece9e9 linear-gradient(180deg, #fff, #ece9e9) no-repeat;
 }
 
+.white-theme .stats-block {
+    color: black;
+}
+
 .white-theme button {
     color: black;
 }

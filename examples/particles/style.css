@@ -9,6 +9,11 @@ body {
     background: radial-gradient(circle at 10% 20%, #bc8fab 0%, #404972 80%) !important;
 }
 
+.stats-block {
+    color: #fff !important;
+    text-shadow: 0 0 2px black, 0 0 2px black, 0 0 2px black, 0 0 2px black;
+}
+
 #canvas {
     width: 100%;
     height: 100%;

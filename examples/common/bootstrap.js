@@ -139,6 +139,7 @@ export class Bootstrap {
         if (options.debug?.statistics) {
             if (!this.#statsElement) {
                 this.#statsElement = document.createElement("pre");
+                this.#statsElement.className = "stats-block";
                 document.body.appendChild(this.#statsElement);
             }
 
@@ -371,17 +372,6 @@ export class Bootstrap {
         const {dpr} = CommonUtils.initCanvas(this.#auxCanvas);
         this.#auxCtx = this.#auxCanvas.getContext("2d");
         this.#auxCtx.scale(dpr, dpr)
-
-        if (this.#statsElement) {
-            this.#statsElement.className = "stats-block";
-            this.#statsElement.style.pointerEvents = "none";
-            this.#statsElement.style.position = "absolute";
-            this.#statsElement.style.left = "1rem";
-            this.#statsElement.style.bottom = "1rem";
-            this.#statsElement.style.margin = "0";
-            this.#statsElement.style.fontSize = "0.6rem";
-            this.#statsElement.style.textShadow = "0 0 2px white, 0 0 2px white, 0 0 2px white, 0 0 2px white";
-        }
     }
 
     #step() {

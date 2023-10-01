@@ -54,6 +54,18 @@ body {
 
     overflow: hidden;
     font: 13px Helvetica Neue, Lucida Grande, Arial;
+    background: black;
+    color: rgb(200, 200, 200);
+}
+
+.stats-block {
+    pointer-events: none;
+    position: absolute;
+    left: 1rem;
+    bottom: 1rem;
+    margin: 0;
+
+    color: white;
 }
 
 button {
