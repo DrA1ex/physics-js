@@ -53,6 +53,9 @@ export const Parser = {
     string: v => v?.toString(),
 }
 
+/**
+ * @deprecated Use Settings instead (CommonBootstrapSettings for example)
+ */
 export function parse(def = {}) {
     const urlSearchParams = new URLSearchParams(window.location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
@@ -109,6 +112,9 @@ export function parse(def = {}) {
     }, {});
 }
 
+/**
+ * @deprecated Use Settings instead (CommonBootstrapSettings for example)
+ */
 export function parseSettings(config) {
     const urlSearchParams = new URLSearchParams(window.location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
