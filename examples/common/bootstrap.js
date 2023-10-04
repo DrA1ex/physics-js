@@ -5,6 +5,7 @@ import {Particle} from "../../lib/render/particles/particle.js";
 import {ParticleSystem} from "../../lib/render/particles/system.js";
 import * as Utils from "../../lib/utils/common.js";
 import * as CommonUtils from "./utils.js";
+import {EventEmitter} from "../../lib/misc/event.js";
 
 
 /**
@@ -28,7 +29,7 @@ const ShapeType = {
     rect: 2
 }
 
-export class Bootstrap {
+export class Bootstrap extends EventEmitter {
     /** @type {State} */
     #state = State.stop;
     /** @type {Debug} */
@@ -71,11 +72,25 @@ export class Bootstrap {
     #debug = false;
     #slowMotion = 1;
 
+    /** @type {Event<number>} */
+    #onBeforePhysicsStep = this.createEvent("before_physics_step");
+    /** @type {Event<number>} */
+    #onAfterPhysicsStep = this.createEvent("after_physics_step");
+    /** @type {Event<number>} */
+    #onBeforeRenderStep = this.createEvent("before_render_step");
+    /** @type {Event<number>} */
+    #onAfterRenderStep = this.createEvent("after_render_step");
+
+    get onBeforePhysicsStep() {return this.#onBeforePhysicsStep;}
+    get onAfterPhysicsStep() {return this.#onAfterPhysicsStep;}
+    get onBeforeRenderStep() {return this.#onBeforeRenderStep;}
+    get onAfterRenderStep() {return this.#onAfterRenderStep;}
+
     get state() {return this.#state; }
 
     get renderer() { return this.#renderer; }
     get solver() { return this.#solver; }
-    get debug() {return this.#debugInstance;}
+    get debug() { return this.#debug ? this.#debugInstance : null; }
 
     /** @deprecated Use renderer instead */
     get canvas() { return this.#renderer.canvas; }
@@ -101,6 +116,7 @@ export class Bootstrap {
      * }} options
      */
     constructor(renderer, options = {}) {
+        super();
         this.#renderer = renderer;
 
         this.#slowMotion = 1;
@@ -416,14 +432,22 @@ export class Bootstrap {
         const delta = Math.max(0, Math.min(0.1, elapsed * this.#slowMotion));
         if (delta === 0) return;
 
+        this.onBeforePhysicsStep.emit(delta);
+
         for (const waiterCb of this.#physicsWaiters) waiterCb(delta);
         this.#physicsWaiters.clear();
 
         this.#particleSystem.step(delta);
         this.#solver.solve(delta);
+
+        this.onAfterPhysicsStep.emit(delta);
     }
 
     #render(delta) {
+        if (this.state === State.play) {
+            this.onBeforeRenderStep.emit(delta);
+        }
+
         if (!this.#debugInstance || this.#debugInstance.showBodies) {
             this.#renderer.render(this.state === State.play ? delta : 1e-12);
         } else {
@@ -433,6 +457,7 @@ export class Bootstrap {
         if (this.state === State.play) {
             for (const waiterCb of this.#renderWaiters) waiterCb(delta);
             this.#renderWaiters.clear();
+            this.onAfterRenderStep.emit(delta);
         }
 
         if (this.#debugInstance || this.#shapeId > 0) {
