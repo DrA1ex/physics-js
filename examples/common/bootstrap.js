@@ -398,11 +398,6 @@ export class Bootstrap extends EventEmitter {
         const t = performance.now();
         if (this.state !== State.pause) {
             this.#physicsStep(this.#stats.elapsed / 1000);
-
-            for (const collision of this.#solver.stepInfo.collisions) {
-                collision.aBody.collider.onCollide(collision, collision.bBody);
-                collision.bBody.collider.onCollide(collision, collision.aBody);
-            }
         }
 
         if (this.state === State.step) {
@@ -415,6 +410,12 @@ export class Bootstrap extends EventEmitter {
         this.#stats.bodiesCount = this.#solver.rigidBodies.length
         this.#stats.collisionCount = this.#solver.stepInfo.collisionCount;
         this.#stats.checkCount = this.#solver.stepInfo.checkCount;
+
+        for (const body of this.rigidBodies) {
+            if (body.destroyed) {
+                this.#destroyBodyImpl(body);
+            }
+        }
 
         requestAnimationFrame(timestamp => {
             this.#stats.elapsed = timestamp - this.#stats.lastStepTime;

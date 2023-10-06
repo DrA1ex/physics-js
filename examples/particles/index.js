@@ -44,7 +44,7 @@ class SmokeCollider extends CircleCollider {
         return !(body2.collider instanceof SmokeCollider);
     }
 
-    onCollide(collision, body2) {
+    afterCollision(collision, body2) {
         if (body2.tag === Tags.world) {
             this.particle.setState(SmokeState.destroy);
         }

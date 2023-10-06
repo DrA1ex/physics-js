@@ -36,7 +36,7 @@ export class SnowdriftCollider extends PolygonCollider {
         this.#onCollideHandler = onCollideFn;
     }
 
-    onCollide(collision, body2) {
+    afterCollision(collision, body2) {
         this.#onCollideHandler(collision, this.body, body2);
     }
 }
@@ -49,7 +49,7 @@ export class WorldBorderCollider extends Collider {
         this.#engine = engine;
     }
 
-    onCollide(collision, body2) {
+    afterCollision(collision, body2) {
         if (body2.tag === Tags.snowflake) {
             this.#engine.destroyBody(body2);
         }
@@ -116,7 +116,7 @@ export class SmokeCollider extends CircleCollider {
         return SmokeCollider.#NoCollideTags.indexOf(body2.tag) === -1;
     }
 
-    onCollide(collision, body2) {
+    afterCollision(collision, body2) {
         if (body2.tag === Tags.worldBorder && !this.#particle.destroyed) {
             this.#particle.setState(SmokeState.destroy);
         }
