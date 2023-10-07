@@ -38,7 +38,9 @@ export class DebugSettings extends SettingsBase {
             .setName("Show tree leafs"),
         showTreeSegments: Property.bool("debug_tree_segments", false)
             .setName("Show tree segments"),
-        showTreeBoundaryCollision: Property.bool("debug_tree_collision", true)
+        showTreeSegmentsBoundary: Property.bool("debug_tree_segments_boundary", false)
+            .setName("Show tree segments boundary"),
+        showTreeBoundaryCollision: Property.bool("debug_tree_collision", false)
             .setName("Show tree boundary collision"),
 
         vectorArrowSize: Property.float("vector_arrow_size", 2)
